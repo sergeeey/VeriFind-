@@ -1,9 +1,9 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Week 3 Day 4 - Neo4j Graph Integration
-📍 **Focus**: 156 Tests Passing - Episode & Lineage Tracking
-🚦 **Status**: ✅ Week 3 Day 4 COMPLETE - Neo4j Graph Functional
+🎯 **Phase**: Week 4 Day 2 - Real PLAN Node API Integration
+📍 **Focus**: 179 Tests (169 passing + 10 real API tests pending validation)
+🚦 **Status**: ⏳ Week 4 Day 2 IN PROGRESS - Real API Tests Created
 
 ## Последняя Сессия (2026-02-08, Week 3 Day 4 COMPLETE - Autonomous 156 Tests)
 ### Выполнено:
@@ -136,6 +136,30 @@
   - Graph statistics and cascade deletion
   - All 10/10 integration tests pass
   - **TOTAL: 156/156 tests passing (100%)**
+- ✅ **WEEK 3 DAY 5 ЗАВЕРШЕН: End-to-End Pipeline Integration**
+  - Full pipeline: Query → LangGraph → TimescaleDB + Neo4j
+  - E2E tests with persistence validation
+  - Multi-fact lineage tracking
+  - Metrics aggregation functional
+  - All 6/6 E2E integration tests pass
+  - **TOTAL: 162/162 tests passing (100%)**
+- ✅ **WEEK 4 DAY 1 ЗАВЕРШЕН: Doubter Agent (Adversarial Validation)**
+  - DoubterAgent for VerifiedFact validation
+  - Verdict system: ACCEPT/CHALLENGE/REJECT
+  - Statistical validity checks (correlation, sample size, p-value)
+  - Confidence penalty calculation
+  - Disabled mode for testing
+  - All 7/7 unit tests pass
+  - **TOTAL: 169/169 tests passing (100%)**
+- ⏳ **WEEK 4 DAY 2 В ПРОЦЕССЕ: Real PLAN Node API Integration**
+  - Created test_plan_node_real_api.py (10 real API tests)
+  - Tests validate Claude generates EXECUTABLE code (no hallucinations)
+  - End-to-end: Query → PLAN (real API) → VEE → GATE
+  - Pytest markers: @pytest.mark.realapi, @pytest.mark.integration
+  - pytest.ini configuration for test categorization
+  - docs/TESTING.md documentation created
+  - Cost control: skip realapi by default (`pytest -m "not realapi"`)
+  - **TOTAL: 179 tests (169 passing, 10 pending API key validation)**
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -167,19 +191,23 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: 🎉 **WEEK 3 DAY 1-3 ЗАВЕРШЕНО!** → Week 3 Day 4 ⏳
+**Current**: ⏳ **WEEK 4 DAY 2 IN PROGRESS** - Real API Tests Created, Awaiting Validation
 
-**Week 3 Progress Summary**: Days 1-3 DONE ✅
-- ✅ Day 1: LangGraph State Machine (15/15 tests) - State-based orchestration with retry
-- ✅ Day 2: TimescaleDB Storage (11/11 tests) - VerifiedFacts persistence with hypertables
-- ✅ Day 3: FETCH Node (11/11 tests) - Market data integration with conditional routing
-- ✅ TDD RED→GREEN cycle успешен для всех компонентов
-- ✅ **Total: 146/146 tests passing (100% success rate 🎉🎉🎉)**
+**Week 4 Progress Summary**: Days 1-2 ⏳
+- ✅ Day 1: Doubter Agent (7/7 tests) - Adversarial validation with confidence penalties
+- ⏳ Day 2: Real PLAN Node API Integration (10 tests created, pending validation)
+- ✅ Infrastructure: pytest.ini, markers (@realapi), docs/TESTING.md
+- ✅ Cost control: tests skip by default without ANTHROPIC_API_KEY
 
-**Week 3 Day 4: [Next Component] (Next)**
-- [ ] To be determined based on project roadmap
-- [ ] Continue TDD workflow
-- [ ] Maintain 100% test success rate
+**Week 4 Day 2: Real API Validation (NEXT STEP)**
+- [ ] Option 1: Set ANTHROPIC_API_KEY and run `pytest -m realapi -v`
+- [ ] Option 2: Continue to Week 4 Day 3 (Temporal Integrity Module) without API validation
+- [ ] Option 3: Mock API responses for regression testing
+
+**Critical Blocker Resolution Status** (from Arakul Assessment):
+1. ❌ **PLAN Node (4/10)**: ⏳ Tests created, awaiting API validation (Week 4 Day 2)
+2. ❌ **Temporal Integrity Module (3/10)**: 🔴 Next priority (Week 4 Day 3-4)
+3. ❌ **API Layer (2/10)**: ⏸️ Deferred to Week 8-9
 
 **Week 1 Success Criteria:** ✅ MET
 - Infrastructure ready
@@ -203,41 +231,46 @@ Performance:
 
 ## Метрики Прогресса
 ```
-Overall: [█████░░░░░] 50.6% (Week 3 Day 3: 7.3/16 weeks)
+Overall: [██████░░░░] 56.25% (Week 4 Day 2: 9/16 weeks)
 
 Milestones:
-- M1 (Week 1-4):  [██████░░░░] 56% (Week 1-2 + 3.1-3.3) ⏳
+- M1 (Week 1-4):  [███████░░░] 65% (Week 1-3 complete + 4.1-4.2) ⏳
 - M2 (Week 5-8):  [░░░░░░░░░░] 0%
 - M3 (Week 9-12): [░░░░░░░░░░] 0%
 - M4 (Week 13-16):[░░░░░░░░░░] 0%
 
-Week 3 Day 3 Stats:
-- Tests: 146/146 passing (100% 🎉)
-- Code: ~7000 lines (+500 LOC)
-- Files: 32 created (+2 FETCH files)
-- Components: 10 modules fully tested
+Week 4 Day 2 Stats:
+- Tests: 179 total (169 passing + 10 real API pending)
+- Passing rate: 100% (169/169 non-API tests)
+- Code: ~8500 lines (+1500 LOC from Week 3 Day 4-Week 4 Day 2)
+- Files: 38 created (+6 files: E2E, Doubter, Real API tests, pytest.ini, TESTING.md)
+- Components: 12 modules fully tested
   - VEE Sandbox ✅
   - YFinance Adapter ✅
   - Truth Boundary Gate ✅
   - ChromaDB ✅
-  - PLAN Node ✅
+  - PLAN Node ✅ (mocked)
+  - PLAN Node Real API ⏳ (tests created, pending validation)
   - Evaluation ✅
   - Orchestrator ✅
   - LangGraph State Machine ✅
   - TimescaleDB Storage ✅
-  - FETCH Node ✅ (NEW!)
+  - Neo4j Graph ✅
+  - FETCH Node ✅
+  - Doubter Agent ✅ (NEW!)
 - State Machine: Full PLAN→FETCH→VEE→GATE flow functional
 - Performance: <5s end-to-end для simple queries
+- Testing Infrastructure: pytest markers, CI/CD docs
 ```
 
 ## Последний Тест
 ```bash
-# Week 3 Day 3 Test Suite
-pytest tests/ -q
-# Result: 146/146 tests PASSED ✅ (100% success rate 🎉)
+# Week 4 Day 2 Test Suite (excluding real API tests)
+pytest tests/ -m "not realapi" -q
+# Result: 169/169 tests PASSED ✅ (100% success rate 🎉)
 # Components:
 # - ChromaDB: 10/10 ✅
-# - PLAN node: 17/17 ✅
+# - PLAN node (mocked): 17/17 ✅
 # - Evaluation: 18/18 ✅
 # - VEE Sandbox: 16/16 ✅
 # - YFinance Adapter: 14/14 ✅
@@ -246,9 +279,19 @@ pytest tests/ -q
 # - APE Orchestrator: 11/11 ✅
 # - LangGraph State Machine: 15/15 ✅
 # - TimescaleDB Storage: 11/11 ✅
-# - FETCH Node: 11/11 ✅ (NEW!)
-# Total: 11 test suites, 32 files, ~7000 LOC
-# Goal: 100+ tests ✅ EXCEEDED (146 tests!)
+# - FETCH Node: 11/11 ✅
+# - Neo4j Graph: 10/10 ✅
+# - E2E Pipeline: 6/6 ✅
+# - Doubter Agent: 7/7 ✅ (NEW!)
+# Total: 13 test suites, 38 files, ~8500 LOC
+# Goal: 100+ tests ✅ EXCEEDED (169 tests, +10 real API tests pending!)
+# Duration: 84s (1:24)
+
+# Real API Tests (pending validation):
+pytest -m realapi -v
+# Expected: 10/10 tests (requires ANTHROPIC_API_KEY)
+# Cost: ~$0.15-0.30 per full run
+# Status: ⏳ Tests created, awaiting API key
 ```
 
 ## Заметки для будущих сессий
@@ -258,7 +301,8 @@ pytest tests/ -q
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 12:00 UTC (Autonomous Session)*
-*Next Review: Перед началом Week 3 Day 4*
-*Session Duration: ~5 hours (Week 2 COMPLETE + Week 3 Days 1-3)*
-*Achievement: 146 tests passing! 🎉*
+*Last Updated: 2026-02-08 18:00 UTC (Autonomous Session - Week 4 Day 2)*
+*Next Review: Перед началом Week 4 Day 3 (Temporal Integrity Module)*
+*Session Duration: ~8 hours (Week 3 Days 4-5 + Week 4 Days 1-2)*
+*Achievement: 169 tests passing + 10 real API tests created! 🎉*
+*Critical Blocker #1 Addressed: PLAN Node real API tests implemented ✅*
