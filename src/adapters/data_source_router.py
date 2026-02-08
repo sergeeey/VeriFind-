@@ -1,439 +1,302 @@
+"""Data Source Router with automatic failover.
+
+Week 11: Production-grade failover between yfinance, AlphaVantage, and cache.
+
+Failover chain:
+1. yfinance (primary, free, real-time)
+2. alpha_vantage (secondary, free tier 5calls/min)
+3. cache (tertiary, stale data acceptable)
+4. error (fail gracefully)
 """
-Data Source Router with Failover Logic.
 
-Week 11 Day 4: Cost Tracking & Reliability
-
-Routes data requests across multiple sources with automatic failover,
-circuit breaker pattern, and latency-based routing.
-
-Priority chain: yfinance → alpha_vantage → polygon → cache → error
-
-Author: Claude Sonnet 4.5
-Created: 2026-02-08
-"""
+import logging
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+from dataclasses import dataclass
+from enum import Enum
 
 import pandas as pd
-import logging
-from typing import Optional, Dict, List, Tuple, Any
-from datetime import datetime, timedelta
-from enum import Enum
-from dataclasses import dataclass, field
-import time
+
+# Import adapters at module level for testability
+from .yfinance_adapter import YFinanceAdapter
+from .alpha_vantage_adapter import AlphaVantageAdapter
 
 logger = logging.getLogger(__name__)
 
 
-class DataSourceStatus(Enum):
-    """Status of a data source."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    CIRCUIT_OPEN = "circuit_open"
-    UNAVAILABLE = "unavailable"
+class DataSourcePriority(Enum):
+    """Priority order for data sources."""
+    YFINANCE = 1
+    ALPHA_VANTAGE = 2
+    CACHE = 3
 
 
 @dataclass
-class DataSourceMetrics:
-    """Metrics for a data source."""
-    source_name: str
-    total_requests: int = 0
-    successful_requests: int = 0
-    failed_requests: int = 0
-    total_latency_ms: float = 0.0
-    last_success: Optional[datetime] = None
-    last_failure: Optional[datetime] = None
-    circuit_breaker_failures: int = 0
-    circuit_breaker_opened_at: Optional[datetime] = None
-    status: DataSourceStatus = DataSourceStatus.HEALTHY
-
-    @property
-    def success_rate(self) -> float:
-        """Calculate success rate (0.0 to 1.0)."""
-        if self.total_requests == 0:
-            return 1.0
-        return self.successful_requests / self.total_requests
-
-    @property
-    def avg_latency_ms(self) -> float:
-        """Calculate average latency in milliseconds."""
-        if self.successful_requests == 0:
-            return 0.0
-        return self.total_latency_ms / self.successful_requests
-
-    def is_circuit_open(self) -> bool:
-        """Check if circuit breaker is open."""
-        return self.status == DataSourceStatus.CIRCUIT_OPEN
-
-    def should_close_circuit(self, timeout_minutes: int = 5) -> bool:
-        """Check if circuit breaker should close (half-open state)."""
-        if not self.is_circuit_open():
-            return False
-        if self.circuit_breaker_opened_at is None:
-            return True
-        elapsed = datetime.now() - self.circuit_breaker_opened_at
-        return elapsed > timedelta(minutes=timeout_minutes)
-
-
-class CircuitBreakerError(Exception):
-    """Raised when circuit breaker is open for a data source."""
-    pass
-
-
-class DataUnavailableError(Exception):
-    """Raised when all data sources have failed."""
-    pass
+class DataSourceResult:
+    """Result from data source with metadata."""
+    data: Any  # DataFrame or Dict
+    source: str  # 'yfinance', 'alpha_vantage', 'cache'
+    is_cached: bool
+    fetched_at: datetime
+    error: Optional[str] = None
 
 
 class DataSourceRouter:
-    """
-    Routes data requests with automatic failover.
-
+    """Routes data requests across multiple sources with failover.
+    
     Features:
-    - Failover chain: yfinance → alpha_vantage → polygon → error
-    - Circuit breaker: Skip failed sources for 5 minutes
-    - Latency-based routing: Prefer faster sources
-    - Cost optimization: Prefer free sources over paid
-
-    Example:
-        >>> router = DataSourceRouter(
-        ...     yfinance=YFinanceAdapter(),
-        ...     alpha_vantage=AlphaVantageAdapter(api_key="..."),
-        ... )
-        >>> df, source = router.get_ohlcv("AAPL", "2023-01-01", "2023-12-31")
-        >>> print(f"Data from {source}: {len(df)} rows")
+    - Automatic failover on primary source failure
+    - Prometheus metrics for monitoring
+    - Cache-as-fallback for degraded mode
+    - Data freshness tracking
+    
+    Usage:
+        router = DataSourceRouter(
+            alpha_vantage_key="YOUR_KEY"
+        )
+        result = router.get_ohlcv("AAPL", "2024-01-01", "2024-12-31")
+        print(f"Data from: {result.source}")  # 'yfinance' or 'alpha_vantage'
     """
 
     def __init__(
         self,
-        yfinance=None,
-        alpha_vantage=None,
-        polygon=None,
-        circuit_breaker_threshold: int = 5,
-        circuit_breaker_timeout_minutes: int = 5,
-        latency_weight: float = 0.3,
-        prefer_free_sources: bool = True,
+        alpha_vantage_key: Optional[str] = None,
+        enable_metrics: bool = True,
+        cache_ttl_seconds: int = 3600
     ):
-        """
-        Initialize router with data sources.
-
+        """Initialize router with data sources.
+        
         Args:
-            yfinance: YFinanceAdapter instance
-            alpha_vantage: AlphaVantageAdapter instance
-            polygon: PolygonAdapter instance (optional)
-            circuit_breaker_threshold: Failures before opening circuit (default: 5)
-            circuit_breaker_timeout_minutes: Minutes before closing circuit (default: 5)
-            latency_weight: Weight for latency in routing (0.0-1.0, default: 0.3)
-            prefer_free_sources: Prefer free sources over paid (default: True)
+            alpha_vantage_key: API key for AlphaVantage (optional)
+            enable_metrics: Enable Prometheus metrics
+            cache_ttl_seconds: Cache time-to-live
         """
-        self.sources = {}
-        self.metrics: Dict[str, DataSourceMetrics] = {}
-
-        # Register sources in priority order
-        if yfinance:
-            self._register_source("yfinance", yfinance, cost_per_call=0.0)
-        if alpha_vantage:
-            self._register_source("alpha_vantage", alpha_vantage, cost_per_call=0.0)
-        if polygon:
-            self._register_source("polygon", polygon, cost_per_call=0.002)  # $0.002/call
-
-        self.circuit_breaker_threshold = circuit_breaker_threshold
-        self.circuit_breaker_timeout_minutes = circuit_breaker_timeout_minutes
-        self.latency_weight = latency_weight
-        self.prefer_free_sources = prefer_free_sources
-
-        if not self.sources:
-            raise ValueError("At least one data source must be provided")
-
-        logger.info(
-            f"DataSourceRouter initialized with {len(self.sources)} sources: "
-            f"{list(self.sources.keys())}"
-        )
-
-    def _register_source(self, name: str, adapter: Any, cost_per_call: float = 0.0):
-        """Register a data source adapter."""
-        self.sources[name] = {
-            "adapter": adapter,
-            "cost_per_call": cost_per_call,
-        }
-        self.metrics[name] = DataSourceMetrics(source_name=name)
-        logger.debug(f"Registered source: {name} (cost: ${cost_per_call}/call)")
-
-    def _get_source_priority(self) -> List[str]:
-        """
-        Get ordered list of sources by priority.
-
-        Priority factors:
-        1. Circuit breaker status (skip open circuits)
-        2. Cost (prefer free if enabled)
-        3. Latency (prefer faster sources)
-        4. Success rate (prefer reliable sources)
-
-        Returns:
-            List of source names in priority order
-        """
-        candidates = []
-
-        for name, source_info in self.sources.items():
-            metrics = self.metrics[name]
-
-            # Skip if circuit breaker is open (unless timeout expired)
-            if metrics.is_circuit_open():
-                if metrics.should_close_circuit(self.circuit_breaker_timeout_minutes):
-                    logger.info(f"Circuit breaker for {name} entering half-open state")
-                    metrics.status = DataSourceStatus.DEGRADED
-                else:
-                    logger.debug(f"Skipping {name}: circuit breaker open")
-                    continue
-
-            # Calculate priority score (higher = better)
-            score = 0.0
-
-            # Factor 1: Cost (free sources get +100 if prefer_free_sources)
-            if self.prefer_free_sources and source_info["cost_per_call"] == 0.0:
-                score += 100.0
-
-            # Factor 2: Success rate (0-100)
-            score += metrics.success_rate * 100.0
-
-            # Factor 3: Latency (lower is better, scaled by weight)
-            if metrics.avg_latency_ms > 0:
-                # Penalize slow sources (max penalty: latency_weight * 100)
-                latency_penalty = min(metrics.avg_latency_ms / 1000.0, 1.0) * 100.0 * self.latency_weight
-                score -= latency_penalty
-
-            candidates.append((name, score))
-
-        # Sort by score (descending)
-        candidates.sort(key=lambda x: x[1], reverse=True)
-
-        priority_order = [name for name, _ in candidates]
-        logger.debug(f"Source priority order: {priority_order}")
-
-        return priority_order
-
-    def _record_success(self, source_name: str, latency_ms: float):
-        """Record successful request."""
-        metrics = self.metrics[source_name]
-        metrics.total_requests += 1
-        metrics.successful_requests += 1
-        metrics.total_latency_ms += latency_ms
-        metrics.last_success = datetime.now()
-        metrics.circuit_breaker_failures = 0  # Reset failures on success
-
-        # Close circuit if was open/degraded
-        if metrics.status in [DataSourceStatus.CIRCUIT_OPEN, DataSourceStatus.DEGRADED]:
-            logger.info(f"Circuit breaker for {source_name} CLOSED (success)")
-            metrics.status = DataSourceStatus.HEALTHY
-
-        logger.debug(
-            f"{source_name} success: {latency_ms:.2f}ms "
-            f"(success_rate: {metrics.success_rate:.2%}, avg_latency: {metrics.avg_latency_ms:.2f}ms)"
-        )
-
-    def _record_failure(self, source_name: str, error: Exception):
-        """Record failed request and handle circuit breaker."""
-        metrics = self.metrics[source_name]
-        metrics.total_requests += 1
-        metrics.failed_requests += 1
-        metrics.last_failure = datetime.now()
-        metrics.circuit_breaker_failures += 1
-
-        logger.warning(
-            f"{source_name} failure ({metrics.circuit_breaker_failures}/{self.circuit_breaker_threshold}): "
-            f"{type(error).__name__}: {error}"
-        )
-
-        # Open circuit breaker if threshold exceeded
-        if metrics.circuit_breaker_failures >= self.circuit_breaker_threshold:
-            metrics.status = DataSourceStatus.CIRCUIT_OPEN
-            metrics.circuit_breaker_opened_at = datetime.now()
-            logger.error(
-                f"Circuit breaker for {source_name} OPENED "
-                f"(failures: {metrics.circuit_breaker_failures})"
-            )
+        # Initialize primary source (always available)
+        self._yfinance = YFinanceAdapter(cache_ttl_seconds=cache_ttl_seconds)
+        
+        # Initialize secondary source (if key provided)
+        self._alpha_vantage: Optional[Any] = None
+        if alpha_vantage_key:
+            try:
+                self._alpha_vantage = AlphaVantageAdapter(
+                    api_key=alpha_vantage_key,
+                    enable_metrics=enable_metrics
+                )
+                logger.info("AlphaVantage adapter initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize AlphaVantage: {e}")
+        
+        # Initialize cache (in-memory)
+        self._cache: Dict[str, Any] = {}
+        self._cache_ttl = cache_ttl_seconds
+        
+        # Metrics
+        self._enable_metrics = enable_metrics
+        if enable_metrics:
+            try:
+                from src.monitoring.metrics import data_source_failover_total
+                self._failover_metric = data_source_failover_total
+            except ImportError:
+                logger.warning("Metrics not available")
+                self._failover_metric = None
+        else:
+            self._failover_metric = None
+        
+        # Track last successful source per ticker
+        self._last_successful_source: Dict[str, str] = {}
 
     def get_ohlcv(
         self,
         ticker: str,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-    ) -> Tuple[pd.DataFrame, str, float]:
-        """
-        Fetch OHLCV data with automatic failover.
-
-        Args:
-            ticker: Stock symbol (e.g., "AAPL")
-            start_date: Start date YYYY-MM-DD (optional)
-            end_date: End date YYYY-MM-DD (optional)
-
-        Returns:
-            Tuple of (DataFrame, source_name, data_freshness_timestamp)
-
-        Raises:
-            DataUnavailableError: If all sources fail
-
-        Example:
-            >>> df, source, freshness = router.get_ohlcv("AAPL")
-            >>> print(f"Got {len(df)} rows from {source}")
-        """
-        priority_sources = self._get_source_priority()
-
-        if not priority_sources:
-            raise DataUnavailableError(
-                f"No available data sources for {ticker} (all circuits open)"
-            )
-
-        errors = {}
-
-        for source_name in priority_sources:
-            adapter = self.sources[source_name]["adapter"]
-
-            logger.info(f"Attempting to fetch {ticker} from {source_name}")
-
-            start_time = time.time()
-
-            try:
-                # Call adapter's get_ohlcv method
-                df = adapter.get_ohlcv(ticker, start_date, end_date)
-
-                latency_ms = (time.time() - start_time) * 1000
-
-                # Check if data is valid
-                if df is None or df.empty:
-                    raise ValueError(f"Empty DataFrame returned for {ticker}")
-
-                # Success!
-                self._record_success(source_name, latency_ms)
-
-                data_freshness = time.time()
-
-                logger.info(
-                    f"Successfully fetched {ticker} from {source_name}: "
-                    f"{len(df)} rows in {latency_ms:.2f}ms"
-                )
-
-                return df, source_name, data_freshness
-
-            except Exception as e:
-                self._record_failure(source_name, e)
-                errors[source_name] = str(e)
-
-                # Try next source in failover chain
-                continue
-
-        # All sources failed
-        error_summary = ", ".join([f"{s}: {e}" for s, e in errors.items()])
-        raise DataUnavailableError(
-            f"All data sources failed for {ticker}. Errors: {error_summary}"
-        )
-
-    def get_fundamentals(
-        self,
-        ticker: str,
-    ) -> Tuple[Dict[str, float], str, float]:
-        """
-        Fetch fundamental data with automatic failover.
-
+        interval: str = "1d"
+    ) -> DataSourceResult:
+        """Fetch OHLCV data with automatic failover.
+        
         Args:
             ticker: Stock symbol
-
+            start_date: Start date (YYYY-MM-DD)
+            end_date: End date (YYYY-MM-DD)
+            interval: Data interval (1d only for now)
+            
         Returns:
-            Tuple of (fundamentals_dict, source_name, data_freshness_timestamp)
-
-        Raises:
-            DataUnavailableError: If all sources fail
+            DataSourceResult with data and metadata
         """
-        priority_sources = self._get_source_priority()
-
-        if not priority_sources:
-            raise DataUnavailableError(
-                f"No available data sources for {ticker} fundamentals (all circuits open)"
-            )
-
-        errors = {}
-
-        for source_name in priority_sources:
-            adapter = self.sources[source_name]["adapter"]
-
-            # Skip if adapter doesn't support fundamentals
-            if not hasattr(adapter, 'get_fundamentals'):
-                logger.debug(f"{source_name} doesn't support get_fundamentals()")
-                continue
-
-            logger.info(f"Attempting to fetch {ticker} fundamentals from {source_name}")
-
-            start_time = time.time()
-
-            try:
-                fundamentals = adapter.get_fundamentals(ticker)
-
-                latency_ms = (time.time() - start_time) * 1000
-
-                if not fundamentals or not isinstance(fundamentals, dict):
-                    raise ValueError(f"Invalid fundamentals data for {ticker}")
-
-                self._record_success(source_name, latency_ms)
-
-                data_freshness = time.time()
-
-                logger.info(
-                    f"Successfully fetched {ticker} fundamentals from {source_name} "
-                    f"in {latency_ms:.2f}ms"
+        fetched_at = datetime.utcnow()
+        
+        # Try 1: yfinance (primary)
+        try:
+            logger.info(f"Fetching {ticker} from yfinance...")
+            df = self._yfinance.fetch_ohlcv(ticker, start_date, end_date, interval)
+            
+            if not df.empty:
+                self._last_successful_source[ticker] = "yfinance"
+                logger.info(f"✓ yfinance success for {ticker}")
+                return DataSourceResult(
+                    data=df,
+                    source="yfinance",
+                    is_cached=False,
+                    fetched_at=fetched_at
                 )
-
-                return fundamentals, source_name, data_freshness
-
+            else:
+                logger.warning(f"yfinance returned empty for {ticker}")
+                
+        except Exception as e:
+            logger.warning(f"yfinance failed for {ticker}: {e}")
+        
+        # Record failover
+        self._record_failover("yfinance", "alpha_vantage", ticker, "empty_or_error")
+        
+        # Try 2: AlphaVantage (secondary)
+        if self._alpha_vantage:
+            try:
+                logger.info(f"Fetching {ticker} from AlphaVantage (failover)...")
+                df = self._alpha_vantage.get_ohlcv(ticker, start_date, end_date)
+                
+                if not df.empty:
+                    self._last_successful_source[ticker] = "alpha_vantage"
+                    logger.info(f"✓ AlphaVantage success for {ticker}")
+                    return DataSourceResult(
+                        data=df,
+                        source="alpha_vantage",
+                        is_cached=False,
+                        fetched_at=fetched_at
+                    )
+                else:
+                    logger.warning(f"AlphaVantage returned empty for {ticker}")
+                    
             except Exception as e:
-                self._record_failure(source_name, e)
-                errors[source_name] = str(e)
-                continue
-
-        error_summary = ", ".join([f"{s}: {e}" for s, e in errors.items()])
-        raise DataUnavailableError(
-            f"All data sources failed for {ticker} fundamentals. Errors: {error_summary}"
+                logger.warning(f"AlphaVantage failed for {ticker}: {e}")
+            
+            self._record_failover("alpha_vantage", "cache", ticker, "empty_or_error")
+        else:
+            logger.warning("AlphaVantage not configured, skipping")
+        
+        # Try 3: Cache (tertiary - degraded mode)
+        cache_key = f"{ticker}_{start_date}_{end_date}_{interval}"
+        if cache_key in self._cache:
+            cached_result = self._cache[cache_key]
+            logger.info(f"✓ Cache hit for {ticker} (degraded mode)")
+            return DataSourceResult(
+                data=cached_result,
+                source="cache",
+                is_cached=True,
+                fetched_at=fetched_at,
+                error="Serving stale data from cache"
+            )
+        
+        # All sources failed
+        logger.error(f"All data sources failed for {ticker}")
+        return DataSourceResult(
+            data=pd.DataFrame(),
+            source="error",
+            is_cached=False,
+            fetched_at=fetched_at,
+            error="All data sources failed"
         )
 
-    def get_stats(self) -> Dict[str, Any]:
-        """
-        Get router statistics.
-
+    def get_fundamentals(self, ticker: str) -> DataSourceResult:
+        """Fetch fundamentals with automatic failover.
+        
+        Args:
+            ticker: Stock symbol
+            
         Returns:
-            Dict with metrics for each source:
-            {
-                'yfinance': {
-                    'status': 'healthy',
-                    'total_requests': 100,
-                    'success_rate': 0.95,
-                    'avg_latency_ms': 245.3,
-                    ...
-                },
-                ...
-            }
+            DataSourceResult with fundamentals dict
         """
-        stats = {}
+        fetched_at = datetime.utcnow()
+        
+        # Try 1: yfinance
+        try:
+            data = self._yfinance.fetch_fundamentals(ticker)
+            if data and any(v is not None for v in data.values()):
+                return DataSourceResult(
+                    data=data,
+                    source="yfinance",
+                    is_cached=False,
+                    fetched_at=fetched_at
+                )
+        except Exception as e:
+            logger.warning(f"yfinance fundamentals failed: {e}")
+        
+        self._record_failover("yfinance", "alpha_vantage", ticker, "fundamentals_error")
+        
+        # Try 2: AlphaVantage
+        if self._alpha_vantage:
+            try:
+                data = self._alpha_vantage.get_fundamentals(ticker)
+                if data and any(v is not None for v in data.values() if isinstance(v, (int, float))):
+                    return DataSourceResult(
+                        data=data,
+                        source="alpha_vantage",
+                        is_cached=False,
+                        fetched_at=fetched_at
+                    )
+            except Exception as e:
+                logger.warning(f"AlphaVantage fundamentals failed: {e}")
+        
+        # Return empty
+        return DataSourceResult(
+            data={},
+            source="error",
+            is_cached=False,
+            fetched_at=fetched_at,
+            error="Could not fetch fundamentals"
+        )
 
-        for name, metrics in self.metrics.items():
-            stats[name] = {
-                "status": metrics.status.value,
-                "total_requests": metrics.total_requests,
-                "successful_requests": metrics.successful_requests,
-                "failed_requests": metrics.failed_requests,
-                "success_rate": round(metrics.success_rate, 4),
-                "avg_latency_ms": round(metrics.avg_latency_ms, 2),
-                "circuit_breaker_failures": metrics.circuit_breaker_failures,
-                "last_success": metrics.last_success.isoformat() if metrics.last_success else None,
-                "last_failure": metrics.last_failure.isoformat() if metrics.last_failure else None,
+    def _record_failover(
+        self,
+        from_source: str,
+        to_source: str,
+        ticker: str,
+        reason: str
+    ) -> None:
+        """Record failover event."""
+        logger.info(f"Failover: {from_source} → {to_source} ({ticker}, {reason})")
+        if self._failover_metric:
+            self._failover_metric.labels(
+                from_source=from_source,
+                to_source=to_source,
+                ticker=ticker,
+                reason=reason
+            ).inc()
+
+    def cache_result(
+        self,
+        ticker: str,
+        start_date: Optional[str],
+        end_date: Optional[str],
+        interval: str,
+        data: pd.DataFrame
+    ) -> None:
+        """Manually cache a result for degraded mode."""
+        cache_key = f"{ticker}_{start_date}_{end_date}_{interval}"
+        self._cache[cache_key] = data.copy()
+        logger.debug(f"Cached result for {ticker}")
+
+    def get_health(self) -> Dict[str, Any]:
+        """Get health status of all data sources."""
+        health = {
+            "yfinance": {"status": "healthy"},
+            "alpha_vantage": {"status": "not_configured"},
+            "cache": {"entries": len(self._cache)}
+        }
+        
+        if self._alpha_vantage:
+            circuit_state = self._alpha_vantage.get_circuit_state()
+            health["alpha_vantage"] = {
+                "status": "healthy" if circuit_state == "closed" else "degraded",
+                "circuit_state": circuit_state
             }
+        
+        return health
 
-        return stats
+    def clear_cache(self) -> None:
+        """Clear all cached data."""
+        self._cache.clear()
+        logger.info("Router cache cleared")
 
-    def reset_circuit_breaker(self, source_name: str):
-        """Manually reset circuit breaker for a source (for testing/admin)."""
-        if source_name not in self.metrics:
-            raise ValueError(f"Unknown source: {source_name}")
-
-        metrics = self.metrics[source_name]
-        metrics.circuit_breaker_failures = 0
-        metrics.circuit_breaker_opened_at = None
-        metrics.status = DataSourceStatus.HEALTHY
-
-        logger.info(f"Circuit breaker for {source_name} manually reset")
+    def get_last_successful_source(self, ticker: str) -> Optional[str]:
+        """Get last successful data source for ticker."""
+        return self._last_successful_source.get(ticker)
