@@ -25,28 +25,81 @@ from pydantic import BaseModel, Field, validator
 from ..orchestration.langgraph_orchestrator import LangGraphOrchestrator, APEState
 from ..storage.timescale_store import TimescaleDBStore
 from ..graph.neo4j_client import Neo4jClient
+from .security import input_validator, rate_limiter
+from .config import get_settings, load_production_api_keys
+
+# Load settings
+settings = get_settings()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=getattr(logging, settings.log_level))
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="APE 2026 API",
-    description="Autonomous Precision Engine for Financial Analysis",
-    version="1.0.0",
+    title=settings.app_name,
+    description=settings.app_description,
+    version=settings.app_version,
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# CORS configuration (adjust for production)
+# CORS configuration from settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origins,
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=settings.cors_allow_methods,
+    allow_headers=settings.cors_allow_headers,
 )
+
+
+# Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    """
+    Add security headers to all responses.
+
+    Headers:
+    - X-Content-Type-Options: Prevent MIME sniffing
+    - X-Frame-Options: Prevent clickjacking
+    - X-XSS-Protection: Enable XSS filter
+    - Strict-Transport-Security: Enforce HTTPS (production)
+    - Content-Security-Policy: Restrict resource loading
+    """
+    response = await call_next(request)
+
+    # Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # Prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # Enable XSS protection (legacy, but still useful)
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+
+    # TODO: Enable HSTS in production (requires HTTPS)
+    # response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+    # Content Security Policy (restrictive)
+    csp_directives = [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline'",  # Allow inline scripts for API docs
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https:",
+        "font-src 'self'",
+        "connect-src 'self' ws: wss:",  # Allow WebSocket connections
+        "frame-ancestors 'none'",
+    ]
+    response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
+
+    # Referrer policy
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # Permissions policy (restrict features)
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+
+    return response
 
 # ============================================================================
 # Request/Response Models
@@ -54,16 +107,30 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     """Request model for query execution."""
-    query: str = Field(..., min_length=10, max_length=500, description="Financial analysis query")
+    query: str = Field(..., min_length=10, max_length=1000, description="Financial analysis query")
     priority: Optional[str] = Field("normal", description="Query priority: low, normal, high")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
     @validator('query')
     def validate_query(cls, v):
-        """Validate query content."""
+        """
+        Validate query content with security checks.
+
+        Checks for:
+        - SQL injection patterns
+        - XSS patterns
+        - Command injection patterns
+        """
         if not v.strip():
             raise ValueError("Query cannot be empty")
-        return v.strip()
+
+        # Security validation
+        validation = input_validator.validate_query(v)
+        if not validation.is_valid:
+            raise ValueError(f"Security validation failed: {validation.error_message}")
+
+        # Return sanitized value
+        return validation.sanitized_value
 
     @validator('priority')
     def validate_priority(cls, v):
@@ -147,14 +214,8 @@ class ErrorResponse(BaseModel):
 # Authentication & Rate Limiting
 # ============================================================================
 
-# Simple API key authentication (TODO: Replace with proper auth in production)
-API_KEYS = {
-    "dev_key_12345": {"name": "Development", "rate_limit": 100},
-    "prod_key_67890": {"name": "Production", "rate_limit": 1000}
-}
-
-# Rate limiting (simple in-memory counter)
-rate_limit_store: Dict[str, List[datetime]] = {}
+# Load API keys from settings and environment
+API_KEYS = {**settings.api_keys, **load_production_api_keys()}
 
 
 async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
@@ -175,30 +236,28 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
 
 
 async def check_rate_limit(api_key: str = Depends(verify_api_key)) -> str:
-    """Check rate limit for API key."""
-    now = datetime.utcnow()
-    window = timedelta(hours=1)
+    """
+    Check rate limit for API key using advanced rate limiter.
 
-    # Initialize if first request
-    if api_key not in rate_limit_store:
-        rate_limit_store[api_key] = []
+    Uses per-endpoint limits with burst protection and exponential backoff.
+    """
+    # Get rate limit for this API key
+    limit = API_KEYS[api_key].get("rate_limit", settings.default_rate_limit)
 
-    # Remove old entries outside window
-    rate_limit_store[api_key] = [
-        ts for ts in rate_limit_store[api_key]
-        if now - ts < window
-    ]
+    # Check rate limit with burst protection
+    is_allowed, error_message = rate_limiter.check_rate_limit(
+        key=api_key,
+        endpoint="query",  # Can be customized per endpoint
+        limit=limit,
+        window_seconds=settings.rate_limit_window_hours * 3600,
+        burst_limit=settings.default_rate_limit // 10  # 10% of hourly limit per minute
+    )
 
-    # Check limit
-    limit = API_KEYS[api_key]["rate_limit"]
-    if len(rate_limit_store[api_key]) >= limit:
+    if not is_allowed:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded: {limit} requests per hour"
+            detail=error_message
         )
-
-    # Add current request
-    rate_limit_store[api_key].append(now)
 
     return api_key
 
@@ -668,12 +727,16 @@ async def list_facts(
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket, api_key: Optional[str] = Query(None)):
     """
     WebSocket endpoint for real-time query status updates.
 
+    Authentication:
+    - Pass API key as query parameter: ws://localhost:8000/ws?api_key=your_key
+    - Or send {"action": "auth", "api_key": "..."} as first message
+
     Protocol:
-    1. Client connects
+    1. Client connects (with api_key in query params OR sends auth message)
     2. Client sends: {"action": "subscribe", "query_id": "..."}
     3. Server broadcasts updates: {"query_id": "...", "data": {...}}
     4. Client sends: {"action": "unsubscribe", "query_id": "..."}
@@ -691,7 +754,29 @@ async def websocket_endpoint(websocket: WebSocket):
         }
     }
     """
+    # Accept connection first (required before sending messages)
     await connection_manager.connect(websocket)
+
+    # Authentication check
+    authenticated = False
+    if api_key and api_key in API_KEYS:
+        authenticated = True
+        await connection_manager.send_personal_message(
+            websocket,
+            {
+                "status": "authenticated",
+                "message": f"Authenticated as {API_KEYS[api_key]['name']}"
+            }
+        )
+    else:
+        # Wait for auth message
+        await connection_manager.send_personal_message(
+            websocket,
+            {
+                "status": "auth_required",
+                "message": "Please authenticate with {action: 'auth', api_key: '...'} or connect with ?api_key=..."
+            }
+        )
 
     try:
         while True:
@@ -701,19 +786,62 @@ async def websocket_endpoint(websocket: WebSocket):
             try:
                 message = json.loads(data)
                 action = message.get("action")
-                query_id = message.get("query_id")
 
-                if not action or not query_id:
+                # Handle authentication action
+                if action == "auth":
+                    auth_key = message.get("api_key")
+                    if auth_key and auth_key in API_KEYS:
+                        authenticated = True
+                        await connection_manager.send_personal_message(
+                            websocket,
+                            {
+                                "status": "authenticated",
+                                "message": f"Authenticated as {API_KEYS[auth_key]['name']}"
+                            }
+                        )
+                    else:
+                        await connection_manager.send_personal_message(
+                            websocket,
+                            {"error": "Invalid API key"}
+                        )
+                    continue
+
+                # Check authentication for all other actions
+                if not authenticated:
                     await connection_manager.send_personal_message(
                         websocket,
                         {
-                            "error": "Invalid message format. Expected: {action, query_id}",
-                            "received": message
+                            "error": "Not authenticated. Please authenticate first.",
+                            "hint": "Send {action: 'auth', api_key: '...'}"
                         }
                     )
                     continue
 
+                # Validate query_id if present
+                query_id = message.get("query_id")
+                if query_id:
+                    validation = input_validator.validate_query_id(query_id)
+                    if not validation.is_valid:
+                        await connection_manager.send_personal_message(
+                            websocket,
+                            {"error": validation.error_message}
+                        )
+                        continue
+
+                if not action:
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {"error": "Missing 'action' field"}
+                    )
+                    continue
+
                 if action == "subscribe":
+                    if not query_id:
+                        await connection_manager.send_personal_message(
+                            websocket,
+                            {"error": "Missing 'query_id' for subscribe action"}
+                        )
+                        continue
                     await connection_manager.subscribe(websocket, query_id)
                     await connection_manager.send_personal_message(
                         websocket,
