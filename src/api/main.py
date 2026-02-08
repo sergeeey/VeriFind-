@@ -10,13 +10,15 @@ Endpoints:
 - GET /health - Health check
 """
 
-from fastapi import FastAPI, HTTPException, Depends, status, Header, Query
+from fastapi import FastAPI, HTTPException, Depends, status, Header, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 from datetime import datetime, timedelta
 import logging
 from uuid import uuid4
+import asyncio
+import json
 
 from pydantic import BaseModel, Field, validator
 
@@ -202,6 +204,156 @@ async def check_rate_limit(api_key: str = Depends(verify_api_key)) -> str:
 
 
 # ============================================================================
+# WebSocket Connection Manager
+# ============================================================================
+
+class ConnectionManager:
+    """
+    Manages WebSocket connections and message broadcasting.
+
+    Supports subscribing to specific query_id updates.
+    """
+
+    def __init__(self):
+        # Map of query_id -> set of WebSocket connections
+        self.active_connections: Dict[str, Set[WebSocket]] = {}
+        # Map of WebSocket -> set of query_ids (for cleanup)
+        self.subscriptions: Dict[WebSocket, Set[str]] = {}
+        self._lock = asyncio.Lock()
+
+    async def connect(self, websocket: WebSocket):
+        """Accept WebSocket connection."""
+        await websocket.accept()
+        async with self._lock:
+            self.subscriptions[websocket] = set()
+        logger.info(f"WebSocket connected: {id(websocket)}")
+
+    async def disconnect(self, websocket: WebSocket):
+        """Remove WebSocket connection and cleanup subscriptions."""
+        async with self._lock:
+            # Remove from all query subscriptions
+            if websocket in self.subscriptions:
+                for query_id in self.subscriptions[websocket]:
+                    if query_id in self.active_connections:
+                        self.active_connections[query_id].discard(websocket)
+                        # Cleanup empty subscription sets
+                        if not self.active_connections[query_id]:
+                            del self.active_connections[query_id]
+
+                del self.subscriptions[websocket]
+
+        logger.info(f"WebSocket disconnected: {id(websocket)}")
+
+    async def subscribe(self, websocket: WebSocket, query_id: str):
+        """Subscribe WebSocket to query_id updates."""
+        async with self._lock:
+            if query_id not in self.active_connections:
+                self.active_connections[query_id] = set()
+
+            self.active_connections[query_id].add(websocket)
+
+            if websocket not in self.subscriptions:
+                self.subscriptions[websocket] = set()
+            self.subscriptions[websocket].add(query_id)
+
+        logger.info(f"WebSocket {id(websocket)} subscribed to query {query_id}")
+
+    async def unsubscribe(self, websocket: WebSocket, query_id: str):
+        """Unsubscribe WebSocket from query_id updates."""
+        async with self._lock:
+            if query_id in self.active_connections:
+                self.active_connections[query_id].discard(websocket)
+                if not self.active_connections[query_id]:
+                    del self.active_connections[query_id]
+
+            if websocket in self.subscriptions:
+                self.subscriptions[websocket].discard(query_id)
+
+        logger.info(f"WebSocket {id(websocket)} unsubscribed from query {query_id}")
+
+    async def broadcast_to_query(self, query_id: str, message: Dict[str, Any]):
+        """Broadcast message to all subscribers of a specific query."""
+        async with self._lock:
+            connections = self.active_connections.get(query_id, set()).copy()
+
+        if not connections:
+            logger.debug(f"No active connections for query {query_id}")
+            return
+
+        message_json = json.dumps(message)
+        disconnected = []
+
+        for websocket in connections:
+            try:
+                await websocket.send_text(message_json)
+            except Exception as e:
+                logger.error(f"Failed to send message to WebSocket {id(websocket)}: {e}")
+                disconnected.append(websocket)
+
+        # Cleanup disconnected WebSockets
+        for websocket in disconnected:
+            await self.disconnect(websocket)
+
+        logger.info(f"Broadcasted to {len(connections) - len(disconnected)} connections for query {query_id}")
+
+    async def send_personal_message(self, websocket: WebSocket, message: Dict[str, Any]):
+        """Send message to specific WebSocket connection."""
+        try:
+            await websocket.send_text(json.dumps(message))
+        except Exception as e:
+            logger.error(f"Failed to send personal message: {e}")
+            await self.disconnect(websocket)
+
+
+# Global ConnectionManager instance
+connection_manager = ConnectionManager()
+
+
+# ============================================================================
+# WebSocket Helper Functions
+# ============================================================================
+
+async def broadcast_query_update(
+    query_id: str,
+    status: str,
+    current_node: Optional[str] = None,
+    progress: float = 0.0,
+    verified_facts_count: int = 0,
+    error: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None
+):
+    """
+    Broadcast query status update to all subscribed WebSocket clients.
+
+    This function can be called from anywhere in the application to push
+    real-time updates to connected clients.
+
+    Args:
+        query_id: Query identifier
+        status: Current status (e.g., "processing", "completed", "failed")
+        current_node: Current pipeline node (e.g., "PLAN", "VEE", "GATE")
+        progress: Completion progress (0.0 to 1.0)
+        verified_facts_count: Number of facts generated so far
+        error: Error message if status is "failed"
+        metadata: Additional metadata to include
+    """
+    message = {
+        "query_id": query_id,
+        "data": {
+            "status": status,
+            "current_node": current_node,
+            "progress": progress,
+            "verified_facts_count": verified_facts_count,
+            "error": error,
+            "updated_at": datetime.utcnow().isoformat(),
+            "metadata": metadata or {}
+        }
+    }
+
+    await connection_manager.broadcast_to_query(query_id, message)
+
+
+# ============================================================================
 # Dependency Injection
 # ============================================================================
 
@@ -288,8 +440,25 @@ async def submit_query(
         logger.info(f"Query submitted: {query_id} | API Key: {API_KEYS[api_key]['name']}")
         logger.info(f"Query text: {request.query}")
 
+        # Broadcast initial status to WebSocket subscribers
+        await broadcast_query_update(
+            query_id=query_id,
+            status="accepted",
+            current_node=None,
+            progress=0.0,
+            verified_facts_count=0,
+            metadata={"priority": request.priority, "query_text": request.query}
+        )
+
         # TODO: Implement async execution (background task or queue)
-        # For now, return accepted status
+        # When orchestrator runs, it should call broadcast_query_update() at each node
+        # Example:
+        # - At PLAN node: broadcast_query_update(query_id, "processing", "PLAN", 0.2)
+        # - At FETCH node: broadcast_query_update(query_id, "processing", "FETCH", 0.4)
+        # - At VEE node: broadcast_query_update(query_id, "processing", "VEE", 0.6)
+        # - At GATE node: broadcast_query_update(query_id, "processing", "GATE", 0.8)
+        # - At DEBATE node: broadcast_query_update(query_id, "processing", "DEBATE", 0.9)
+        # - On completion: broadcast_query_update(query_id, "completed", None, 1.0, facts_count)
 
         # Estimate completion time (simple heuristic)
         estimated_seconds = 10 if request.priority == "high" else 30
@@ -432,6 +601,110 @@ async def list_facts(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve facts"
         )
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time query status updates.
+
+    Protocol:
+    1. Client connects
+    2. Client sends: {"action": "subscribe", "query_id": "..."}
+    3. Server broadcasts updates: {"query_id": "...", "data": {...}}
+    4. Client sends: {"action": "unsubscribe", "query_id": "..."}
+    5. Client disconnects
+
+    Example message from server:
+    {
+        "query_id": "abc-123",
+        "data": {
+            "status": "processing",
+            "current_node": "VEE",
+            "progress": 0.6,
+            "verified_facts_count": 2,
+            "updated_at": "2026-02-08T12:00:00Z"
+        }
+    }
+    """
+    await connection_manager.connect(websocket)
+
+    try:
+        while True:
+            # Receive message from client
+            data = await websocket.receive_text()
+
+            try:
+                message = json.loads(data)
+                action = message.get("action")
+                query_id = message.get("query_id")
+
+                if not action or not query_id:
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {
+                            "error": "Invalid message format. Expected: {action, query_id}",
+                            "received": message
+                        }
+                    )
+                    continue
+
+                if action == "subscribe":
+                    await connection_manager.subscribe(websocket, query_id)
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {
+                            "status": "subscribed",
+                            "query_id": query_id,
+                            "message": f"Subscribed to updates for query {query_id}"
+                        }
+                    )
+
+                elif action == "unsubscribe":
+                    await connection_manager.unsubscribe(websocket, query_id)
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {
+                            "status": "unsubscribed",
+                            "query_id": query_id,
+                            "message": f"Unsubscribed from query {query_id}"
+                        }
+                    )
+
+                elif action == "ping":
+                    # Heartbeat support
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {"status": "pong", "timestamp": datetime.utcnow().isoformat()}
+                    )
+
+                else:
+                    await connection_manager.send_personal_message(
+                        websocket,
+                        {
+                            "error": f"Unknown action: {action}",
+                            "supported_actions": ["subscribe", "unsubscribe", "ping"]
+                        }
+                    )
+
+            except json.JSONDecodeError:
+                await connection_manager.send_personal_message(
+                    websocket,
+                    {"error": "Invalid JSON format"}
+                )
+            except Exception as e:
+                logger.error(f"Error processing WebSocket message: {e}", exc_info=True)
+                await connection_manager.send_personal_message(
+                    websocket,
+                    {"error": f"Server error: {str(e)}"}
+                )
+
+    except WebSocketDisconnect:
+        await connection_manager.disconnect(websocket)
+        logger.info("WebSocket client disconnected normally")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}", exc_info=True)
+        await connection_manager.disconnect(websocket)
 
 
 # ============================================================================
