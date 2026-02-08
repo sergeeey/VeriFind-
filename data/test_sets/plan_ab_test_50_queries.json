@@ -1,0 +1,302 @@
+[
+  {
+    "category": "simple",
+    "query": "Calculate the 20-day moving average of AAPL for Q4 2023",
+    "expected_features": ["rolling window", "date sorting", "Q4 date range"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "What is the correlation between SPY and DIA returns in 2023?",
+    "expected_features": ["pct_change", "date alignment", "correlation"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Calculate the Sharpe ratio of QQQ for 2023 with 4% risk-free rate",
+    "expected_features": ["annualization", "risk-free subtraction", "sqrt(252)"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Find the maximum drawdown of MSFT in 2023",
+    "expected_features": ["cummax", "running max", "temporal order"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Calculate the current P/E ratio of GOOGL",
+    "expected_features": ["price/eps", "fundamentals fetch"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "What is the average daily return of NVDA in 2023?",
+    "expected_features": ["pct_change", "mean", "date range"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Calculate the 50-day SMA of SPY as of end of 2023",
+    "expected_features": ["rolling(50)", "iloc[-1]", "date sorting"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "What was the total return of TSLA in 2023?",
+    "expected_features": ["(end/start - 1)", "percentage"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Calculate the volatility (std of returns) of IWM in 2023",
+    "expected_features": ["pct_change", "std", "date range"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "simple",
+    "query": "Find the date when AMZN had its highest closing price in 2023",
+    "expected_features": ["idxmax", "date range", "Close field"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "advanced",
+    "query": "Calculate the 95% Value at Risk of SPY for 2023",
+    "expected_features": ["quantile(0.05)", "returns distribution", "percentile"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "What is the information ratio of ARKK vs SPY for 2023?",
+    "expected_features": ["excess returns", "tracking error std", "annualization"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "Calculate the Sortino ratio of QQQ for 2023 (MAR 0%, rf 4%)",
+    "expected_features": ["downside deviation", "only negative returns", "MAR"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "Find the Calmar ratio of IWM for 2023",
+    "expected_features": ["annualized return / abs(max_drawdown)", "ratio"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "Calculate the 99% CVaR (Conditional VaR) of TSLA for 2023",
+    "expected_features": ["mean of returns below 1st percentile", "tail risk"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "What is the Treynor ratio of AAPL for 2023 (SPY benchmark, rf 4%)?",
+    "expected_features": ["(return - rf) / beta", "beta calculation", "benchmark"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "Calculate the maximum consecutive losing days for NVDA in 2023",
+    "expected_features": ["streak detection", "negative returns", "consecutive count"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "advanced",
+    "query": "Find the ulcer index of SPY for 2023",
+    "expected_features": ["drawdown severity", "squared drawdowns", "RMS"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "advanced",
+    "query": "Calculate the omega ratio of QQQ for 2023 (threshold 0%)",
+    "expected_features": ["gains/losses ratio", "threshold-based", "probability weighted"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "advanced",
+    "query": "What is the tail ratio (95th/5th percentile) of TSLA returns in 2023?",
+    "expected_features": ["quantile(0.95) / abs(quantile(0.05))", "tail risk asymmetry"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Calculate the beta of TSLA relative to SPY for 2023",
+    "expected_features": ["covariance / variance", "date alignment", "returns"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Create a correlation matrix for AAPL, MSFT, GOOGL in 2023",
+    "expected_features": ["multi-ticker merge", "corr()", "returns matrix"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Calculate the portfolio Sharpe ratio for equal-weighted AAPL, MSFT, GOOGL in 2023 (rf 4%)",
+    "expected_features": ["equal weights", "portfolio returns", "portfolio std"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "What is the rolling 30-day correlation between QQQ and SPY in 2023?",
+    "expected_features": ["rolling(30).corr()", "date alignment", "final value"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Calculate the tracking error of ARKK vs SPY for 2023",
+    "expected_features": ["excess returns std", "annualization", "volatility of difference"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Find which had higher volatility in 2023: TSLA or NVDA?",
+    "expected_features": ["std comparison", "returns", "comparison logic"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Calculate the alpha of ARKK vs SPY for 2023 (rf 4%)",
+    "expected_features": ["jensen's alpha", "beta", "excess return vs expected"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "What is the pairwise beta matrix for SPY, QQQ, IWM in 2023?",
+    "expected_features": ["matrix of betas", "nested loops", "covariance matrix"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Calculate the diversification ratio of an equal-weighted AAPL, MSFT, GOOGL portfolio in 2023",
+    "expected_features": ["weighted avg std / portfolio std", "correlation effect"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "multi_ticker",
+    "query": "Find the pair with highest correlation among SPY, QQQ, DIA, IWM in 2023",
+    "expected_features": ["pairwise correlations", "max", "combination logic"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Predict the next month's return for SPY based on 2023 data",
+    "expected_features": ["SHOULD REFUSE", "temporal violation", "no prediction"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Calculate optimal portfolio allocation using tomorrow's prices",
+    "expected_features": ["SHOULD REFUSE", "look-ahead bias", "shift(-1)"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "What will AAPL's price be next week?",
+    "expected_features": ["SHOULD REFUSE", "future prediction", "not executable"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Calculate the best entry point for TSLA using future price data",
+    "expected_features": ["SHOULD REFUSE", "look-ahead", "temporal violation"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Backtest a strategy using next-day returns to generate signals",
+    "expected_features": ["SHOULD REFUSE or detect shift(-1)", "look-ahead bias"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Calculate the 30-day forward return of SPY for each day in 2023",
+    "expected_features": ["SHOULD WARN", "forward-looking", "shift(-30)"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Find the best Sharpe ratio by testing parameters on the same test data",
+    "expected_features": ["SHOULD WARN", "overfitting risk", "in-sample optimization"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Calculate returns using adjusted close from 10-K filed 90 days after quarter end",
+    "expected_features": ["T+90 lag", "publication lag", "temporal correctness"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Use next quarter's earnings to predict this quarter's stock performance",
+    "expected_features": ["SHOULD REFUSE", "causal reversal", "impossible"],
+    "difficulty": "trap"
+  },
+  {
+    "category": "temporal_edge",
+    "query": "Calculate the cumulative return of SPY from Jan 1 2023 to Dec 31 2023",
+    "expected_features": ["VALID historical query", "no temporal violation"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "novel",
+    "query": "Calculate the coefficient of variation for AAPL returns in 2023",
+    "expected_features": ["std / mean", "relative volatility", "dimensionless"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "novel",
+    "query": "Find the 3-month rolling maximum of QQQ in 2023",
+    "expected_features": ["rolling(63).max()", "trading days", "final value"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "novel",
+    "query": "Calculate the average true range (ATR) of TSLA for the last 14 days of 2023",
+    "expected_features": ["max(H-L, H-C_prev, C_prev-L)", "rolling mean", "OHLC"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "novel",
+    "query": "What percentage of days in 2023 did SPY close higher than its open?",
+    "expected_features": ["Close > Open", "count", "percentage"],
+    "difficulty": "easy"
+  },
+  {
+    "category": "novel",
+    "query": "Calculate the median absolute deviation of NVDA returns in 2023",
+    "expected_features": ["median(abs(returns - median))", "robust stat"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "novel",
+    "query": "Find the longest winning streak (consecutive positive days) for AAPL in 2023",
+    "expected_features": ["streak detection", "max consecutive", "positive returns"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "novel",
+    "query": "Calculate the Kelly criterion optimal bet size for SPY in 2023",
+    "expected_features": ["win rate", "avg win/loss ratio", "f = (wp - q)/b"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "novel",
+    "query": "What is the skewness of QQQ returns in 2023?",
+    "expected_features": ["scipy.stats.skew or manual", "distribution asymmetry"],
+    "difficulty": "medium"
+  },
+  {
+    "category": "novel",
+    "query": "Calculate the Hurst exponent of SPY for 2023",
+    "expected_features": ["R/S analysis", "trend persistence", "advanced stat"],
+    "difficulty": "hard"
+  },
+  {
+    "category": "novel",
+    "query": "Find the average gap (open - previous close) for TSLA in 2023",
+    "expected_features": ["Open - Close.shift(1)", "overnight gap", "mean"],
+    "difficulty": "medium"
+  }
+]
