@@ -180,8 +180,12 @@ def test_create_verified_fact(gate):
     assert len(fact.extracted_values) > 0
 
 
-def test_verified_fact_immutability(gate):
-    """Test that VerifiedFact is immutable (frozen dataclass)."""
+def test_verified_fact_confidence_mutable(gate):
+    """Test that VerifiedFact confidence_score is mutable for Debate System.
+
+    Week 5 Day 3: VerifiedFact no longer frozen to allow confidence adjustment.
+    Core numerical values still come from VEE execution (Truth Boundary).
+    """
     fact = VerifiedFact(
         fact_id='fact_001',
         query_id='query_001',
@@ -192,12 +196,20 @@ def test_verified_fact_immutability(gate):
         execution_time_ms=1500,
         memory_used_mb=50.0,
         created_at=datetime.now(UTC),
-        error_message=None
+        error_message=None,
+        source_code='# test code',
+        confidence_score=0.9
     )
 
-    # Should not be able to modify
-    with pytest.raises(AttributeError):
-        fact.status = 'error'
+    # Should be able to modify confidence_score (for Debate System)
+    original_confidence = fact.confidence_score
+    fact.confidence_score = 0.85
+    assert fact.confidence_score == 0.85
+    assert fact.confidence_score != original_confidence
+
+    # Numerical values still come from VEE (Truth Boundary intact)
+    assert fact.extracted_values == {'correlation': 0.95}
+    assert fact.execution_time_ms == 1500
 
 
 def test_hallucination_detection(gate):

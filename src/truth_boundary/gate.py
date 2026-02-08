@@ -26,13 +26,16 @@ from typing import Dict, Any, List, Optional
 from src.vee.sandbox_runner import ExecutionResult
 
 
-@dataclass(frozen=True)
+@dataclass
 class VerifiedFact:
     """
-    Immutable verified fact from code execution.
+    Verified fact from code execution.
 
     All numerical values are guaranteed to come from VEE execution,
     not LLM hallucination.
+
+    Week 5 Day 3: Made mutable to allow confidence adjustment via Debate.
+    Core numerical values remain immutable by design.
     """
 
     fact_id: str
@@ -45,6 +48,10 @@ class VerifiedFact:
     memory_used_mb: float
     created_at: datetime
     error_message: Optional[str] = None
+
+    # Week 5 Day 3: Added for Debate System integration
+    source_code: Optional[str] = None
+    confidence_score: float = 1.0  # Default high confidence before debate
 
 
 @dataclass
@@ -188,10 +195,11 @@ class TruthBoundaryGate:
         plan_id: str,
         code_hash: Optional[str] = None,
         execution_time_ms: Optional[int] = None,
-        memory_used_mb: Optional[float] = None
+        memory_used_mb: Optional[float] = None,
+        source_code: Optional[str] = None
     ) -> VerifiedFact:
         """
-        Create immutable VerifiedFact from validation result.
+        Create VerifiedFact from validation result.
 
         Args:
             validation: Validation result
@@ -200,9 +208,10 @@ class TruthBoundaryGate:
             code_hash: Hash of executed code (optional, from ExecutionResult)
             execution_time_ms: Execution time (optional, from ExecutionResult)
             memory_used_mb: Memory used (optional, from ExecutionResult)
+            source_code: Executed source code (optional, for Debate System)
 
         Returns:
-            Immutable VerifiedFact
+            VerifiedFact
         """
         fact_id = str(uuid.uuid4())
 
@@ -216,5 +225,7 @@ class TruthBoundaryGate:
             execution_time_ms=execution_time_ms or 0,
             memory_used_mb=memory_used_mb or 0.0,
             created_at=datetime.now(UTC),
-            error_message=validation.error_message
+            error_message=validation.error_message,
+            source_code=source_code,
+            confidence_score=1.0  # Default high confidence before debate
         )

@@ -2,16 +2,18 @@
 LangGraph State Machine Orchestrator for APE.
 
 Week 3 Day 1: State-based orchestration with conditional routing.
+Week 5 Day 3: Integrated Debate System for multi-perspective analysis.
 
 State Machine:
 - PLAN: Generate executable code
 - FETCH: Get market data (conditional)
 - VEE: Execute code in sandbox
 - GATE: Validate output
+- DEBATE: Multi-perspective analysis (Bull/Bear/Neutral)
 - ERROR: Handle failures with retry
 
 State Flow:
-INITIALIZED → PLAN → (FETCH?) → VEE → GATE → COMPLETED
+INITIALIZED → PLAN → (FETCH?) → VEE → GATE → DEBATE → COMPLETED
                 ↓ error ↓
               ERROR → retry or FAILED
 """
@@ -25,6 +27,9 @@ import time
 from src.vee.sandbox_runner import SandboxRunner, ExecutionResult
 from src.truth_boundary.gate import TruthBoundaryGate, VerifiedFact
 from src.adapters.yfinance_adapter import YFinanceAdapter, MarketData
+from src.debate.debater_agent import DebaterAgent
+from src.debate.synthesizer_agent import SynthesizerAgent
+from src.debate.schemas import Perspective, DebateContext, DebateReport, Synthesis
 
 
 class StateStatus(str, Enum):
@@ -34,6 +39,7 @@ class StateStatus(str, Enum):
     FETCHING = 'fetching'
     EXECUTING = 'executing'
     VALIDATING = 'validating'
+    DEBATING = 'debating'
     COMPLETED = 'completed'
     FAILED = 'failed'
 
@@ -56,6 +62,10 @@ class APEState:
     fetched_data: Optional[Dict[str, Any]] = None
     execution_result: Optional[ExecutionResult] = None
     verified_fact: Optional[VerifiedFact] = None
+
+    # Debate (Week 5 Day 2)
+    debate_reports: Optional[List[Any]] = None  # List[DebateReport]
+    synthesis: Optional[Any] = None  # Synthesis
 
     # Error handling
     error_count: int = 0
@@ -312,7 +322,8 @@ class LangGraphOrchestrator:
                 plan_id=state.plan.get('plan_id', 'unknown'),
                 code_hash=state.execution_result.code_hash,
                 execution_time_ms=state.execution_result.duration_ms,
-                memory_used_mb=state.execution_result.memory_used_mb
+                memory_used_mb=state.execution_result.memory_used_mb,
+                source_code=state.execution_result.code  # Week 5 Day 3: for Debate System
             )
 
             state.verified_fact = verified_fact
@@ -320,6 +331,74 @@ class LangGraphOrchestrator:
 
         except Exception as e:
             state.error_message = str(e)
+            state.status = StateStatus.FAILED
+
+        return state
+
+    def debate_node(self, state: APEState) -> APEState:
+        """
+        DEBATE node: Multi-perspective analysis (Bull/Bear/Neutral).
+
+        Week 5 Day 2: Run debate on VerifiedFact to adjust confidence.
+
+        Args:
+            state: Current state with verified_fact
+
+        Returns:
+            Updated state with debate_reports and synthesis
+        """
+        state.current_node = 'DEBATE'
+        state.status = StateStatus.DEBATING
+        state.nodes_visited.append('DEBATE')
+
+        if not state.verified_fact:
+            state.error_message = 'No verified fact to debate'
+            state.status = StateStatus.FAILED
+            return state
+
+        try:
+            # Create debate context from VerifiedFact
+            debate_context = DebateContext(
+                fact_id=state.verified_fact.fact_id,
+                extracted_values=state.verified_fact.extracted_values,
+                source_code=state.verified_fact.source_code,
+                query_text=state.query_text,
+                execution_metadata={
+                    'execution_time_ms': state.verified_fact.execution_time_ms,
+                    'memory_used_mb': state.verified_fact.memory_used_mb
+                }
+            )
+
+            # Generate perspectives
+            bull_agent = DebaterAgent(perspective=Perspective.BULL)
+            bear_agent = DebaterAgent(perspective=Perspective.BEAR)
+            neutral_agent = DebaterAgent(perspective=Perspective.NEUTRAL)
+
+            bull_report = bull_agent.debate(debate_context)
+            bear_report = bear_agent.debate(debate_context)
+            neutral_report = neutral_agent.debate(debate_context)
+
+            debate_reports = [bull_report, bear_report, neutral_report]
+
+            # Synthesize
+            synthesizer = SynthesizerAgent(enable_synthesis=True)
+            synthesis = synthesizer.synthesize(
+                debate_reports=debate_reports,
+                original_confidence=state.verified_fact.confidence_score,
+                fact_id=state.verified_fact.fact_id
+            )
+
+            # Update state
+            state.debate_reports = debate_reports
+            state.synthesis = synthesis
+
+            # Update verified_fact confidence with adjusted value
+            state.verified_fact.confidence_score = synthesis.adjusted_confidence
+
+            state.status = StateStatus.COMPLETED
+
+        except Exception as e:
+            state.error_message = f'Debate failed: {str(e)}'
             state.status = StateStatus.FAILED
 
         return state
@@ -363,7 +442,8 @@ class LangGraphOrchestrator:
             StateStatus.PLANNING: 'should_fetch',  # Conditional: FETCH or VEE
             StateStatus.FETCHING: 'VEE',
             StateStatus.EXECUTING: 'GATE',
-            StateStatus.VALIDATING: 'END',
+            StateStatus.VALIDATING: 'DEBATE',  # Week 5 Day 3: Add debate after validation
+            StateStatus.DEBATING: 'END',
             StateStatus.COMPLETED: 'END',
             StateStatus.FAILED: 'ERROR' if self.enable_retry else 'END'
         }

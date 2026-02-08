@@ -126,7 +126,7 @@ def test_gate_node_validates_output(lg_orchestrator):
 
 def test_state_machine_routing_success_path(lg_orchestrator):
     """Test state machine routes through success path."""
-    # PLAN → should_fetch → (FETCH or VEE) → GATE → COMPLETED
+    # Week 5 Day 3: PLAN → should_fetch → (FETCH or VEE) → GATE → DEBATE → COMPLETED
     routing = lg_orchestrator.get_next_node(StateStatus.INITIALIZED)
     assert routing == 'PLAN'
 
@@ -140,6 +140,9 @@ def test_state_machine_routing_success_path(lg_orchestrator):
     assert routing == 'GATE'
 
     routing = lg_orchestrator.get_next_node(StateStatus.VALIDATING)
+    assert routing == 'DEBATE'  # Week 5 Day 3: Added DEBATE after GATE
+
+    routing = lg_orchestrator.get_next_node(StateStatus.DEBATING)
     assert routing == 'END'
 
 

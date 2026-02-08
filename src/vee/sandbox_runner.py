@@ -34,6 +34,7 @@ class ExecutionResult:
     memory_used_mb: float
     executed_at: str  # ISO 8601 timestamp
     code_hash: str  # SHA-256 hash of executed code
+    code: str = ""  # Week 5 Day 3: Executed source code for Debate System
 
 
 class SandboxRunner:
@@ -115,6 +116,7 @@ class SandboxRunner:
         execution_timeout = timeout if timeout is not None else self.timeout
         code_hash = hashlib.sha256(code.encode()).hexdigest()
         executed_at = datetime.now(UTC).isoformat()
+        original_code = code  # Week 5 Day 3: Save for Debate System
 
         start_time = time.time()
 
@@ -140,7 +142,8 @@ class SandboxRunner:
                         duration_ms=duration_ms,
                         memory_used_mb=0.0,
                         executed_at=executed_at,
-                        code_hash=code_hash
+                        code_hash=code_hash,
+                        code=original_code
                     )
 
         # Prepare restricted code if subprocess disabled
@@ -212,7 +215,8 @@ builtins.__import__ = restricted_import
                 duration_ms=duration_ms,
                 memory_used_mb=memory_used_mb,
                 executed_at=executed_at,
-                code_hash=code_hash
+                code_hash=code_hash,
+                code=original_code
             )
 
         except Exception as e:
@@ -227,7 +231,8 @@ builtins.__import__ = restricted_import
                 duration_ms=duration_ms,
                 memory_used_mb=0.0,
                 executed_at=executed_at,
-                code_hash=code_hash
+                code_hash=code_hash,
+                code=original_code
             )
 
     def get_active_containers(self) -> List[str]:
