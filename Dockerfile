@@ -1,6 +1,7 @@
 # ============================================================================
-# Multi-Stage Dockerfile for Predictive Analytics System
-# Week 7 Day 3 - Production Deployment
+# Multi-Stage Dockerfile for APE 2026 API
+# Week 9 Day 2 - Production Deployment
+# With Security Hardening, Error Handling, and WebSocket Support
 # ============================================================================
 
 # Stage 1: Base Python environment

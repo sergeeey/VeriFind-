@@ -1,0 +1,86 @@
+# APE 2026 - Docker Ignore File
+# Excludes unnecessary files from Docker build context
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+wheels/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Environment
+.env
+.env.*
+!.env.example
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!README.md
+docs/
+*.txt
+!requirements.txt
+!requirements-dev.txt
+
+# Data and logs (mounted as volumes)
+data/
+logs/
+*.log
+*.db
+*.sqlite
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Tests (except for testing stage)
+tests/
+pytest.ini
+.coveragerc
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# ChromaDB data
+chroma_data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS
+Thumbs.db
