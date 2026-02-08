@@ -93,7 +93,9 @@ export function QueryStatus({ status }: QueryStatusProps) {
   }
 
   const duration = status.created_at
-    ? formatDuration(new Date(status.created_at), new Date(status.updated_at || Date.now()))
+    ? formatDuration(
+        new Date(status.updated_at || Date.now()).getTime() - new Date(status.created_at).getTime()
+      )
     : '0s'
 
   return (

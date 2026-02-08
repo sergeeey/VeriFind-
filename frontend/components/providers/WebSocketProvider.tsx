@@ -95,6 +95,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         wsRef.current.close()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const subscribe = (queryId: string, callback: (data: any) => void) => {

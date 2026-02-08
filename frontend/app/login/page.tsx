@@ -95,7 +95,7 @@ export default function LoginPage() {
                   disabled={loading}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Don't have an API key?{' '}
+                  Don&apos;t have an API key?{' '}
                   <Link href="/register" className="text-primary hover:underline">
                     Register here
                   </Link>

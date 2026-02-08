@@ -35,7 +35,9 @@ export function ResultsHeader({ episode }: ResultsHeaderProps) {
   const duration = episode.duration_ms
     ? `${(episode.duration_ms / 1000).toFixed(2)}s`
     : episode.completed_at
-    ? formatDuration(new Date(episode.created_at), new Date(episode.completed_at))
+    ? formatDuration(
+        new Date(episode.completed_at).getTime() - new Date(episode.created_at).getTime()
+      )
     : 'N/A'
 
   return (
