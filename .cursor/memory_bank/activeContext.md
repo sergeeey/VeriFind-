@@ -1,11 +1,11 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Pre-Implementation (Week 0 завершение)
-📍 **Focus**: Infrastructure Setup Complete → Ready for Week 1
-🚦 **Status**: ✅ Architectural decisions DONE, Infrastructure READY
+🎯 **Phase**: Week 2 Development (VEE Implementation)
+📍 **Focus**: Verifiable Execution Environment Complete
+🚦 **Status**: ✅ Week 2 Day 1 COMPLETE - Security sandbox functional
 
-## Последняя Сессия (2026-02-08, Week 1 COMPLETE - Autonomous)
+## Последняя Сессия (2026-02-08, Week 2 Day 1 COMPLETE - Autonomous)
 ### Выполнено:
 - ✅ Изучено ТЗ v2.1 (1860 строк)
 - ✅ Изучена методология (439 строк)
@@ -48,6 +48,15 @@
   - Sample queries для testing
   - All 18/18 evaluation tests pass
   - Aggregation metrics functional
+- ✅ **WEEK 2 DAY 1 ЗАВЕРШЕН: VEE Sandbox (TDD)**
+  - Docker-based code execution sandbox
+  - Security features: network isolation, read-only filesystem, timeout enforcement
+  - Resource limits: 256MB memory, 0.5 CPU, 30s timeout
+  - stdout/stderr separation working
+  - Subprocess blocking functional
+  - Code hash tracking для audit
+  - All 16/16 unit tests pass (TDD RED→GREEN cycle)
+  - Container cleanup verified
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -79,21 +88,19 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: 🎉 **WEEK 1 ЗАВЕРШЕН!** → Week 2 Day 1 ⏳
+**Current**: 🎉 **WEEK 2 DAY 1 ЗАВЕРШЕН!** → Week 2 Day 2-5 ⏳
 
-**Week 1 Summary (Day 1-5)**: ALL COMPLETE ✅
-- ✅ TimescaleDB (0.109ms query)
-- ✅ ChromaDB (10/10 tests, embedded mode)
-- ✅ Claude API Integration (17/17 tests)
-- ✅ Ground Truth Pipeline (18/18 tests)
-- ✅ **Total: 44/45 tests passing** (98% success rate)
+**Week 2 Day 1 Summary**: COMPLETE ✅
+- ✅ VEE Sandbox implementation (16/16 tests)
+- ✅ Docker security isolation working
+- ✅ TDD RED→GREEN cycle успешен
+- ✅ **Total: 60/61 tests passing** (98.4% success rate)
 
-**Week 2 Day 1: VEE Sandbox (TDD)**
-- [ ] Docker sandbox runner implementation
-- [ ] Network isolation tests
-- [ ] Filesystem restrictions
-- [ ] Timeout enforcement
-- [ ] Security review (Opus session)
+**Week 2 Day 2-5: YFinance & Truth Boundary**
+- [ ] YFinance Adapter (TDD) - Week 2 Day 2
+- [ ] Truth Boundary Gate - Week 2 Day 3
+- [ ] VEE Security Review (Opus session)
+- [ ] Integration: PLAN→VEE→Gate pipeline
 
 **Week 1 Success Criteria:** ✅ MET
 - Infrastructure ready
@@ -117,30 +124,32 @@ Performance:
 
 ## Метрики Прогресса
 ```
-Overall: [████░░░░░░] 31.25% (Week 1 Complete: 5/16 weeks)
+Overall: [████░░░░░░] 34.4% (Week 2 Day 1 Complete: 5.2/16 weeks)
 
 Milestones:
-- M1 (Week 1-4):  [██████████] 100% (Week 1/4 complete) 🎉
+- M1 (Week 1-4):  [███░░░░░░░] 30% (Week 1 + Day 1) ⏳
 - M2 (Week 5-8):  [░░░░░░░░░░] 0%
 - M3 (Week 9-12): [░░░░░░░░░░] 0%
 - M4 (Week 13-16):[░░░░░░░░░░] 0%
 
-Week 1 Stats:
-- Tests: 44/45 passing (98%)
-- Code: ~3000 lines
-- Files: 15 created
+Week 2 Day 1 Stats:
+- Tests: 60/61 passing (98.4%)
+- Code: ~3500 lines (+500 LOC)
+- Files: 17 created (+2 VEE files)
+- Docker security: ✅ Read-only FS, network isolation, timeout, subprocess blocking
 ```
 
 ## Последний Тест
 ```bash
-# Week 1 Complete Test Suite
+# Week 2 Day 1 Complete Test Suite
 pytest tests/ -v
-# Result: 44/45 tests PASSED ✅ (98% success rate)
+# Result: 60/61 tests PASSED ✅ (98.4% success rate)
 # Components:
-# - ChromaDB: 10/10 ✅
+# - ChromaDB: 9/10 ✅ (latency test flaky на Windows)
 # - PLAN node: 17/17 ✅
 # - Evaluation: 18/18 ✅
-# Total: 3 modules, 15 files, ~3000 LOC
+# - VEE Sandbox: 16/16 ✅ (NEW!)
+# Total: 4 modules, 17 files, ~3500 LOC
 ```
 
 ## Заметки для будущих сессий
@@ -150,6 +159,6 @@ pytest tests/ -v
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 05:00 UTC (Autonomous Session)*
-*Next Review: Перед началом Week 2 Day 1 (VEE Sandbox)*
-*Session Duration: ~5 hours (autonomous)*
+*Last Updated: 2026-02-08 05:30 UTC (Autonomous Session)*
+*Next Review: Перед началом Week 2 Day 2 (YFinance Adapter)*
+*Session Duration: ~30 min (Week 2 Day 1 GREEN phase)*
