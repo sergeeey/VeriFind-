@@ -19,6 +19,8 @@ from dataclasses import dataclass
 from datetime import datetime, UTC
 from typing import Optional, List
 
+from src.temporal.integrity_checker import TemporalIntegrityChecker
+
 
 @dataclass
 class ExecutionResult:
@@ -50,7 +52,9 @@ class SandboxRunner:
         image: str = "python:3.11-slim",
         memory_limit: str = "256m",
         cpu_limit: float = 0.5,
-        timeout: int = 30
+        timeout: int = 30,
+        enable_temporal_checks: bool = False,  # NEW: TIM integration
+        query_date: Optional[datetime] = None  # NEW: For temporal validation
     ):
         """
         Initialize sandbox runner.
@@ -60,11 +64,21 @@ class SandboxRunner:
             memory_limit: Memory limit (e.g., "256m", "1g")
             cpu_limit: CPU limit (fraction of CPU, 0.5 = 50%)
             timeout: Default timeout in seconds
+            enable_temporal_checks: Enable Temporal Integrity Module (TIM)
+            query_date: Query date for temporal validation (required if TIM enabled)
         """
         self.image = image
         self.memory_limit = memory_limit
         self.cpu_limit = cpu_limit
         self.timeout = timeout
+        self.enable_temporal_checks = enable_temporal_checks
+        self.query_date = query_date
+
+        # Initialize Temporal Integrity Checker (if enabled)
+        if enable_temporal_checks:
+            self.tim = TemporalIntegrityChecker(enable_checks=True)
+        else:
+            self.tim = None
 
         # Initialize Docker client
         try:
@@ -103,6 +117,31 @@ class SandboxRunner:
         executed_at = datetime.now(UTC).isoformat()
 
         start_time = time.time()
+
+        # NEW: Temporal Integrity Check (if enabled)
+        if self.enable_temporal_checks and self.tim:
+            if not self.query_date:
+                raise ValueError("query_date required when temporal checks enabled")
+
+            tim_result = self.tim.check_code(code, query_date=self.query_date)
+
+            if tim_result.has_violations:
+                # Get critical violations
+                critical = tim_result.get_critical_violations()
+
+                if critical:
+                    # Block execution if critical violations found
+                    duration_ms = int((time.time() - start_time) * 1000)
+                    return ExecutionResult(
+                        status="error",
+                        exit_code=-2,  # Special code for temporal violation
+                        stdout="",
+                        stderr=f"TEMPORAL INTEGRITY VIOLATION:\n{tim_result.report}",
+                        duration_ms=duration_ms,
+                        memory_used_mb=0.0,
+                        executed_at=executed_at,
+                        code_hash=code_hash
+                    )
 
         # Prepare restricted code if subprocess disabled
         if not allow_subprocess:
