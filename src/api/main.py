@@ -27,12 +27,33 @@ from ..storage.timescale_store import TimescaleDBStore
 from ..graph.neo4j_client import Neo4jClient
 from .security import input_validator, rate_limiter
 from .config import get_settings, load_production_api_keys
+from .exceptions import (
+    APEException,
+    ValidationError as APEValidationError,
+    AuthenticationError,
+    RateLimitError,
+    ResourceNotFoundError,
+    OrchestratorError
+)
+from .error_handlers import (
+    ape_exception_handler,
+    validation_exception_handler,
+    generic_exception_handler,
+    request_id_middleware,
+    error_logging_middleware,
+    configure_logging
+)
+from fastapi.exceptions import RequestValidationError
 
 # Load settings
 settings = get_settings()
 
-# Configure logging
-logging.basicConfig(level=getattr(logging, settings.log_level))
+# Configure structured logging
+configure_logging(
+    level=settings.log_level,
+    format="json" if settings.environment == "production" else "text",
+    log_file=None  # Configure via environment if needed
+)
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
@@ -44,6 +65,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Register exception handlers
+app.add_exception_handler(APEException, ape_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
+
 # CORS configuration from settings
 app.add_middleware(
     CORSMiddleware,
@@ -52,6 +78,11 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+
+# Error handling middlewares
+app.middleware("http")(request_id_middleware)
+app.middleware("http")(error_logging_middleware)
 
 
 # Security Headers Middleware
@@ -221,16 +252,10 @@ API_KEYS = {**settings.api_keys, **load_production_api_keys()}
 async def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
     """Verify API key from header."""
     if not x_api_key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing API key. Include X-API-Key header."
-        )
+        raise AuthenticationError("Missing API key. Include X-API-Key header.")
 
     if x_api_key not in API_KEYS:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key"
-        )
+        raise AuthenticationError("Invalid API key")
 
     return x_api_key
 
@@ -254,10 +279,12 @@ async def check_rate_limit(api_key: str = Depends(verify_api_key)) -> str:
     )
 
     if not is_allowed:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=error_message
-        )
+        # Extract retry_after from error message if present
+        import re
+        retry_match = re.search(r"Try again in (\d+)s", error_message)
+        retry_after = int(retry_match.group(1)) if retry_match else None
+
+        raise RateLimitError(error_message, retry_after=retry_after)
 
     return api_key
 
@@ -509,28 +536,21 @@ async def health_check():
 
     Returns system status and component health.
     """
-    try:
-        # TODO: Check actual component health
-        components = {
-            "api": "healthy",
-            "orchestrator": "healthy",
-            "timescaledb": "unknown",  # TODO: ping database
-            "neo4j": "unknown",  # TODO: ping database
-            "chromadb": "healthy"
-        }
+    # TODO: Check actual component health
+    components = {
+        "api": "healthy",
+        "orchestrator": "healthy",
+        "timescaledb": "unknown",  # TODO: ping database
+        "neo4j": "unknown",  # TODO: ping database
+        "chromadb": "healthy"
+    }
 
-        return HealthResponse(
-            status="healthy",
-            timestamp=datetime.utcnow(),
-            version="1.0.0",
-            components=components
-        )
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service unhealthy"
-        )
+    return HealthResponse(
+        status="healthy",
+        timestamp=datetime.utcnow(),
+        version="1.0.0",
+        components=components
+    )
 
 
 @app.post("/query", response_model=QueryResponse, tags=["Query"], status_code=status.HTTP_202_ACCEPTED)
@@ -549,57 +569,49 @@ async def submit_query(
 
     Returns a query ID for status tracking.
     """
-    try:
-        query_id = str(uuid4())
+    query_id = str(uuid4())
 
-        logger.info(f"Query submitted: {query_id} | API Key: {API_KEYS[api_key]['name']}")
-        logger.info(f"Query text: {request.query}")
+    logger.info(f"Query submitted: {query_id} | API Key: {API_KEYS[api_key]['name']}")
+    logger.info(f"Query text: {request.query}")
 
-        # Broadcast initial status to WebSocket subscribers
-        await broadcast_query_update(
-            query_id=query_id,
-            status="accepted",
-            current_node=None,
-            progress=0.0,
-            verified_facts_count=0,
-            metadata={"priority": request.priority, "query_text": request.query}
-        )
+    # Broadcast initial status to WebSocket subscribers
+    await broadcast_query_update(
+        query_id=query_id,
+        status="accepted",
+        current_node=None,
+        progress=0.0,
+        verified_facts_count=0,
+        metadata={"priority": request.priority, "query_text": request.query}
+    )
 
-        # Example code for testing (calculates 2+2)
-        # In production, this would come from PLAN node (Claude API)
-        test_code = """
+    # Example code for testing (calculates 2+2)
+    # In production, this would come from PLAN node (Claude API)
+    test_code = """
 import json
 result = 2 + 2
 output = {"calculation": "2+2", "result": result}
 print(json.dumps(output))
 """
 
-        # Run orchestrator in background
-        # This will automatically broadcast updates at each node via WebSocket
-        background_tasks.add_task(
-            run_query_orchestrator,
-            query_id=query_id,
-            query_text=request.query,
-            direct_code=test_code  # Remove this in production
-        )
+    # Run orchestrator in background
+    # This will automatically broadcast updates at each node via WebSocket
+    background_tasks.add_task(
+        run_query_orchestrator,
+        query_id=query_id,
+        query_text=request.query,
+        direct_code=test_code  # Remove this in production
+    )
 
-        # Estimate completion time (simple heuristic)
-        estimated_seconds = 10 if request.priority == "high" else 30
-        estimated_completion = datetime.utcnow() + timedelta(seconds=estimated_seconds)
+    # Estimate completion time (simple heuristic)
+    estimated_seconds = 10 if request.priority == "high" else 30
+    estimated_completion = datetime.utcnow() + timedelta(seconds=estimated_seconds)
 
-        return QueryResponse(
-            query_id=query_id,
-            status="accepted",
-            message="Query accepted for processing. Subscribe to WebSocket for real-time updates.",
-            estimated_completion=estimated_completion
-        )
-
-    except Exception as e:
-        logger.error(f"Query submission failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to submit query: {str(e)}"
-        )
+    return QueryResponse(
+        query_id=query_id,
+        status="accepted",
+        message="Query accepted for processing. Subscribe to WebSocket for real-time updates.",
+        estimated_completion=estimated_completion
+    )
 
 
 @app.get("/status/{query_id}", response_model=StatusResponse, tags=["Query"])
@@ -613,30 +625,23 @@ async def get_query_status(
 
     Returns current status, progress, and any verified facts generated.
     """
-    try:
-        # TODO: Implement actual status retrieval from storage
-        # For now, return mock status
+    # TODO: Implement actual status retrieval from storage
+    # For now, return mock status
 
-        logger.info(f"Status requested for query: {query_id}")
+    logger.info(f"Status requested for query: {query_id}")
 
-        # Mock response
-        return StatusResponse(
-            query_id=query_id,
-            status="processing",
-            current_node="VEE",
-            progress=0.6,
-            verified_facts_count=2,
-            created_at=datetime.utcnow() - timedelta(minutes=2),
-            updated_at=datetime.utcnow(),
-            metadata={"priority": "normal"}
-        )
-
-    except Exception as e:
-        logger.error(f"Status retrieval failed for {query_id}: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Query not found: {query_id}"
-        )
+    # Mock response
+    # In production, check if query exists and raise ResourceNotFoundError if not
+    return StatusResponse(
+        query_id=query_id,
+        status="processing",
+        current_node="VEE",
+        progress=0.6,
+        verified_facts_count=2,
+        created_at=datetime.utcnow() - timedelta(minutes=2),
+        updated_at=datetime.utcnow(),
+        metadata={"priority": "normal"}
+    )
 
 
 @app.get("/episodes/{episode_id}", response_model=EpisodeResponse, tags=["Episodes"])
@@ -650,41 +655,34 @@ async def get_episode(
 
     An episode represents a complete query execution with all generated facts.
     """
-    try:
-        logger.info(f"Episode requested: {episode_id}")
+    logger.info(f"Episode requested: {episode_id}")
 
-        # TODO: Implement actual episode retrieval from Neo4j
+    # TODO: Implement actual episode retrieval from Neo4j
+    # In production, check if episode exists and raise ResourceNotFoundError if not
 
-        # Mock response
-        return EpisodeResponse(
-            episode_id=episode_id,
-            query_id=str(uuid4()),
-            query_text="Calculate Sharpe ratio of SPY for 2023",
-            status="completed",
-            verified_facts=[
-                VerifiedFactResponse(
-                    fact_id=str(uuid4()),
-                    query_id=str(uuid4()),
-                    statement="SPY Sharpe ratio for 2023 is 1.45",
-                    value=1.45,
-                    confidence_score=0.92,
-                    source_code="sharpe = (returns.mean() * 252) / (returns.std() * np.sqrt(252))",
-                    created_at=datetime.utcnow(),
-                    metadata={"source": "VEE"}
-                )
-            ],
-            synthesis={"verdict": "ACCEPT", "confidence": 0.89},
-            created_at=datetime.utcnow() - timedelta(minutes=5),
-            completed_at=datetime.utcnow(),
-            execution_time_ms=4523.5
-        )
-
-    except Exception as e:
-        logger.error(f"Episode retrieval failed for {episode_id}: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Episode not found: {episode_id}"
-        )
+    # Mock response
+    return EpisodeResponse(
+        episode_id=episode_id,
+        query_id=str(uuid4()),
+        query_text="Calculate Sharpe ratio of SPY for 2023",
+        status="completed",
+        verified_facts=[
+            VerifiedFactResponse(
+                fact_id=str(uuid4()),
+                query_id=str(uuid4()),
+                statement="SPY Sharpe ratio for 2023 is 1.45",
+                value=1.45,
+                confidence_score=0.92,
+                source_code="sharpe = (returns.mean() * 252) / (returns.std() * np.sqrt(252))",
+                created_at=datetime.utcnow(),
+                metadata={"source": "VEE"}
+            )
+        ],
+        synthesis={"verdict": "ACCEPT", "confidence": 0.89},
+        created_at=datetime.utcnow() - timedelta(minutes=5),
+        completed_at=datetime.utcnow(),
+        execution_time_ms=4523.5
+    )
 
 
 @app.get("/facts", response_model=List[VerifiedFactResponse], tags=["Facts"])
@@ -700,30 +698,22 @@ async def list_facts(
 
     Optionally filter by query_id. Supports pagination.
     """
-    try:
-        logger.info(f"Facts list requested: query_id={query_id}, limit={limit}, offset={offset}")
+    logger.info(f"Facts list requested: query_id={query_id}, limit={limit}, offset={offset}")
 
-        # TODO: Implement actual fact retrieval from TimescaleDB
+    # TODO: Implement actual fact retrieval from TimescaleDB
 
-        # Mock response
-        return [
-            VerifiedFactResponse(
-                fact_id=str(uuid4()),
-                query_id=query_id or str(uuid4()),
-                statement="Mock verified fact",
-                value=123.45,
-                confidence_score=0.87,
-                created_at=datetime.utcnow(),
-                metadata={}
-            )
-        ]
-
-    except Exception as e:
-        logger.error(f"Facts retrieval failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve facts"
+    # Mock response
+    return [
+        VerifiedFactResponse(
+            fact_id=str(uuid4()),
+            query_id=query_id or str(uuid4()),
+            statement="Mock verified fact",
+            value=123.45,
+            confidence_score=0.87,
+            created_at=datetime.utcnow(),
+            metadata={}
         )
+    ]
 
 
 @app.websocket("/ws")
