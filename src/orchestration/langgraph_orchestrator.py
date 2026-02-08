@@ -31,6 +31,7 @@ from src.truth_boundary.gate import TruthBoundaryGate, VerifiedFact
 from src.adapters.yfinance_adapter import YFinanceAdapter, MarketData
 from src.debate.debater_agent import DebaterAgent
 from src.debate.synthesizer_agent import SynthesizerAgent
+from src.debate.real_llm_adapter import RealLLMDebateAdapter  # Week 11 Day 2: Real LLM integration
 from src.debate.schemas import Perspective, DebateContext, DebateReport, Synthesis
 
 # Logger for orchestrator
@@ -143,7 +144,9 @@ class LangGraphOrchestrator:
         enable_retry: bool = True,
         max_retries: int = 3,
         vee_config: Optional[Dict[str, Any]] = None,
-        broadcast_callback: Optional[Callable] = None
+        broadcast_callback: Optional[Callable] = None,
+        use_real_llm: bool = True,  # Week 11 Day 2: Enable real LLM by default
+        llm_provider: str = "deepseek"  # Week 11 Day 2: Default to cheapest provider
     ):
         """
         Initialize LangGraph orchestrator.
@@ -155,10 +158,14 @@ class LangGraphOrchestrator:
             vee_config: VEE sandbox configuration
             broadcast_callback: Optional async callback for broadcasting status updates
                                Should have signature: (query_id, status, node, progress, facts_count, error, metadata)
+            use_real_llm: Use real LLM API for debate (True) or mock agents (False)
+            llm_provider: LLM provider for debate ("openai", "gemini", "deepseek")
         """
         self.enable_retry = enable_retry
         self.max_retries = max_retries
         self.broadcast_callback = broadcast_callback
+        self.use_real_llm = use_real_llm
+        self.llm_provider = llm_provider
 
         # Initialize components
         vee_config = vee_config or {}
@@ -170,6 +177,17 @@ class LangGraphOrchestrator:
 
         self.truth_gate = TruthBoundaryGate()
         self.yfinance_adapter = YFinanceAdapter()
+
+        # Initialize debate system (Week 11 Day 2)
+        if self.use_real_llm:
+            self.debate_adapter = RealLLMDebateAdapter(
+                provider=llm_provider,
+                enable_debate=True
+            )
+            logger.info(f"Initialized real LLM debate with provider: {llm_provider}")
+        else:
+            self.debate_adapter = None
+            logger.info("Using mock debate agents")
 
     def _broadcast_update(
         self,
@@ -531,6 +549,7 @@ class LangGraphOrchestrator:
         DEBATE node: Multi-perspective analysis (Bull/Bear/Neutral).
 
         Week 5 Day 2: Run debate on VerifiedFact to adjust confidence.
+        Week 11 Day 2: Integrated with real LLM API (OpenAI, Gemini, DeepSeek).
 
         Args:
             state: Current state with verified_fact
@@ -580,24 +599,43 @@ class LangGraphOrchestrator:
                 }
             )
 
-            # Generate perspectives
-            bull_agent = DebaterAgent(perspective=Perspective.BULL)
-            bear_agent = DebaterAgent(perspective=Perspective.BEAR)
-            neutral_agent = DebaterAgent(perspective=Perspective.NEUTRAL)
+            # Week 11 Day 2: Use real LLM API or mock agents
+            if self.use_real_llm and self.debate_adapter:
+                # Real LLM API (production mode)
+                logger.info(f"Using real LLM ({self.llm_provider}) for debate")
+                debate_reports, synthesis = self.debate_adapter.generate_debate(
+                    context=debate_context,
+                    original_confidence=state.verified_fact.confidence_score
+                )
 
-            bull_report = bull_agent.debate(debate_context)
-            bear_report = bear_agent.debate(debate_context)
-            neutral_report = neutral_agent.debate(debate_context)
+                # Log cost stats
+                stats = self.debate_adapter.get_stats()
+                if stats:
+                    logger.info(
+                        f"LLM API cost: ${stats.get('total_cost', 0):.6f} "
+                        f"({stats.get('total_input_tokens', 0)} in + "
+                        f"{stats.get('total_output_tokens', 0)} out tokens)"
+                    )
+            else:
+                # Mock agents (test mode)
+                logger.info("Using mock debate agents (test mode)")
+                bull_agent = DebaterAgent(perspective=Perspective.BULL)
+                bear_agent = DebaterAgent(perspective=Perspective.BEAR)
+                neutral_agent = DebaterAgent(perspective=Perspective.NEUTRAL)
 
-            debate_reports = [bull_report, bear_report, neutral_report]
+                bull_report = bull_agent.debate(debate_context)
+                bear_report = bear_agent.debate(debate_context)
+                neutral_report = neutral_agent.debate(debate_context)
 
-            # Synthesize
-            synthesizer = SynthesizerAgent(enable_synthesis=True)
-            synthesis = synthesizer.synthesize(
-                debate_reports=debate_reports,
-                original_confidence=state.verified_fact.confidence_score,
-                fact_id=state.verified_fact.fact_id
-            )
+                debate_reports = [bull_report, bear_report, neutral_report]
+
+                # Synthesize
+                synthesizer = SynthesizerAgent(enable_synthesis=True)
+                synthesis = synthesizer.synthesize(
+                    debate_reports=debate_reports,
+                    original_confidence=state.verified_fact.confidence_score,
+                    fact_id=state.verified_fact.fact_id
+                )
 
             # Update state
             state.debate_reports = debate_reports
@@ -616,8 +654,9 @@ class LangGraphOrchestrator:
                 progress=0.95,
                 verified_facts_count=1,
                 metadata={
-                    "verdict": synthesis.verdict.value,
-                    "adjusted_confidence": synthesis.adjusted_confidence
+                    "adjusted_confidence": synthesis.adjusted_confidence,
+                    "llm_provider": self.llm_provider if self.use_real_llm else "mock",
+                    "debate_quality": synthesis.debate_quality_score
                 }
             )
 
