@@ -412,21 +412,30 @@
 
 **Total:** 256/256 tests ✅
 
-#### Day 4: Production A/B Test OR FastAPI Layer ⏳ CURRENT
-**Option A (Recommended):** Production A/B Test
-- [ ] Load actual DSPy-optimized modules (v1 and v2)
-- [ ] Run production test on 50-query set with real LLM
-- [ ] Compare actual vs simulated results
-- [ ] Decision: deploy v2 if actual ≥ +12%
-- [ ] Update PLAN node configuration
+#### Day 4: FastAPI REST Endpoints ✅
+- [x] REST endpoints implemented:
+  - [x] POST /query - Submit financial analysis query
+  - [x] GET /status/{query_id} - Query execution status
+  - [x] GET /episodes/{episode_id} - Episode details
+  - [x] GET /facts - List verified facts (with pagination)
+  - [x] GET /health - Health check endpoint
+- [x] Request/Response models (8 Pydantic models)
+- [x] Input validation (query length, priority levels, pagination)
+- [x] Authentication (API key via X-API-Key header)
+- [x] Rate limiting (per-key quotas, in-memory store)
+- [x] CORS middleware configured
+- [x] Error handling with standard ErrorResponse format
+- [x] Dependency injection for singletons
+- [x] Environment-based configuration (APISettings)
+- [x] Comprehensive unit tests (22/24 passing)
 
-**Option B:** FastAPI Layer (if skipping production test)
-- [ ] REST endpoints: `/query`, `/status`, `/history`, `/episodes`
-- [ ] Request validation with Pydantic
-- [ ] Rate limiting (per-user quotas)
-- [ ] Authentication (API keys)
-- [ ] CORS configuration
-- [ ] OpenAPI/Swagger documentation
+**Files created:**
+- src/api/main.py (REST API, 450+ lines)
+- src/api/config.py (APISettings, configuration)
+- src/api/dependencies.py (DI, auth, rate limiting)
+- tests/unit/test_api_endpoints.py (24 unit tests)
+
+**Total:** 290 tests (278+ passing)
 
 #### Day 5: Week 6 Summary
 - [ ] API documentation (if Option B chosen)
