@@ -1,28 +1,22 @@
 """
-Debate System - Multi-Perspective Analysis.
+Debate module for APE 2026.
 
-Week 5 Day 2: Structured debates for financial analysis quality.
-
-Components:
-- DebaterAgent: Generates arguments from specific perspective (Bull/Bear/Neutral)
-- SynthesizerAgent: Combines perspectives into balanced synthesis
-- DebateProtocol: Orchestrates debate flow
+Week 10 Day 3: LLM-powered multi-perspective analysis.
+Replaces rule-based debate with nuanced LLM-generated perspectives.
 """
 
-from .schemas import (
-    Perspective,
-    Argument,
-    DebateReport,
-    Synthesis
+from .llm_debate import (
+    DebatePerspective,
+    DebateResult,
+    LLMDebateNode,
+    DebateValidator,
+    DebatePromptBuilder
 )
-from .debater_agent import DebaterAgent
-from .synthesizer_agent import SynthesizerAgent
 
 __all__ = [
-    'Perspective',
-    'Argument',
-    'DebateReport',
-    'Synthesis',
-    'DebaterAgent',
-    'SynthesizerAgent'
+    "DebatePerspective",
+    "DebateResult",
+    "LLMDebateNode",
+    "DebateValidator",
+    "DebatePromptBuilder"
 ]
