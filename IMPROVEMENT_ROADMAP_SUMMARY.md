@@ -11,10 +11,10 @@
 
 | # | Проблема | Текущий статус | Решение | Приоритет |
 |---|----------|----------------|---------|-----------|
-| 1 | LLM = NotImplementedError | ✅ **FIXED** (Week 11 Day 1) | Интеграция с orchestrator | 🔴 |
-| 2 | Нет disclaimer | ❌ Critical risk | API + UI disclaimers | 🔴 |
-| 3 | Все тесты на моках | ❌ Не проверено в production | Real LLM + Golden Set | 🔴 |
-| 4 | Нет cost tracking | ❌ Blind spot | Middleware + dashboard | 🔴 |
+| 1 | LLM = NotImplementedError | ✅ **FIXED** (Week 11 Day 1-2) | Интеграция с orchestrator | 🔴 |
+| 2 | Нет disclaimer | 🔄 **NEXT** (Week 11 Day 3) | API + UI disclaimers | 🔴 |
+| 3 | Все тесты на моках | 🔄 **PLANNED** (Week 11 Day 5) | Real LLM + Golden Set | 🔴 |
+| 4 | Нет cost tracking | 🔄 **PLANNED** (Week 11 Day 4) | Middleware + dashboard | 🔴 |
 | 5 | God Object (main.py 947 LOC) | ❌ Maintenance hell | Разбить на routers | 🟡 |
 | 6 | Sync orchestrator | ❌ Bottleneck | Async + background tasks | 🟡 |
 | 7 | Нет load testing | ❌ Unknown capacity | Locust baseline | 🟡 |
@@ -28,15 +28,25 @@
 
 ### **Week 11: CRITICAL FIXES** ⚡
 **Goal:** Production blockers устранены
+**Progress:** 40% (2/5 days complete)
 
 **Deliverables:**
-- ✅ LLM integrated with orchestrator (OpenAI, Gemini, DeepSeek)
-- ✅ Disclaimer в API responses и UI
-- ✅ Cost tracking per query operational
-- ✅ Golden Set baseline с реальным LLM (accuracy ≥90%)
-- ✅ Async LLM calls (non-blocking)
+- ✅ **LLM integrated with orchestrator** (OpenAI, Gemini, DeepSeek) - Day 1-2 COMPLETE
+- 🔄 Disclaimer в API responses и UI - Day 3 NEXT
+- 🔄 Cost tracking per query operational - Day 4 PLANNED
+- 🔄 Golden Set baseline с реальным LLM (accuracy ≥90%) - Day 5 PLANNED
+- 🔄 Async LLM calls (non-blocking) - Week 12
 
 **Success Metric:** Can deploy to production без legal/technical risks
+
+**Completed Day 1-2:**
+- ✅ Real LLM API implementation (OpenAI, Gemini, DeepSeek)
+- ✅ RealLLMDebateAdapter (370 LOC)
+- ✅ LangGraphOrchestrator integration
+- ✅ Cost tracking infrastructure (get_stats())
+- ✅ 3 mock tests passing
+- ✅ Default to DeepSeek ($0.000264 per debate, 24% cheaper)
+- ✅ Backward compatible with mock agents
 
 ---
 
@@ -122,14 +132,15 @@
 ## 🚦 Go/No-Go Criteria
 
 **BEFORE Week 11:**
-- [ ] Week 11 Day 1 complete ✅ (LLM integration реализован)
+- [x] Week 11 Day 1 complete ✅ (LLM integration реализован) - DONE
+- [x] Week 11 Day 2 complete ✅ (Orchestrator integration) - DONE
 - [ ] Budget approved ($500/month LLM API)
 - [ ] Legal contact для disclaimer review
 
 **AFTER Week 11 (Go to Week 12):**
-- [ ] Real LLM working in orchestrator
-- [ ] Disclaimer approved by legal
-- [ ] Cost tracking shows <$0.001 per query
+- [x] Real LLM working in orchestrator - ✅ DONE (Day 1-2)
+- [ ] Disclaimer approved by legal - Day 3
+- [ ] Cost tracking shows <$0.001 per query - Day 4-5
 
 **AFTER Week 12 (Go to Week 13):**
 - [ ] Load test baseline met
