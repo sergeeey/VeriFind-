@@ -237,7 +237,11 @@ def is_retryable(exception: Exception) -> bool:
     - Authentication/Authorization errors
     - Invalid queries
     """
-    if isinstance(exception, (TimeoutError, ExternalServiceError, StorageError)):
+    # Check ExternalServiceError first for retry_possible flag
+    if isinstance(exception, ExternalServiceError):
+        return exception.details.get("retry_possible", True)
+
+    if isinstance(exception, (TimeoutError, StorageError)):
         return True
 
     if isinstance(exception, APEException):
