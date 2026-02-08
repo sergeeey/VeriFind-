@@ -43,6 +43,13 @@ from .error_handlers import (
     error_logging_middleware,
     configure_logging
 )
+from .monitoring import (
+    prometheus_middleware,
+    metrics_endpoint,
+    initialize_monitoring,
+    get_health_metrics
+)
+from .metrics import queries_submitted_total, websocket_connections_total
 from fastapi.exceptions import RequestValidationError
 
 # Load settings
@@ -55,6 +62,12 @@ configure_logging(
     log_file=None  # Configure via environment if needed
 )
 logger = logging.getLogger(__name__)
+
+# Initialize monitoring
+initialize_monitoring(
+    version=settings.app_version,
+    environment=settings.environment
+)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -83,6 +96,9 @@ app.add_middleware(
 # Error handling middlewares
 app.middleware("http")(request_id_middleware)
 app.middleware("http")(error_logging_middleware)
+
+# Prometheus metrics middleware
+app.middleware("http")(prometheus_middleware)
 
 
 # Security Headers Middleware
@@ -545,12 +561,27 @@ async def health_check():
         "chromadb": "healthy"
     }
 
+    # Add metrics to health check
+    health_metrics = get_health_metrics()
+    components["metrics"] = f"{int(health_metrics['total_requests'])} requests"
+
     return HealthResponse(
         status="healthy",
         timestamp=datetime.utcnow(),
-        version="1.0.0",
+        version=settings.app_version,
         components=components
     )
+
+
+@app.get("/metrics", tags=["Monitoring"])
+async def get_metrics():
+    """
+    Prometheus metrics endpoint.
+
+    Returns metrics in Prometheus exposition format.
+    This endpoint is scraped by Prometheus for monitoring.
+    """
+    return metrics_endpoint()
 
 
 @app.post("/query", response_model=QueryResponse, tags=["Query"], status_code=status.HTTP_202_ACCEPTED)
@@ -573,6 +604,9 @@ async def submit_query(
 
     logger.info(f"Query submitted: {query_id} | API Key: {API_KEYS[api_key]['name']}")
     logger.info(f"Query text: {request.query}")
+
+    # Track query submission metric
+    queries_submitted_total.labels(priority=request.priority).inc()
 
     # Broadcast initial status to WebSocket subscribers
     await broadcast_query_update(
