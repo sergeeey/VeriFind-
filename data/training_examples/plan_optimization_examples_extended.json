@@ -1,0 +1,715 @@
+[
+  {
+    "query": "Calculate the 30-day moving average of SPY closing prices for the last quarter",
+    "good_plan": {
+      "description": "Fetch SPY historical data for Q4 2023, calculate 30-day SMA on close prices",
+      "reasoning": "Need 30 days of history for MA calculation. Q4 = Oct-Dec 2023. Use pandas rolling() for SMA.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-10-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate 30-day SMA\ndf['SMA_30'] = df['Close'].rolling(window=30).mean()\n\n# Get final value\nfinal_sma = df['SMA_30'].iloc[-1]\n\nprint(f'SMA_30_final: {final_sma:.2f}')\nresult = {'sma_30': final_sma, 'ticker': 'SPY', 'period': 'Q4_2023'}"
+    },
+    "bad_plan": {
+      "description": "Get SPY data and calculate average",
+      "reasoning": "Need to calculate moving average",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\navg = df['Close'].mean()\nprint(avg)"
+    },
+    "quality_score": 0.95,
+    "issues_in_bad": [
+      "Missing start_date and end_date (temporal ambiguity)",
+      "Uses simple mean() instead of rolling window",
+      "No date sorting (temporal integrity violation)",
+      "Missing result structure",
+      "No validation of window size vs data length"
+    ]
+  },
+  {
+    "query": "What is the correlation between QQQ and SPY returns over the last year?",
+    "good_plan": {
+      "description": "Fetch QQQ and SPY daily prices for 2023, calculate daily returns, compute Pearson correlation",
+      "reasoning": "Returns = (price_t - price_t-1) / price_t-1. Need at least 252 trading days for annual data. Pearson correlation measures linear relationship.",
+      "data_requirements": {
+        "tickers": ["QQQ", "SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\nqqq_df = pd.DataFrame(fetched_data['QQQ'])\nspy_df = pd.DataFrame(fetched_data['SPY'])\n\n# Convert dates and sort\nfor df in [qqq_df, spy_df]:\n    df['Date'] = pd.to_datetime(df['Date'])\n    df.sort_values('Date', inplace=True)\n\n# Calculate daily returns\nqqq_df['Returns'] = qqq_df['Close'].pct_change()\nspy_df['Returns'] = spy_df['Close'].pct_change()\n\n# Merge on date (inner join ensures aligned dates)\nmerged = pd.merge(qqq_df[['Date', 'Returns']], spy_df[['Date', 'Returns']], \n                  on='Date', suffixes=('_QQQ', '_SPY'))\n\n# Drop NaN (first row after pct_change)\nmerged = merged.dropna()\n\n# Calculate Pearson correlation\ncorrelation = merged['Returns_QQQ'].corr(merged['Returns_SPY'])\nn_samples = len(merged)\n\nprint(f'correlation: {correlation:.4f}')\nprint(f'sample_size: {n_samples}')\nresult = {'correlation': correlation, 'sample_size': n_samples, 'pair': 'QQQ-SPY', 'period': '2023'}"
+    },
+    "bad_plan": {
+      "description": "Calculate correlation between QQQ and SPY",
+      "reasoning": "Use correlation function",
+      "data_requirements": {
+        "tickers": ["QQQ", "SPY"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\nqqq = fetched_data['QQQ']['Close']\nspy = fetched_data['SPY']['Close']\ncorr = pd.Series(qqq).corr(pd.Series(spy))\nprint(corr)"
+    },
+    "quality_score": 0.92,
+    "issues_in_bad": [
+      "Correlating prices instead of returns (wrong metric)",
+      "No date alignment between series (temporal violation)",
+      "Missing end_date",
+      "No sample size reporting (statistical validity unclear)",
+      "No NaN handling",
+      "Assumes equal-length arrays without verification"
+    ]
+  },
+  {
+    "query": "Calculate the Sharpe ratio of IWM for 2023 (assume risk-free rate of 4%)",
+    "good_plan": {
+      "description": "Fetch IWM daily prices for 2023, calculate daily returns, annualized return and volatility, compute Sharpe ratio",
+      "reasoning": "Sharpe = (annualized_return - risk_free_rate) / annualized_volatility. Annualized return = mean(daily_returns) * 252. Annualized vol = std(daily_returns) * sqrt(252).",
+      "data_requirements": {
+        "tickers": ["IWM"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['IWM'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Annualize metrics (252 trading days)\nmean_daily_return = df['Returns'].mean()\nstd_daily_return = df['Returns'].std()\n\nannualized_return = mean_daily_return * 252\nannualized_volatility = std_daily_return * math.sqrt(252)\n\n# Sharpe ratio\nrisk_free_rate = 0.04\nsharpe_ratio = (annualized_return - risk_free_rate) / annualized_volatility\n\nn_days = len(df)\n\nprint(f'sharpe_ratio: {sharpe_ratio:.4f}')\nprint(f'annualized_return: {annualized_return:.4f}')\nprint(f'annualized_volatility: {annualized_volatility:.4f}')\nprint(f'sample_size: {n_days}')\n\nresult = {\n    'sharpe_ratio': sharpe_ratio,\n    'annualized_return': annualized_return,\n    'annualized_volatility': annualized_volatility,\n    'sample_size': n_days,\n    'ticker': 'IWM',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate Sharpe ratio for IWM",
+      "reasoning": "Sharpe = return / volatility",
+      "data_requirements": {
+        "tickers": ["IWM"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['IWM'])\nreturns = df['Close'].pct_change()\nsharpe = returns.mean() / returns.std()\nprint(sharpe)"
+    },
+    "quality_score": 0.90,
+    "issues_in_bad": [
+      "Not subtracting risk-free rate",
+      "Not annualizing return and volatility",
+      "Missing date range specification",
+      "No date sorting (temporal issue)",
+      "Wrong Sharpe formula (missing risk-free rate)",
+      "No result structure"
+    ]
+  },
+  {
+    "query": "Find the maximum drawdown of AAPL in 2023",
+    "good_plan": {
+      "description": "Fetch AAPL daily prices for 2023, calculate running maximum, compute drawdowns, find maximum drawdown",
+      "reasoning": "Drawdown = (current_price - running_max) / running_max. Maximum drawdown = min(all_drawdowns). Need chronological order for running max.",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['AAPL'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')  # Critical for running max\n\n# Calculate running maximum\ndf['Running_Max'] = df['Close'].cummax()\n\n# Calculate drawdown at each point\ndf['Drawdown'] = (df['Close'] - df['Running_Max']) / df['Running_Max']\n\n# Find maximum drawdown (most negative value)\nmax_drawdown = df['Drawdown'].min()\nmax_dd_pct = max_drawdown * 100\n\n# Find date of maximum drawdown\nmax_dd_date = df.loc[df['Drawdown'] == max_drawdown, 'Date'].iloc[0].strftime('%Y-%m-%d')\n\nprint(f'max_drawdown_pct: {max_dd_pct:.2f}')\nprint(f'max_drawdown_date: {max_dd_date}')\n\nresult = {\n    'max_drawdown': max_drawdown,\n    'max_drawdown_pct': max_dd_pct,\n    'max_drawdown_date': max_dd_date,\n    'ticker': 'AAPL',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate max drawdown",
+      "reasoning": "Find biggest drop",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['AAPL'])\nmax_price = df['Close'].max()\nmin_price = df['Close'].min()\ndrawdown = (min_price - max_price) / max_price\nprint(drawdown)"
+    },
+    "quality_score": 0.88,
+    "issues_in_bad": [
+      "Wrong drawdown calculation (global min vs running max)",
+      "No date sorting - temporal integrity violation!",
+      "Missing end_date",
+      "Drawdown not calculated point-by-point (running max missing)",
+      "Can't identify when max drawdown occurred",
+      "Look-ahead bias: uses future max in calculation"
+    ]
+  },
+  {
+    "query": "Calculate the P/E ratio of MSFT",
+    "good_plan": {
+      "description": "Fetch MSFT current price and fundamentals (EPS), calculate P/E ratio",
+      "reasoning": "P/E = Price / EPS (trailing twelve months). Need both current price and TTM EPS from fundamentals.",
+      "data_requirements": {
+        "tickers": ["MSFT"],
+        "fields": ["Close", "trailingEps"]
+      },
+      "code": "# Data provided by FETCH node\nmsft_data = fetched_data['MSFT']\n\n# Get latest price\nif isinstance(msft_data, dict) and 'Close' in msft_data:\n    price = msft_data['Close']\nelse:\n    import pandas as pd\n    df = pd.DataFrame(msft_data)\n    price = df['Close'].iloc[-1]\n\n# Get EPS from fundamentals\nif 'trailingEps' in fetched_data['MSFT']:\n    eps = fetched_data['MSFT']['trailingEps']\nelse:\n    # Fallback if not in fetched data structure\n    eps = None\n\nif eps and eps > 0:\n    pe_ratio = price / eps\n    print(f'pe_ratio: {pe_ratio:.2f}')\n    print(f'price: {price:.2f}')\n    print(f'eps: {eps:.2f}')\n    result = {'pe_ratio': pe_ratio, 'price': price, 'eps': eps, 'ticker': 'MSFT'}\nelse:\n    print('Error: EPS not available or invalid')\n    result = {'error': 'EPS not available'}"
+    },
+    "bad_plan": {
+      "description": "Get P/E ratio",
+      "reasoning": "Fetch MSFT data",
+      "data_requirements": {
+        "tickers": ["MSFT"]
+      },
+      "code": "data = fetched_data['MSFT']\npe = data['pe_ratio']\nprint(pe)"
+    },
+    "quality_score": 0.85,
+    "issues_in_bad": [
+      "Assumes 'pe_ratio' field exists (may not be fetched)",
+      "Should calculate P/E = Price / EPS instead of assuming it's provided",
+      "Missing fields specification in data_requirements",
+      "No error handling for missing data",
+      "No result structure"
+    ]
+  },
+  {
+    "query": "Calculate the beta of TSLA relative to SPY for 2023",
+    "good_plan": {
+      "description": "Fetch TSLA and SPY daily prices for 2023, calculate daily returns, compute beta using covariance",
+      "reasoning": "Beta = Cov(TSLA_returns, SPY_returns) / Var(SPY_returns). Need aligned dates and returns calculation.",
+      "data_requirements": {
+        "tickers": ["TSLA", "SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ntsla_df = pd.DataFrame(fetched_data['TSLA'])\nspy_df = pd.DataFrame(fetched_data['SPY'])\n\n# Convert dates and sort\nfor df in [tsla_df, spy_df]:\n    df['Date'] = pd.to_datetime(df['Date'])\n    df.sort_values('Date', inplace=True)\n\n# Calculate daily returns\ntsla_df['Returns'] = tsla_df['Close'].pct_change()\nspy_df['Returns'] = spy_df['Close'].pct_change()\n\n# Merge on date to align\nmerged = pd.merge(tsla_df[['Date', 'Returns']], spy_df[['Date', 'Returns']], \n                  on='Date', suffixes=('_TSLA', '_SPY'))\nmerged = merged.dropna()\n\n# Calculate beta: Cov(TSLA, SPY) / Var(SPY)\ncovariance = merged['Returns_TSLA'].cov(merged['Returns_SPY'])\nvariance_spy = merged['Returns_SPY'].var()\nbeta = covariance / variance_spy\n\nn_samples = len(merged)\n\nprint(f'beta: {beta:.4f}')\nprint(f'sample_size: {n_samples}')\nresult = {'beta': beta, 'ticker': 'TSLA', 'benchmark': 'SPY', 'period': '2023', 'sample_size': n_samples}"
+    },
+    "bad_plan": {
+      "description": "Calculate beta of TSLA",
+      "reasoning": "Beta measures volatility",
+      "data_requirements": {
+        "tickers": ["TSLA", "SPY"]
+      },
+      "code": "import pandas as pd\ntsla = pd.DataFrame(fetched_data['TSLA'])\nspy = pd.DataFrame(fetched_data['SPY'])\nbeta = tsla['Close'].std() / spy['Close'].std()\nprint(beta)"
+    },
+    "quality_score": 0.87,
+    "issues_in_bad": [
+      "Wrong beta formula (uses std ratio, not covariance/variance)",
+      "Operating on prices instead of returns",
+      "No date alignment",
+      "Missing date range",
+      "No date sorting",
+      "Beta should use covariance, not standard deviation ratio"
+    ]
+  },
+  {
+    "query": "Calculate the correlation matrix for a portfolio of AAPL, MSFT, GOOGL in 2023",
+    "good_plan": {
+      "description": "Fetch AAPL, MSFT, GOOGL daily prices for 2023, calculate returns, compute correlation matrix",
+      "reasoning": "Need returns for all tickers, aligned by date. Correlation matrix shows pairwise correlations.",
+      "data_requirements": {
+        "tickers": ["AAPL", "MSFT", "GOOGL"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ntickers = ['AAPL', 'MSFT', 'GOOGL']\nreturns_dict = {}\n\nfor ticker in tickers:\n    df = pd.DataFrame(fetched_data[ticker])\n    df['Date'] = pd.to_datetime(df['Date'])\n    df = df.sort_values('Date')\n    df['Returns'] = df['Close'].pct_change()\n    returns_dict[ticker] = df[['Date', 'Returns']]\n\n# Merge all on date\nmerged = returns_dict['AAPL']\nfor ticker in ['MSFT', 'GOOGL']:\n    merged = pd.merge(merged, returns_dict[ticker], on='Date', suffixes=('', f'_{ticker}'))\n\nmerged = merged.dropna()\n\n# Rename columns for clarity\nmerged.columns = ['Date', 'AAPL', 'MSFT', 'GOOGL']\n\n# Calculate correlation matrix\ncorr_matrix = merged[['AAPL', 'MSFT', 'GOOGL']].corr()\n\nprint('correlation_matrix:')\nfor ticker1 in ['AAPL', 'MSFT', 'GOOGL']:\n    for ticker2 in ['AAPL', 'MSFT', 'GOOGL']:\n        print(f'{ticker1}_{ticker2}: {corr_matrix.loc[ticker1, ticker2]:.4f}')\n\nresult = {\n    'correlation_matrix': corr_matrix.to_dict(),\n    'tickers': ['AAPL', 'MSFT', 'GOOGL'],\n    'period': '2023',\n    'sample_size': len(merged)\n}"
+    },
+    "bad_plan": {
+      "description": "Get correlation matrix for portfolio",
+      "reasoning": "Calculate correlations between stocks",
+      "data_requirements": {
+        "tickers": ["AAPL", "MSFT", "GOOGL"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\ndata = {ticker: fetched_data[ticker]['Close'] for ticker in ['AAPL', 'MSFT', 'GOOGL']}\ndf = pd.DataFrame(data)\ncorr = df.corr()\nprint(corr)"
+    },
+    "quality_score": 0.83,
+    "issues_in_bad": [
+      "Using prices instead of returns for correlation",
+      "No date alignment between series",
+      "Missing end_date",
+      "Assumes all series have same length",
+      "No NaN handling",
+      "No date sorting"
+    ]
+  },
+  {
+    "query": "Calculate the 20-day volatility (annualized) of SPY for Q4 2023",
+    "good_plan": {
+      "description": "Fetch SPY data for Q4 2023, calculate 20-day rolling std of returns, annualize",
+      "reasoning": "Volatility = std(returns) * sqrt(252) for annualization. Use 20-day rolling window.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-10-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\n\n# Calculate 20-day rolling volatility (std of returns)\ndf['Volatility_20d'] = df['Returns'].rolling(window=20).std()\n\n# Annualize volatility\ndf['Annualized_Vol'] = df['Volatility_20d'] * math.sqrt(252)\n\n# Get final value\nfinal_vol = df['Annualized_Vol'].iloc[-1]\n\nprint(f'annualized_volatility_20d: {final_vol:.4f}')\nresult = {\n    'annualized_volatility': final_vol,\n    'window': 20,\n    'ticker': 'SPY',\n    'period': 'Q4_2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate volatility of SPY",
+      "reasoning": "Volatility is standard deviation",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nvol = df['Close'].std()\nprint(vol)"
+    },
+    "quality_score": 0.86,
+    "issues_in_bad": [
+      "Using price std instead of returns std",
+      "Not using rolling window (20-day)",
+      "Not annualizing volatility",
+      "Missing date range",
+      "No date sorting",
+      "Wrong volatility definition"
+    ]
+  },
+  {
+    "query": "What is the RSI (14-day) of NVDA as of end of 2023?",
+    "good_plan": {
+      "description": "Fetch NVDA data for late 2023, calculate 14-day RSI using price changes",
+      "reasoning": "RSI = 100 - (100 / (1 + RS)). RS = avg_gain / avg_loss over 14 days. Need extra data for warmup.",
+      "data_requirements": {
+        "tickers": ["NVDA"],
+        "start_date": "2023-11-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['NVDA'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate price changes\ndf['Change'] = df['Close'].diff()\n\n# Separate gains and losses\ndf['Gain'] = df['Change'].apply(lambda x: x if x > 0 else 0)\ndf['Loss'] = df['Change'].apply(lambda x: abs(x) if x < 0 else 0)\n\n# Calculate 14-day average gain and loss\nwindow = 14\ndf['Avg_Gain'] = df['Gain'].rolling(window=window).mean()\ndf['Avg_Loss'] = df['Loss'].rolling(window=window).mean()\n\n# Calculate RS and RSI\ndf['RS'] = df['Avg_Gain'] / df['Avg_Loss']\ndf['RSI'] = 100 - (100 / (1 + df['RS']))\n\n# Get final RSI value\nfinal_rsi = df['RSI'].iloc[-1]\nfinal_date = df['Date'].iloc[-1].strftime('%Y-%m-%d')\n\nprint(f'rsi_14: {final_rsi:.2f}')\nprint(f'date: {final_date}')\nresult = {'rsi': final_rsi, 'period': 14, 'ticker': 'NVDA', 'date': final_date}"
+    },
+    "bad_plan": {
+      "description": "Calculate RSI for NVDA",
+      "reasoning": "RSI shows momentum",
+      "data_requirements": {
+        "tickers": ["NVDA"],
+        "start_date": "2023-12-01"
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['NVDA'])\nchanges = df['Close'].diff()\nrsi = changes.mean() * 100\nprint(rsi)"
+    },
+    "quality_score": 0.82,
+    "issues_in_bad": [
+      "Completely wrong RSI formula",
+      "Not separating gains and losses",
+      "Not using 14-day rolling average",
+      "Missing end_date",
+      "Insufficient historical data for 14-day calculation",
+      "No date sorting"
+    ]
+  },
+  {
+    "query": "Calculate the portfolio Sharpe ratio for equal-weighted AAPL, MSFT, GOOGL in 2023 (risk-free rate 4%)",
+    "good_plan": {
+      "description": "Fetch portfolio stocks for 2023, calculate portfolio returns (equal-weighted), compute Sharpe ratio",
+      "reasoning": "Portfolio return = mean of individual returns (equal weight). Portfolio Sharpe = (portfolio_return - rf) / portfolio_volatility.",
+      "data_requirements": {
+        "tickers": ["AAPL", "MSFT", "GOOGL"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ntickers = ['AAPL', 'MSFT', 'GOOGL']\nreturns_list = []\n\nfor ticker in tickers:\n    df = pd.DataFrame(fetched_data[ticker])\n    df['Date'] = pd.to_datetime(df['Date'])\n    df = df.sort_values('Date')\n    df['Returns'] = df['Close'].pct_change()\n    returns_list.append(df[['Date', 'Returns']].rename(columns={'Returns': ticker}))\n\n# Merge all returns on date\nmerged = returns_list[0]\nfor i in range(1, len(returns_list)):\n    merged = pd.merge(merged, returns_list[i], on='Date')\n\nmerged = merged.dropna()\n\n# Equal-weighted portfolio returns\nweights = [1/3, 1/3, 1/3]\nmerged['Portfolio_Returns'] = (merged['AAPL'] * weights[0] + \n                                merged['MSFT'] * weights[1] + \n                                merged['GOOGL'] * weights[2])\n\n# Annualize\nmean_daily_return = merged['Portfolio_Returns'].mean()\nstd_daily_return = merged['Portfolio_Returns'].std()\nannualized_return = mean_daily_return * 252\nannualized_volatility = std_daily_return * math.sqrt(252)\n\n# Sharpe ratio\nrisk_free_rate = 0.04\nsharpe_ratio = (annualized_return - risk_free_rate) / annualized_volatility\n\nprint(f'portfolio_sharpe: {sharpe_ratio:.4f}')\nprint(f'annualized_return: {annualized_return:.4f}')\nprint(f'annualized_volatility: {annualized_volatility:.4f}')\n\nresult = {\n    'sharpe_ratio': sharpe_ratio,\n    'annualized_return': annualized_return,\n    'annualized_volatility': annualized_volatility,\n    'weights': {'AAPL': 1/3, 'MSFT': 1/3, 'GOOGL': 1/3},\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate Sharpe for portfolio",
+      "reasoning": "Average Sharpe ratios of individual stocks",
+      "data_requirements": {
+        "tickers": ["AAPL", "MSFT", "GOOGL"]
+      },
+      "code": "import pandas as pd\nsharpes = []\nfor ticker in ['AAPL', 'MSFT', 'GOOGL']:\n    df = pd.DataFrame(fetched_data[ticker])\n    returns = df['Close'].pct_change()\n    sharpe = returns.mean() / returns.std()\n    sharpes.append(sharpe)\navg_sharpe = sum(sharpes) / len(sharpes)\nprint(avg_sharpe)"
+    },
+    "quality_score": 0.80,
+    "issues_in_bad": [
+      "Can't average individual Sharpe ratios to get portfolio Sharpe",
+      "Need to calculate portfolio returns first, then Sharpe",
+      "Not using equal weighting for portfolio",
+      "Missing risk-free rate subtraction",
+      "Not annualizing metrics",
+      "Missing date range and sorting"
+    ]
+  },
+  {
+    "query": "Calculate the 95% Value at Risk (VaR) of SPY for 2023",
+    "good_plan": {
+      "description": "Fetch SPY data for 2023, calculate daily returns, compute 5th percentile (95% VaR)",
+      "reasoning": "95% VaR = 5th percentile of returns distribution. Represents maximum expected loss 95% of the time.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Calculate 95% VaR (5th percentile)\nvar_95 = df['Returns'].quantile(0.05)\nvar_95_pct = var_95 * 100\n\nn_samples = len(df)\n\nprint(f'var_95_pct: {var_95_pct:.2f}')\nprint(f'sample_size: {n_samples}')\n\nresult = {\n    'var_95': var_95,\n    'var_95_pct': var_95_pct,\n    'confidence_level': 0.95,\n    'ticker': 'SPY',\n    'period': '2023',\n    'sample_size': n_samples\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate VaR",
+      "reasoning": "VaR is volatility metric",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nreturns = df['Close'].pct_change()\nvar = returns.std() * 1.96\nprint(var)"
+    },
+    "quality_score": 0.84,
+    "issues_in_bad": [
+      "Using normal distribution assumption (1.96) instead of empirical percentile",
+      "VaR should be 5th percentile, not std * constant",
+      "Missing date range",
+      "No date sorting",
+      "Not reporting confidence level",
+      "Wrong VaR methodology"
+    ]
+  },
+  {
+    "query": "Calculate the information ratio of ARKK vs SPY for 2023",
+    "good_plan": {
+      "description": "Fetch ARKK and SPY for 2023, calculate excess returns, compute information ratio",
+      "reasoning": "Information Ratio = mean(excess_returns) / std(excess_returns). Excess return = ARKK_return - SPY_return.",
+      "data_requirements": {
+        "tickers": ["ARKK", "SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\narkk_df = pd.DataFrame(fetched_data['ARKK'])\nspy_df = pd.DataFrame(fetched_data['SPY'])\n\n# Convert dates and sort\nfor df in [arkk_df, spy_df]:\n    df['Date'] = pd.to_datetime(df['Date'])\n    df.sort_values('Date', inplace=True)\n\n# Calculate returns\narkk_df['Returns'] = arkk_df['Close'].pct_change()\nspy_df['Returns'] = spy_df['Close'].pct_change()\n\n# Merge on date\nmerged = pd.merge(arkk_df[['Date', 'Returns']], spy_df[['Date', 'Returns']], \n                  on='Date', suffixes=('_ARKK', '_SPY'))\nmerged = merged.dropna()\n\n# Calculate excess returns\nmerged['Excess_Returns'] = merged['Returns_ARKK'] - merged['Returns_SPY']\n\n# Information ratio = mean(excess) / std(excess)\nmean_excess = merged['Excess_Returns'].mean()\nstd_excess = merged['Excess_Returns'].std()\ninformation_ratio = mean_excess / std_excess\n\n# Annualize\nannualized_ir = information_ratio * math.sqrt(252)\n\nprint(f'information_ratio: {annualized_ir:.4f}')\nprint(f'sample_size: {len(merged)}')\n\nresult = {\n    'information_ratio': annualized_ir,\n    'fund': 'ARKK',\n    'benchmark': 'SPY',\n    'period': '2023',\n    'sample_size': len(merged)\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate information ratio",
+      "reasoning": "Compare ARKK and SPY returns",
+      "data_requirements": {
+        "tickers": ["ARKK", "SPY"]
+      },
+      "code": "import pandas as pd\narkk = pd.DataFrame(fetched_data['ARKK'])\nspy = pd.DataFrame(fetched_data['SPY'])\narkk_ret = arkk['Close'].pct_change().mean()\nspy_ret = spy['Close'].pct_change().mean()\nir = (arkk_ret - spy_ret) / spy_ret\nprint(ir)"
+    },
+    "quality_score": 0.81,
+    "issues_in_bad": [
+      "Wrong IR formula (should use std of excess returns, not benchmark return)",
+      "No date alignment",
+      "Missing date range",
+      "Not annualizing",
+      "Wrong denominator (using spy_ret instead of std of tracking error)"
+    ]
+  },
+  {
+    "query": "Find the date when TSLA had its highest trading volume in 2023",
+    "good_plan": {
+      "description": "Fetch TSLA OHLCV data for 2023, find date with maximum volume",
+      "reasoning": "Need Volume field, sort by date to ensure temporal order, find max volume date.",
+      "data_requirements": {
+        "tickers": ["TSLA"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close", "Volume"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['TSLA'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Find max volume\nmax_volume = df['Volume'].max()\nmax_volume_date = df.loc[df['Volume'] == max_volume, 'Date'].iloc[0].strftime('%Y-%m-%d')\nclose_on_that_day = df.loc[df['Volume'] == max_volume, 'Close'].iloc[0]\n\nprint(f'max_volume_date: {max_volume_date}')\nprint(f'max_volume: {max_volume}')\nprint(f'close_price: {close_on_that_day:.2f}')\n\nresult = {\n    'max_volume_date': max_volume_date,\n    'max_volume': int(max_volume),\n    'close_price': close_on_that_day,\n    'ticker': 'TSLA',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Find highest volume date",
+      "reasoning": "Get max volume",
+      "data_requirements": {
+        "tickers": ["TSLA"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['TSLA'])\nmax_vol = df['Volume'].max()\nprint(max_vol)"
+    },
+    "quality_score": 0.89,
+    "issues_in_bad": [
+      "Returns volume value, not the date",
+      "Missing Volume field in data_requirements",
+      "Missing date range",
+      "No date sorting",
+      "Doesn't identify when the max occurred"
+    ]
+  },
+  {
+    "query": "Calculate the average daily range (High - Low) as % of close for SPY in Q4 2023",
+    "good_plan": {
+      "description": "Fetch SPY OHLCV for Q4 2023, calculate daily range as % of close, compute average",
+      "reasoning": "Daily range = (High - Low) / Close * 100. Average gives typical intraday volatility.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-10-01",
+        "end_date": "2023-12-31",
+        "fields": ["High", "Low", "Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily range as % of close\ndf['Range_Pct'] = ((df['High'] - df['Low']) / df['Close']) * 100\n\n# Calculate average\navg_range_pct = df['Range_Pct'].mean()\nstd_range_pct = df['Range_Pct'].std()\n\nprint(f'avg_range_pct: {avg_range_pct:.2f}')\nprint(f'std_range_pct: {std_range_pct:.2f}')\nprint(f'sample_size: {len(df)}')\n\nresult = {\n    'avg_range_pct': avg_range_pct,\n    'std_range_pct': std_range_pct,\n    'ticker': 'SPY',\n    'period': 'Q4_2023',\n    'sample_size': len(df)\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate average range",
+      "reasoning": "High minus Low",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nranges = df['High'] - df['Low']\navg = ranges.mean()\nprint(avg)"
+    },
+    "quality_score": 0.88,
+    "issues_in_bad": [
+      "Not calculating as % of close (absolute range not useful)",
+      "Missing High, Low fields in data_requirements",
+      "Missing date range",
+      "No date sorting",
+      "No context (% of close needed for comparability)"
+    ]
+  },
+  {
+    "query": "Detect if SPY returns show significant autocorrelation at lag-1 in 2023",
+    "good_plan": {
+      "description": "Fetch SPY 2023 data, calculate returns, compute lag-1 autocorrelation, test significance",
+      "reasoning": "Autocorrelation = correlation of returns_t with returns_t-1. Significant if |corr| > 1.96/sqrt(n).",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Calculate lag-1 autocorrelation\ndf['Returns_Lag1'] = df['Returns'].shift(1)\ndf_clean = df.dropna()\n\nautocorr_lag1 = df_clean['Returns'].corr(df_clean['Returns_Lag1'])\n\n# Test significance: threshold = 1.96 / sqrt(n) for 95% confidence\nn = len(df_clean)\nthreshold = 1.96 / math.sqrt(n)\nis_significant = abs(autocorr_lag1) > threshold\n\nprint(f'autocorrelation_lag1: {autocorr_lag1:.4f}')\nprint(f'threshold_95pct: {threshold:.4f}')\nprint(f'is_significant: {is_significant}')\n\nresult = {\n    'autocorrelation': autocorr_lag1,\n    'threshold': threshold,\n    'is_significant': is_significant,\n    'lag': 1,\n    'ticker': 'SPY',\n    'period': '2023',\n    'sample_size': n\n}"
+    },
+    "bad_plan": {
+      "description": "Check autocorrelation",
+      "reasoning": "Correlation of returns with themselves",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nreturns = df['Close'].pct_change()\nautocorr = returns.corr(returns)\nprint(autocorr)"
+    },
+    "quality_score": 0.79,
+    "issues_in_bad": [
+      "Correlating returns with itself gives 1.0 (not lagged)",
+      "Need to correlate returns_t with returns_t-1 (shift needed)",
+      "No significance test",
+      "Missing date range",
+      "No date sorting",
+      "Misunderstands autocorrelation (need lag)"
+    ]
+  },
+  {
+    "query": "Calculate the rolling 30-day beta of AAPL vs SPY for 2023",
+    "good_plan": {
+      "description": "Fetch AAPL and SPY for 2023, calculate rolling 30-day covariance and variance, compute rolling beta",
+      "reasoning": "Rolling beta = rolling_cov(AAPL, SPY) / rolling_var(SPY) over 30-day windows.",
+      "data_requirements": {
+        "tickers": ["AAPL", "SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\naapl_df = pd.DataFrame(fetched_data['AAPL'])\nspy_df = pd.DataFrame(fetched_data['SPY'])\n\n# Convert dates and sort\nfor df in [aapl_df, spy_df]:\n    df['Date'] = pd.to_datetime(df['Date'])\n    df.sort_values('Date', inplace=True)\n\n# Calculate returns\naapl_df['Returns'] = aapl_df['Close'].pct_change()\nspy_df['Returns'] = spy_df['Close'].pct_change()\n\n# Merge on date\nmerged = pd.merge(aapl_df[['Date', 'Returns']], spy_df[['Date', 'Returns']], \n                  on='Date', suffixes=('_AAPL', '_SPY'))\nmerged = merged.dropna()\n\n# Calculate rolling covariance and variance\nwindow = 30\nmerged['Rolling_Cov'] = merged['Returns_AAPL'].rolling(window).cov(merged['Returns_SPY'])\nmerged['Rolling_Var_SPY'] = merged['Returns_SPY'].rolling(window).var()\n\n# Calculate rolling beta\nmerged['Rolling_Beta'] = merged['Rolling_Cov'] / merged['Rolling_Var_SPY']\n\n# Get final beta value\nfinal_beta = merged['Rolling_Beta'].iloc[-1]\nfinal_date = merged['Date'].iloc[-1].strftime('%Y-%m-%d')\n\nprint(f'rolling_beta_30d: {final_beta:.4f}')\nprint(f'date: {final_date}')\n\nresult = {\n    'rolling_beta': final_beta,\n    'window': 30,\n    'ticker': 'AAPL',\n    'benchmark': 'SPY',\n    'date': final_date,\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate rolling beta",
+      "reasoning": "Beta over time windows",
+      "data_requirements": {
+        "tickers": ["AAPL", "SPY"]
+      },
+      "code": "import pandas as pd\naapl = pd.DataFrame(fetched_data['AAPL'])\nspy = pd.DataFrame(fetched_data['SPY'])\naapl['beta'] = aapl['Close'].rolling(30).corr(spy['Close'])\nprint(aapl['beta'].iloc[-1])"
+    },
+    "quality_score": 0.77,
+    "issues_in_bad": [
+      "Using correlation instead of beta formula",
+      "Operating on prices instead of returns",
+      "No date alignment between series",
+      "Beta != correlation (need covariance/variance)",
+      "Missing date range",
+      "No date sorting"
+    ]
+  },
+  {
+    "query": "Calculate the Sortino ratio of QQQ for 2023 (risk-free rate 4%, MAR 0%)",
+    "good_plan": {
+      "description": "Fetch QQQ 2023 data, calculate returns, compute downside deviation, calculate Sortino ratio",
+      "reasoning": "Sortino = (return - MAR) / downside_deviation. Downside deviation uses only negative returns. MAR = Minimum Acceptable Return.",
+      "data_requirements": {
+        "tickers": ["QQQ"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['QQQ'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Calculate annualized return\nmean_daily_return = df['Returns'].mean()\nannualized_return = mean_daily_return * 252\n\n# Calculate downside deviation (only negative returns below MAR)\nMAR = 0.0\ndownside_returns = df[df['Returns'] < MAR]['Returns']\nif len(downside_returns) > 0:\n    downside_variance = (downside_returns ** 2).mean()\n    downside_deviation = math.sqrt(downside_variance)\n    annualized_downside_dev = downside_deviation * math.sqrt(252)\nelse:\n    annualized_downside_dev = 0.0001  # Avoid division by zero\n\n# Sortino ratio\nrisk_free_rate = 0.04\nsortino_ratio = (annualized_return - risk_free_rate) / annualized_downside_dev\n\nprint(f'sortino_ratio: {sortino_ratio:.4f}')\nprint(f'annualized_return: {annualized_return:.4f}')\nprint(f'downside_deviation: {annualized_downside_dev:.4f}')\n\nresult = {\n    'sortino_ratio': sortino_ratio,\n    'annualized_return': annualized_return,\n    'downside_deviation': annualized_downside_dev,\n    'ticker': 'QQQ',\n    'period': '2023',\n    'MAR': MAR\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate Sortino ratio",
+      "reasoning": "Like Sharpe but only downside risk",
+      "data_requirements": {
+        "tickers": ["QQQ"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['QQQ'])\nreturns = df['Close'].pct_change()\nsortino = returns.mean() / returns[returns < 0].std()\nprint(sortino)"
+    },
+    "quality_score": 0.80,
+    "issues_in_bad": [
+      "Not subtracting risk-free rate",
+      "Not annualizing metrics",
+      "Downside deviation should use squared deviations below MAR, not just std of negative returns",
+      "Missing date range",
+      "No date sorting",
+      "Wrong Sortino formula"
+    ]
+  },
+  {
+    "query": "Find the Calmar ratio of IWM for 2023",
+    "good_plan": {
+      "description": "Fetch IWM 2023 data, calculate annualized return and max drawdown, compute Calmar ratio",
+      "reasoning": "Calmar ratio = annualized_return / abs(max_drawdown). Measures return per unit of maximum drawdown risk.",
+      "data_requirements": {
+        "tickers": ["IWM"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['IWM'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate returns\ndf['Returns'] = df['Close'].pct_change()\ndf_returns = df.dropna()\n\n# Annualized return\nmean_daily_return = df_returns['Returns'].mean()\nannualized_return = mean_daily_return * 252\n\n# Calculate max drawdown\ndf['Running_Max'] = df['Close'].cummax()\ndf['Drawdown'] = (df['Close'] - df['Running_Max']) / df['Running_Max']\nmax_drawdown = df['Drawdown'].min()\n\n# Calmar ratio\nif max_drawdown < 0:\n    calmar_ratio = annualized_return / abs(max_drawdown)\nelse:\n    calmar_ratio = float('inf')  # No drawdown case\n\nprint(f'calmar_ratio: {calmar_ratio:.4f}')\nprint(f'annualized_return: {annualized_return:.4f}')\nprint(f'max_drawdown: {max_drawdown:.4f}')\n\nresult = {\n    'calmar_ratio': calmar_ratio,\n    'annualized_return': annualized_return,\n    'max_drawdown': max_drawdown,\n    'ticker': 'IWM',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate Calmar ratio",
+      "reasoning": "Return divided by risk",
+      "data_requirements": {
+        "tickers": ["IWM"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['IWM'])\nreturns = df['Close'].pct_change()\ncalmar = returns.mean() / returns.std()\nprint(calmar)"
+    },
+    "quality_score": 0.78,
+    "issues_in_bad": [
+      "Using std instead of max drawdown",
+      "Calmar = return / max_drawdown, not return / std",
+      "Not annualizing return",
+      "Missing date range",
+      "No date sorting",
+      "Completely wrong denominator"
+    ]
+  },
+  {
+    "query": "Detect if TSLA had any trading days with >10% price change in 2023",
+    "good_plan": {
+      "description": "Fetch TSLA 2023 data, calculate daily returns, find days with abs(return) > 0.10",
+      "reasoning": "Daily return > 10% or < -10% indicates extreme volatility event. Return list of dates and magnitudes.",
+      "data_requirements": {
+        "tickers": ["TSLA"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['TSLA'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Find days with >10% absolute return\nthreshold = 0.10\nextreme_days = df[abs(df['Returns']) > threshold].copy()\n\nif len(extreme_days) > 0:\n    result_list = []\n    for _, row in extreme_days.iterrows():\n        result_list.append({\n            'date': row['Date'].strftime('%Y-%m-%d'),\n            'return_pct': row['Returns'] * 100,\n            'close': row['Close']\n        })\n    \n    print(f'extreme_days_count: {len(extreme_days)}')\n    for item in result_list:\n        print(f\"  {item['date']}: {item['return_pct']:.2f}%\")\n    \n    result = {\n        'has_extreme_days': True,\n        'count': len(extreme_days),\n        'dates': result_list,\n        'threshold_pct': threshold * 100,\n        'ticker': 'TSLA',\n        'period': '2023'\n    }\nelse:\n    print('extreme_days_count: 0')\n    result = {\n        'has_extreme_days': False,\n        'count': 0,\n        'threshold_pct': threshold * 100,\n        'ticker': 'TSLA',\n        'period': '2023'\n    }"
+    },
+    "bad_plan": {
+      "description": "Find >10% price changes",
+      "reasoning": "Check if any big moves",
+      "data_requirements": {
+        "tickers": ["TSLA"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['TSLA'])\nchanges = df['Close'].diff()\nbig_changes = changes[changes > 10]\nprint(len(big_changes))"
+    },
+    "quality_score": 0.85,
+    "issues_in_bad": [
+      "Using absolute price difference, not percentage return",
+      "10% return != $10 price change",
+      "Need pct_change() for percentage moves",
+      "Missing date range",
+      "No date sorting",
+      "Doesn't identify which dates had extreme moves"
+    ]
+  },
+  {
+    "query": "Calculate the win rate (% of positive days) for SPY in 2023",
+    "good_plan": {
+      "description": "Fetch SPY 2023 data, calculate daily returns, count positive days, compute win rate",
+      "reasoning": "Win rate = (positive_days / total_days) * 100. Positive day = daily_return > 0.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Count positive and negative days\npositive_days = len(df[df['Returns'] > 0])\nnegative_days = len(df[df['Returns'] < 0])\nflat_days = len(df[df['Returns'] == 0])\ntotal_days = len(df)\n\n# Win rate\nwin_rate = (positive_days / total_days) * 100\n\nprint(f'win_rate_pct: {win_rate:.2f}')\nprint(f'positive_days: {positive_days}')\nprint(f'negative_days: {negative_days}')\nprint(f'total_days: {total_days}')\n\nresult = {\n    'win_rate_pct': win_rate,\n    'positive_days': positive_days,\n    'negative_days': negative_days,\n    'flat_days': flat_days,\n    'total_days': total_days,\n    'ticker': 'SPY',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate win rate",
+      "reasoning": "Count positive returns",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nreturns = df['Close'].pct_change()\nwin_rate = (returns > 0).sum()\nprint(win_rate)"
+    },
+    "quality_score": 0.87,
+    "issues_in_bad": [
+      "Returns count, not percentage",
+      "Win rate should be (positive_count / total) * 100",
+      "Missing date range",
+      "No date sorting",
+      "Doesn't report total days for context"
+    ]
+  },
+  {
+    "query": "Calculate the momentum (12-month return) of AAPL as of end of 2023",
+    "good_plan": {
+      "description": "Fetch AAPL data for 2023, calculate 12-month return (Dec 2023 / Dec 2022 - 1)",
+      "reasoning": "Momentum = (Price_end / Price_start) - 1. Need 12 months of data ending Dec 2023.",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2022-12-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['AAPL'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Get first and last prices\nfirst_price = df['Close'].iloc[0]\nlast_price = df['Close'].iloc[-1]\nfirst_date = df['Date'].iloc[0].strftime('%Y-%m-%d')\nlast_date = df['Date'].iloc[-1].strftime('%Y-%m-%d')\n\n# Calculate 12-month return\nmomentum = (last_price / first_price) - 1\nmomentum_pct = momentum * 100\n\nprint(f'momentum_12m_pct: {momentum_pct:.2f}')\nprint(f'start_date: {first_date}')\nprint(f'end_date: {last_date}')\nprint(f'start_price: {first_price:.2f}')\nprint(f'end_price: {last_price:.2f}')\n\nresult = {\n    'momentum_12m': momentum,\n    'momentum_12m_pct': momentum_pct,\n    'start_price': first_price,\n    'end_price': last_price,\n    'ticker': 'AAPL',\n    'period': '12M_ending_2023-12'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate momentum",
+      "reasoning": "Price change over time",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['AAPL'])\nmomentum = df['Close'].iloc[-1] - df['Close'].iloc[0]\nprint(momentum)"
+    },
+    "quality_score": 0.84,
+    "issues_in_bad": [
+      "Using absolute price difference, not percentage return",
+      "Momentum should be percentage: (end/start - 1) * 100",
+      "Start date should be 12 months before end (needs Dec 2022 data)",
+      "Missing end_date",
+      "No date sorting"
+    ]
+  },
+  {
+    "query": "TEMPORAL VIOLATION TEST: Calculate next month's expected return for SPY based on 2023 data",
+    "good_plan": {
+      "description": "REFUSE - This query asks for future prediction which violates temporal integrity",
+      "reasoning": "Cannot predict future returns. Can only calculate historical metrics. Should reject or reframe as historical analysis.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "# TEMPORAL INTEGRITY VIOLATION\n# Cannot predict future returns - this would be fortune telling\n# Correct approach: Calculate historical average monthly return for context\n\nimport pandas as pd\n\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate monthly returns (historical)\ndf['Month'] = df['Date'].dt.to_period('M')\nmonthly_df = df.groupby('Month').agg({'Close': ['first', 'last']}).reset_index()\nmonthly_df.columns = ['Month', 'First', 'Last']\nmonthly_df['Monthly_Return'] = (monthly_df['Last'] / monthly_df['First']) - 1\n\n# Historical statistics (NOT predictions)\navg_monthly_return = monthly_df['Monthly_Return'].mean()\nstd_monthly_return = monthly_df['Monthly_Return'].std()\n\nprint(f'historical_avg_monthly_return: {avg_monthly_return:.4f}')\nprint(f'historical_std_monthly_return: {std_monthly_return:.4f}')\nprint('WARNING: Cannot predict future returns - these are HISTORICAL statistics only')\n\nresult = {\n    'note': 'Historical stats only - NOT predictions',\n    'historical_avg_monthly_return': avg_monthly_return,\n    'historical_std_monthly_return': std_monthly_return,\n    'ticker': 'SPY',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Predict next month return using average",
+      "reasoning": "Use historical average as forecast",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2024-01-31"
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\nreturns = df['Close'].pct_change()\nnext_month_expected = returns.mean() * 30\nprint(f'next_month_return: {next_month_expected}')"
+    },
+    "quality_score": 0.95,
+    "issues_in_bad": [
+      "CRITICAL: end_date in future (2024-01-31) - LOOK-AHEAD BIAS!",
+      "Cannot predict future returns",
+      "Presents historical average as prediction",
+      "Violates Truth Boundary (numbers should come from execution, not prediction)",
+      "Temporal integrity violation - using future data",
+      "Misleading: suggests this is an actual forecast"
+    ]
+  },
+  {
+    "query": "TEMPORAL VIOLATION TEST: Use tomorrow's price to calculate today's optimal portfolio allocation",
+    "good_plan": {
+      "description": "REFUSE - Using future prices to make past decisions is classic look-ahead bias",
+      "reasoning": "Optimal allocation must be based on information available AT decision time, not future outcomes.",
+      "data_requirements": {
+        "tickers": ["SPY", "QQQ"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "# TEMPORAL INTEGRITY VIOLATION DETECTED\n# Cannot use future prices (tomorrow) to make past decisions (today)\n# This is textbook look-ahead bias\n\nprint('ERROR: This query requests look-ahead bias')\nprint('Cannot use future information for past decisions')\nprint('Correct approach: Use only data available AT decision time')\n\nresult = {\n    'error': 'TEMPORAL_VIOLATION',\n    'reason': 'Look-ahead bias: Cannot use future prices for past decisions',\n    'suggestion': 'Reframe as: Calculate allocation based on historical data available at time T'\n}"
+    },
+    "bad_plan": {
+      "description": "Use next day prices to optimize allocation",
+      "reasoning": "See which performed better and allocate accordingly",
+      "data_requirements": {
+        "tickers": ["SPY", "QQQ"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "code": "import pandas as pd\nspy = pd.DataFrame(fetched_data['SPY'])\nqqq = pd.DataFrame(fetched_data['QQQ'])\n\n# LOOK-AHEAD BIAS: Using shift(-1) to peek at future\nspy['Next_Return'] = spy['Close'].pct_change().shift(-1)\nqqq['Next_Return'] = qqq['Close'].pct_change().shift(-1)\n\n# Allocate based on which will do better tomorrow\nallocation = 'SPY' if spy['Next_Return'].iloc[-1] > qqq['Next_Return'].iloc[-1] else 'QQQ'\nprint(f'optimal_allocation: {allocation}')"
+    },
+    "quality_score": 0.98,
+    "issues_in_bad": [
+      "CRITICAL: shift(-1) creates look-ahead bias - peeking at future",
+      "Using tomorrow's returns to make today's decision",
+      "This is time-travel optimization (impossible in real trading)",
+      "TIM should REJECT this code before execution",
+      "Severe temporal integrity violation",
+      "Would produce artificially inflated backtest results"
+    ]
+  }
+]

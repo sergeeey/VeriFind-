@@ -1,9 +1,9 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Week 5 Day 5 - Week Summary & Week 6 Planning
-📍 **Focus**: 256 Tests Passing - Milestone 2 @ 50%
-🚦 **Status**: ✅ Week 5 COMPLETE (4/5 days) - Summary Created, Ready for Week 6
+🎯 **Phase**: Week 6 Day 1 - Expanded Training Examples
+📍 **Focus**: 256 Tests Passing - 23 Training Examples Created (5→23)
+🚦 **Status**: ✅ Week 6 Day 1 COMPLETE - Advanced Scenarios Covered
 
 ## Последняя Сессия (2026-02-08, Week 3 Day 4 COMPLETE - Autonomous 156 Tests)
 ### Выполнено:
@@ -224,6 +224,21 @@
   - Optimization time: ~1.5 minutes for 3 bootstrapped demos
   - Successfully bootstrapped 3 full traces
   - **TOTAL: 256/256 tests passing (optimization tested separately)**
+- ✅ **WEEK 6 DAY 1 ЗАВЕРШЕН: Expanded Training Examples (5 → 23)**
+  - Created plan_optimization_examples_extended.json with 23 examples
+  - **Categories covered:**
+    - Original 5: moving avg, correlation, Sharpe, drawdown, P/E
+    - Multi-ticker: beta, correlation matrix, portfolio Sharpe (+3)
+    - Advanced metrics: VaR, information ratio, Sortino, Calmar (+4)
+    - Technical indicators: RSI, volatility, autocorrelation (+3)
+    - Portfolio analysis: rolling beta, equal-weighted portfolio (+2)
+    - Edge detection: extreme days, win rate, momentum (+3)
+    - **Temporal violations: 2 test cases with look-ahead bias (+2)**
+  - All examples follow good/bad pattern with documented issues
+  - Temporal edge cases explicitly test TIM detection
+  - Dry-run test successful (23/23 examples loaded)
+  - Ready for re-optimization with larger dataset
+  - **TOTAL: 256/256 tests passing**
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -255,21 +270,20 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: ✅ **WEEK 5 COMPLETE** - DSPy + Debate + DeepSeek R1, Ready for Week 6
+**Current**: ✅ **WEEK 6 DAY 1 COMPLETE** - 23 Training Examples, Ready for Re-Optimization
 
-**Week 5 Final Summary**: 4/5 days DONE ✅
-- ✅ Day 1: DSPy Optimization Infrastructure (20/20 tests)
-- ✅ Day 2: Debate System (19/19 tests) - Multi-perspective analysis
-- ✅ Day 3: Debate System - LangGraph Integration (11/11 tests)
-- ✅ Day 4: DSPy Real Optimization with DeepSeek R1 ($0.0193 cost)
-- ✅ Day 5: Week 5 Summary created (docs/weekly_summaries/week_05_summary.md)
-- ✅ **Total: 256/256 tests passing (100%)**
+**Week 6 Progress**: Day 1/5 DONE ✅
+- ✅ Day 1: Expanded training examples (5 → 23) - Advanced scenarios
+- ⏳ Day 2: Production PLAN optimization with larger dataset
+- 📋 Day 3-4: FastAPI REST endpoints + authentication
+- 📋 Day 5: Week 6 summary
 
-**Week 6 Plan** (Production Optimization & API):
-- Day 1: Expanded training examples (5 → 25)
-- Day 2: Production PLAN optimization with larger dataset
-- Day 3-4: FastAPI REST endpoints + authentication
-- Day 5: Week 6 summary
+**Next (Week 6 Day 2):**
+- Run DSPy BootstrapFewShot with 23 examples
+- A/B test: baseline (5 examples) vs optimized (23 examples)
+- Measure improvement in executability, temporal validity
+- Deploy optimized prompt to production
+- Performance benchmarks
 
 **Week 5 Alternatives**:
 - Option A: Continue with Debate-LangGraph integration (Day 3)
@@ -389,8 +403,8 @@ pytest -m realapi -v
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 15:00 UTC (Autonomous Session - Week 5 Day 5)*
-*Next Review: Week 6 Day 1*
-*Session Duration: ~19 hours (Week 4-5 complete)*
-*Achievement: Week 5 COMPLETE, 256 tests, M2 @ 50%, Ready for Production API 🎉*
-*Summary: DSPy + Debate + DeepSeek R1 integrated, docs/weekly_summaries/week_05_summary.md created ✅*
+*Last Updated: 2026-02-08 16:00 UTC (Autonomous Session - Week 6 Day 1)*
+*Next Review: Week 6 Day 2*
+*Session Duration: ~20 hours (Week 4-6 Day 1 complete)*
+*Achievement: Week 6 Day 1 COMPLETE, 23 training examples, ready for re-optimization 🎉*
+*Training data expanded 4.6x: advanced scenarios, temporal edge cases, production-grade coverage ✅*
