@@ -1,0 +1,155 @@
+[
+  {
+    "query": "Calculate the 30-day moving average of SPY closing prices for the last quarter",
+    "good_plan": {
+      "description": "Fetch SPY historical data for Q4 2023, calculate 30-day SMA on close prices",
+      "reasoning": "Need 30 days of history for MA calculation. Q4 = Oct-Dec 2023. Use pandas rolling() for SMA.",
+      "data_requirements": {
+        "tickers": ["SPY"],
+        "start_date": "2023-10-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['SPY'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate 30-day SMA\ndf['SMA_30'] = df['Close'].rolling(window=30).mean()\n\n# Get final value\nfinal_sma = df['SMA_30'].iloc[-1]\n\nprint(f'SMA_30_final: {final_sma:.2f}')\nresult = {'sma_30': final_sma, 'ticker': 'SPY', 'period': 'Q4_2023'}"
+    },
+    "bad_plan": {
+      "description": "Get SPY data and calculate average",
+      "reasoning": "Need to calculate moving average",
+      "data_requirements": {
+        "tickers": ["SPY"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['SPY'])\navg = df['Close'].mean()\nprint(avg)"
+    },
+    "quality_score": 0.95,
+    "issues_in_bad": [
+      "Missing start_date and end_date (temporal ambiguity)",
+      "Uses simple mean() instead of rolling window",
+      "No date sorting (temporal integrity violation)",
+      "Missing result structure",
+      "No validation of window size vs data length"
+    ]
+  },
+  {
+    "query": "What is the correlation between QQQ and SPY returns over the last year?",
+    "good_plan": {
+      "description": "Fetch QQQ and SPY daily prices for 2023, calculate daily returns, compute Pearson correlation",
+      "reasoning": "Returns = (price_t - price_t-1) / price_t-1. Need at least 252 trading days for annual data. Pearson correlation measures linear relationship.",
+      "data_requirements": {
+        "tickers": ["QQQ", "SPY"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\nqqq_df = pd.DataFrame(fetched_data['QQQ'])\nspy_df = pd.DataFrame(fetched_data['SPY'])\n\n# Convert dates and sort\nfor df in [qqq_df, spy_df]:\n    df['Date'] = pd.to_datetime(df['Date'])\n    df.sort_values('Date', inplace=True)\n\n# Calculate daily returns\nqqq_df['Returns'] = qqq_df['Close'].pct_change()\nspy_df['Returns'] = spy_df['Close'].pct_change()\n\n# Merge on date (inner join ensures aligned dates)\nmerged = pd.merge(qqq_df[['Date', 'Returns']], spy_df[['Date', 'Returns']], \n                  on='Date', suffixes=('_QQQ', '_SPY'))\n\n# Drop NaN (first row after pct_change)\nmerged = merged.dropna()\n\n# Calculate Pearson correlation\ncorrelation = merged['Returns_QQQ'].corr(merged['Returns_SPY'])\nn_samples = len(merged)\n\nprint(f'correlation: {correlation:.4f}')\nprint(f'sample_size: {n_samples}')\nresult = {'correlation': correlation, 'sample_size': n_samples, 'pair': 'QQQ-SPY', 'period': '2023'}"
+    },
+    "bad_plan": {
+      "description": "Calculate correlation between QQQ and SPY",
+      "reasoning": "Use correlation function",
+      "data_requirements": {
+        "tickers": ["QQQ", "SPY"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\nqqq = fetched_data['QQQ']['Close']\nspy = fetched_data['SPY']['Close']\ncorr = pd.Series(qqq).corr(pd.Series(spy))\nprint(corr)"
+    },
+    "quality_score": 0.92,
+    "issues_in_bad": [
+      "Correlating prices instead of returns (wrong metric)",
+      "No date alignment between series (temporal violation)",
+      "Missing end_date",
+      "No sample size reporting (statistical validity unclear)",
+      "No NaN handling",
+      "Assumes equal-length arrays without verification"
+    ]
+  },
+  {
+    "query": "Calculate the Sharpe ratio of IWM for 2023 (assume risk-free rate of 4%)",
+    "good_plan": {
+      "description": "Fetch IWM daily prices for 2023, calculate daily returns, annualized return and volatility, compute Sharpe ratio",
+      "reasoning": "Sharpe = (annualized_return - risk_free_rate) / annualized_volatility. Annualized return = mean(daily_returns) * 252. Annualized vol = std(daily_returns) * sqrt(252).",
+      "data_requirements": {
+        "tickers": ["IWM"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\nimport math\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['IWM'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')\n\n# Calculate daily returns\ndf['Returns'] = df['Close'].pct_change()\ndf = df.dropna()\n\n# Annualize metrics (252 trading days)\nmean_daily_return = df['Returns'].mean()\nstd_daily_return = df['Returns'].std()\n\nannualized_return = mean_daily_return * 252\nannualized_volatility = std_daily_return * math.sqrt(252)\n\n# Sharpe ratio\nrisk_free_rate = 0.04\nsharpe_ratio = (annualized_return - risk_free_rate) / annualized_volatility\n\nn_days = len(df)\n\nprint(f'sharpe_ratio: {sharpe_ratio:.4f}')\nprint(f'annualized_return: {annualized_return:.4f}')\nprint(f'annualized_volatility: {annualized_volatility:.4f}')\nprint(f'sample_size: {n_days}')\n\nresult = {\n    'sharpe_ratio': sharpe_ratio,\n    'annualized_return': annualized_return,\n    'annualized_volatility': annualized_volatility,\n    'sample_size': n_days,\n    'ticker': 'IWM',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate Sharpe ratio for IWM",
+      "reasoning": "Sharpe = return / volatility",
+      "data_requirements": {
+        "tickers": ["IWM"]
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['IWM'])\nreturns = df['Close'].pct_change()\nsharpe = returns.mean() / returns.std()\nprint(sharpe)"
+    },
+    "quality_score": 0.90,
+    "issues_in_bad": [
+      "Not subtracting risk-free rate",
+      "Not annualizing return and volatility",
+      "Missing date range specification",
+      "No date sorting (temporal issue)",
+      "Wrong Sharpe formula (missing risk-free rate)",
+      "No result structure"
+    ]
+  },
+  {
+    "query": "Find the maximum drawdown of AAPL in 2023",
+    "good_plan": {
+      "description": "Fetch AAPL daily prices for 2023, calculate running maximum, compute drawdowns, find maximum drawdown",
+      "reasoning": "Drawdown = (current_price - running_max) / running_max. Maximum drawdown = min(all_drawdowns). Need chronological order for running max.",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "fields": ["Close"]
+      },
+      "code": "import pandas as pd\n\n# Data provided by FETCH node\ndf = pd.DataFrame(fetched_data['AAPL'])\ndf['Date'] = pd.to_datetime(df['Date'])\ndf = df.sort_values('Date')  # Critical for running max\n\n# Calculate running maximum\ndf['Running_Max'] = df['Close'].cummax()\n\n# Calculate drawdown at each point\ndf['Drawdown'] = (df['Close'] - df['Running_Max']) / df['Running_Max']\n\n# Find maximum drawdown (most negative value)\nmax_drawdown = df['Drawdown'].min()\nmax_dd_pct = max_drawdown * 100\n\n# Find date of maximum drawdown\nmax_dd_date = df.loc[df['Drawdown'] == max_drawdown, 'Date'].iloc[0].strftime('%Y-%m-%d')\n\nprint(f'max_drawdown_pct: {max_dd_pct:.2f}')\nprint(f'max_drawdown_date: {max_dd_date}')\n\nresult = {\n    'max_drawdown': max_drawdown,\n    'max_drawdown_pct': max_dd_pct,\n    'max_drawdown_date': max_dd_date,\n    'ticker': 'AAPL',\n    'period': '2023'\n}"
+    },
+    "bad_plan": {
+      "description": "Calculate max drawdown",
+      "reasoning": "Find biggest drop",
+      "data_requirements": {
+        "tickers": ["AAPL"],
+        "start_date": "2023-01-01"
+      },
+      "code": "import pandas as pd\ndf = pd.DataFrame(fetched_data['AAPL'])\nmax_price = df['Close'].max()\nmin_price = df['Close'].min()\ndrawdown = (min_price - max_price) / max_price\nprint(drawdown)"
+    },
+    "quality_score": 0.88,
+    "issues_in_bad": [
+      "Wrong drawdown calculation (global min vs running max)",
+      "No date sorting - temporal integrity violation!",
+      "Missing end_date",
+      "Drawdown not calculated point-by-point (running max missing)",
+      "Can't identify when max drawdown occurred",
+      "Look-ahead bias: uses future max in calculation"
+    ]
+  },
+  {
+    "query": "Calculate the P/E ratio of MSFT",
+    "good_plan": {
+      "description": "Fetch MSFT current price and fundamentals (EPS), calculate P/E ratio",
+      "reasoning": "P/E = Price / EPS (trailing twelve months). Need both current price and TTM EPS from fundamentals.",
+      "data_requirements": {
+        "tickers": ["MSFT"],
+        "fields": ["Close", "trailingEps"]
+      },
+      "code": "# Data provided by FETCH node\nmsft_data = fetched_data['MSFT']\n\n# Get latest price\nif isinstance(msft_data, dict) and 'Close' in msft_data:\n    price = msft_data['Close']\nelse:\n    import pandas as pd\n    df = pd.DataFrame(msft_data)\n    price = df['Close'].iloc[-1]\n\n# Get EPS from fundamentals\nif 'trailingEps' in fetched_data['MSFT']:\n    eps = fetched_data['MSFT']['trailingEps']\nelse:\n    # Fallback if not in fetched data structure\n    eps = None\n\nif eps and eps > 0:\n    pe_ratio = price / eps\n    print(f'pe_ratio: {pe_ratio:.2f}')\n    print(f'price: {price:.2f}')\n    print(f'eps: {eps:.2f}')\n    result = {'pe_ratio': pe_ratio, 'price': price, 'eps': eps, 'ticker': 'MSFT'}\nelse:\n    print('Error: EPS not available or invalid')\n    result = {'error': 'EPS not available'}"
+    },
+    "bad_plan": {
+      "description": "Get P/E ratio",
+      "reasoning": "Fetch MSFT data",
+      "data_requirements": {
+        "tickers": ["MSFT"]
+      },
+      "code": "data = fetched_data['MSFT']\npe = data['pe_ratio']\nprint(pe)"
+    },
+    "quality_score": 0.85,
+    "issues_in_bad": [
+      "Assumes 'pe_ratio' field exists (may not be fetched)",
+      "Should calculate P/E = Price / EPS instead of assuming it's provided",
+      "Missing fields specification in data_requirements",
+      "No error handling for missing data",
+      "No result structure"
+    ]
+  }
+]
