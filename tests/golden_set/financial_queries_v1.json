@@ -1,0 +1,664 @@
+{
+  "version": "1.0",
+  "description": "Golden Set for APE 2026 - Financial Metrics Validation",
+  "date_created": "2024-01-15",
+  "total_queries": 30,
+  "categories": {
+    "sharpe_ratio": 10,
+    "correlation": 10,
+    "volatility": 5,
+    "beta": 5
+  },
+  "data_sources": [
+    "yfinance"
+  ],
+  "computation_method": "Python (pandas/numpy)",
+  "risk_free_rate": 0.02,
+  "queries": [
+    {
+      "id": "gs_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.743,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_002",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate the Sharpe ratio for SPY from 2021-01-01 to 2023-12-31",
+      "expected_value": 0.542,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_003",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for QQQ from 2023-01-01 to 2023-12-31",
+      "expected_value": 2.493,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_004",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate the Sharpe ratio for QQQ from 2021-01-01 to 2023-12-31",
+      "expected_value": 0.457,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_005",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for AAPL from 2023-01-01 to 2023-12-31",
+      "expected_value": 2.217,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_006",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate the Sharpe ratio for AAPL from 2021-01-01 to 2023-12-31",
+      "expected_value": 0.567,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_007",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for MSFT from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.898,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_008",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for GOOGL from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.584,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_009",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for TSLA from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.825,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_010",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate the Sharpe ratio for VTI from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.681,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "sharpe_ratio",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_011",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between SPY and QQQ from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.917,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "SPY",
+        "QQQ"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_012",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between SPY and TLT from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.131,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "SPY",
+        "TLT"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_013",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between AAPL and MSFT from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.548,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "AAPL",
+        "MSFT"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_014",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between XLE and XLF from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.544,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "XLE",
+        "XLF"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_015",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between GLD and SPY from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.004,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "GLD",
+        "SPY"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_016",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between QQQ and AAPL from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.758,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "QQQ",
+        "AAPL"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_017",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between VTI and SPY from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.992,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "VTI",
+        "SPY"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_018",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between TSLA and SPY from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.55,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "TSLA",
+        "SPY"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_019",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between BND and SPY from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.152,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "BND",
+        "SPY"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_020",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "What is the correlation between DIA and SPY from 2023-01-01 to 2023-12-31?",
+      "expected_value": 0.896,
+      "tolerance": 0.1,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "correlation",
+      "assets": [
+        "DIA",
+        "SPY"
+      ],
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_021",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate the annualized volatility for SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.131,
+      "tolerance": 0.02,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "volatility",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_022",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate the annualized volatility for QQQ from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.179,
+      "tolerance": 0.02,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "volatility",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_023",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate the annualized volatility for AAPL from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.2,
+      "tolerance": 0.02,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "volatility",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_024",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate the annualized volatility for TSLA from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.526,
+      "tolerance": 0.02,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "volatility",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_025",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate the annualized volatility for BND from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.073,
+      "tolerance": 0.02,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "volatility",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_026",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate the beta of AAPL relative to SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.104,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "beta",
+      "benchmark": "SPY",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_027",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate the beta of MSFT relative to SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.172,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "beta",
+      "benchmark": "SPY",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_028",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate the beta of TSLA relative to SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 2.212,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "beta",
+      "benchmark": "SPY",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_029",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate the beta of KO relative to SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 0.381,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "beta",
+      "benchmark": "SPY",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    },
+    {
+      "id": "gs_030",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate the beta of QQQ relative to SPY from 2023-01-01 to 2023-12-31",
+      "expected_value": 1.252,
+      "tolerance": 0.15,
+      "confidence_range": [
+        0.85,
+        0.95
+      ],
+      "date_computed": "2024-01-15",
+      "data_cutoff": "2023-12-31",
+      "metric_type": "beta",
+      "benchmark": "SPY",
+      "temporal_constraints": {
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "no_future_data": true
+      }
+    }
+  ]
+}
