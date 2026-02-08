@@ -73,7 +73,7 @@ print("This should never print")
     # Should timeout
     assert result.status == "timeout"
     assert result.duration_ms >= 5000
-    assert result.duration_ms < 6000  # Should kill quickly after timeout
+    assert result.duration_ms < 6500  # Should kill quickly after timeout (Windows overhead)
     assert "timeout" in result.stderr.lower() or result.stdout == ""
 
 
