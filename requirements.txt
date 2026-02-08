@@ -19,8 +19,8 @@ sentence-transformers==2.3.1  # Embedding generation
 # LLM Providers (Week 1 Day 3)
 # ==============================================================================
 anthropic==0.18.1             # Claude API (Sonnet 4.5 for PLAN node)
-openai==1.12.0                # GPT-4.5 for Doubter (Week 8)
-# DeepSeek uses OpenAI-compatible API
+openai==1.12.0                # GPT-4.5 for Doubter (Week 8) + DeepSeek API
+google-generativeai==0.8.3   # Gemini 2.0 for LLM Debate (Week 11)
 
 # ==============================================================================
 # Database Drivers

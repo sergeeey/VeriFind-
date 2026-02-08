@@ -17,6 +17,22 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 from enum import Enum
 
+# LLM Provider SDKs
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+try:
+    from openai import OpenAI as DeepSeekClient  # DeepSeek uses OpenAI-compatible API
+except ImportError:
+    DeepSeekClient = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -232,13 +248,25 @@ class LLMDebateNode:
         # Set default models
         if not self.model:
             defaults = {
-                "openai": "gpt-3.5-turbo",
-                "gemini": "gemini-1.5-flash",
+                "openai": "gpt-4o-mini",  # Cheap and fast ($0.15 input/$0.60 output per 1M tokens)
+                "gemini": "gemini-2.5-flash",  # Latest stable Gemini model
                 "deepseek": "deepseek-chat",
                 "mock": "mock",
                 "failing_mock": "failing_mock"
             }
-            self.model = defaults.get(provider, "gpt-3.5-turbo")
+            self.model = defaults.get(provider, "gpt-4o-mini")
+
+        # Cost tracking statistics
+        self.stats = {
+            "total_calls": 0,
+            "total_cost": 0.0,
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
+            "by_provider": {}
+        }
+
+        # Initialize API clients
+        self._init_clients()
 
     def generate_debate(self, fact: Dict[str, Any]) -> Optional[DebateResult]:
         """
@@ -276,6 +304,76 @@ class LLMDebateNode:
             logger.error(f"Debate generation error: {e}", exc_info=True)
             return None
 
+    def _init_clients(self):
+        """Initialize API clients for providers."""
+        if self.provider == "openai":
+            if OpenAI is None:
+                raise ImportError("openai package not installed. Run: pip install openai")
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY not found in environment")
+            self.client = OpenAI(api_key=api_key)
+
+        elif self.provider == "gemini":
+            if genai is None:
+                raise ImportError("google-generativeai package not installed. Run: pip install google-generativeai")
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError("GOOGLE_API_KEY not found in environment")
+            genai.configure(api_key=api_key)
+            self.client = genai.GenerativeModel(self.model)
+
+        elif self.provider == "deepseek":
+            if DeepSeekClient is None:
+                raise ImportError("openai package not installed. Run: pip install openai")
+            api_key = os.getenv("DEEPSEEK_API_KEY")
+            if not api_key:
+                raise ValueError("DEEPSEEK_API_KEY not found in environment")
+            # DeepSeek uses OpenAI-compatible API
+            self.client = DeepSeekClient(
+                api_key=api_key,
+                base_url="https://api.deepseek.com"
+            )
+
+        elif self.provider in ["mock", "failing_mock"]:
+            self.client = None  # No client needed for mock
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Get cost tracking statistics."""
+        return self.stats.copy()
+
+    def _reset_stats(self):
+        """Reset statistics (for testing)."""
+        self.stats = {
+            "total_calls": 0,
+            "total_cost": 0.0,
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
+            "by_provider": {}
+        }
+
+    def _update_stats(self, input_tokens: int, output_tokens: int, cost: float):
+        """Update cost tracking statistics."""
+        self.stats["total_calls"] += 1
+        self.stats["total_input_tokens"] += input_tokens
+        self.stats["total_output_tokens"] += output_tokens
+        self.stats["total_cost"] += cost
+
+        # Track by provider
+        if self.provider not in self.stats["by_provider"]:
+            self.stats["by_provider"][self.provider] = {
+                "calls": 0,
+                "cost": 0.0,
+                "input_tokens": 0,
+                "output_tokens": 0
+            }
+
+        provider_stats = self.stats["by_provider"][self.provider]
+        provider_stats["calls"] += 1
+        provider_stats["cost"] += cost
+        provider_stats["input_tokens"] += input_tokens
+        provider_stats["output_tokens"] += output_tokens
+
     def _call_mock_llm(self, fact: Dict[str, Any]) -> Dict[str, Any]:
         """Mock LLM call for testing."""
         metric = fact.get("metric", "unknown")
@@ -303,19 +401,189 @@ class LLMDebateNode:
         }
 
     def _call_openai(self, prompt: str) -> Dict[str, Any]:
-        """Call OpenAI API."""
-        # TODO: Implement in Week 10 Day 3 production
-        raise NotImplementedError("OpenAI integration pending")
+        """
+        Call OpenAI API.
+
+        Uses structured output (JSON mode) for reliable debate parsing.
+
+        Pricing (gpt-4o-mini):
+        - Input: $0.15 per 1M tokens
+        - Output: $0.60 per 1M tokens
+        """
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a financial analyst providing multi-perspective analysis. "
+                                   "Respond ONLY with valid JSON matching this schema: "
+                                   '{"bull": {"analysis": "...", "confidence": 0.8, "facts": ["..."]}, '
+                                   '"bear": {"analysis": "...", "confidence": 0.7, "facts": ["..."]}, '
+                                   '"neutral": {"analysis": "...", "confidence": 0.9, "facts": ["..."]}, '
+                                   '"synthesis": "...", "confidence": 0.8}'
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.7,
+                max_tokens=2000
+            )
+
+            # Extract JSON response
+            content = response.choices[0].message.content
+            result = json.loads(content)
+
+            # Calculate cost
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
+
+            # gpt-4o-mini pricing
+            input_cost = (input_tokens / 1_000_000) * 0.15
+            output_cost = (output_tokens / 1_000_000) * 0.60
+            total_cost = input_cost + output_cost
+
+            # Update stats
+            self._update_stats(input_tokens, output_tokens, total_cost)
+
+            logger.info(f"OpenAI debate generated: {input_tokens} in + {output_tokens} out, ${total_cost:.6f}")
+
+            return result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse OpenAI JSON response: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"OpenAI API error: {e}", exc_info=True)
+            raise
 
     def _call_gemini(self, prompt: str) -> Dict[str, Any]:
-        """Call Google Gemini API."""
-        # TODO: Implement in Week 10 Day 3 production
-        raise NotImplementedError("Gemini integration pending")
+        """
+        Call Google Gemini API.
+
+        Uses JSON mode for structured output.
+
+        Pricing (gemini-2.0-flash-exp - FREE during preview):
+        - Input: $0.00 per 1M tokens
+        - Output: $0.00 per 1M tokens
+        """
+        try:
+            # Configure generation
+            generation_config = {
+                "temperature": 0.7,
+                "max_output_tokens": 2000,
+                "response_mime_type": "application/json",
+            }
+
+            system_instruction = """You are a financial analyst providing multi-perspective analysis.
+Respond ONLY with valid JSON matching this schema:
+{
+  "bull": {"analysis": "...", "confidence": 0.8, "facts": ["..."]},
+  "bear": {"analysis": "...", "confidence": 0.7, "facts": ["..."]},
+  "neutral": {"analysis": "...", "confidence": 0.9, "facts": ["..."]},
+  "synthesis": "...",
+  "confidence": 0.8
+}"""
+
+            # Create model with system instruction
+            model = genai.GenerativeModel(
+                self.model,
+                generation_config=generation_config,
+                system_instruction=system_instruction
+            )
+
+            # Generate response
+            response = model.generate_content(prompt)
+
+            # Extract JSON
+            content = response.text
+            result = json.loads(content)
+
+            # Calculate token usage and cost
+            # Gemini 2.0 Flash is free during preview, but track tokens anyway
+            input_tokens = response.usage_metadata.prompt_token_count
+            output_tokens = response.usage_metadata.candidates_token_count
+
+            # Free during preview
+            total_cost = 0.0
+
+            # Update stats
+            self._update_stats(input_tokens, output_tokens, total_cost)
+
+            logger.info(f"Gemini debate generated: {input_tokens} in + {output_tokens} out, ${total_cost:.6f}")
+
+            return result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse Gemini JSON response: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Gemini API error: {e}", exc_info=True)
+            raise
 
     def _call_deepseek(self, prompt: str) -> Dict[str, Any]:
-        """Call DeepSeek API."""
-        # TODO: Implement in Week 10 Day 3 production
-        raise NotImplementedError("DeepSeek integration pending")
+        """
+        Call DeepSeek API.
+
+        Uses OpenAI-compatible API with JSON mode.
+
+        Pricing (deepseek-chat):
+        - Input: $0.14 per 1M tokens (cache miss)
+        - Output: $0.28 per 1M tokens
+        - Cache hit: $0.014 per 1M tokens (90% discount)
+        """
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a financial analyst providing multi-perspective analysis. "
+                                   "Respond ONLY with valid JSON matching this schema: "
+                                   '{"bull": {"analysis": "...", "confidence": 0.8, "facts": ["..."]}, '
+                                   '"bear": {"analysis": "...", "confidence": 0.7, "facts": ["..."]}, '
+                                   '"neutral": {"analysis": "...", "confidence": 0.9, "facts": ["..."]}, '
+                                   '"synthesis": "...", "confidence": 0.8}'
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.7,
+                max_tokens=2000
+            )
+
+            # Extract JSON response
+            content = response.choices[0].message.content
+            result = json.loads(content)
+
+            # Calculate cost
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
+
+            # DeepSeek pricing (assuming no cache for first call)
+            input_cost = (input_tokens / 1_000_000) * 0.14
+            output_cost = (output_tokens / 1_000_000) * 0.28
+            total_cost = input_cost + output_cost
+
+            # Update stats
+            self._update_stats(input_tokens, output_tokens, total_cost)
+
+            logger.info(f"DeepSeek debate generated: {input_tokens} in + {output_tokens} out, ${total_cost:.6f}")
+
+            return result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse DeepSeek JSON response: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"DeepSeek API error: {e}", exc_info=True)
+            raise
 
     def _parse_response(self, response: Dict[str, Any]) -> DebateResult:
         """
