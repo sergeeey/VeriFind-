@@ -24,6 +24,7 @@ import type { Episode } from '@/types/results'
 import type { FactsTableRow } from '@/types/results'
 import type { TimeRange } from '@/types/charts'
 import { Download, ArrowLeft } from 'lucide-react'
+import { DisclaimerFooter } from '@/components/layout/DisclaimerBanner'
 
 export default function ResultsPage() {
   const params = useParams()
@@ -389,6 +390,9 @@ export default function ResultsPage() {
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
       />
+
+      {/* Legal Disclaimer Footer - Week 11 Day 3 */}
+      <DisclaimerFooter />
     </div>
   )
 }

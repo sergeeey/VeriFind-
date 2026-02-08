@@ -101,6 +101,19 @@ app.middleware("http")(error_logging_middleware)
 app.middleware("http")(prometheus_middleware)
 
 
+# Legal Disclaimer Constants (Week 11 Day 3)
+LEGAL_DISCLAIMER = {
+    "text": (
+        "This analysis is for informational purposes only and should not be considered "
+        "financial advice. Past performance does not guarantee future results. "
+        "Always consult a qualified financial advisor before making investment decisions."
+    ),
+    "version": "1.0",
+    "effective_date": "2026-02-08",
+    "full_text_url": "/disclaimer"  # Link to full DISCLAIMER.md
+}
+
+
 # Security Headers Middleware
 @app.middleware("http")
 async def add_security_headers(request, call_next):
@@ -145,6 +158,58 @@ async def add_security_headers(request, call_next):
 
     # Permissions policy (restrict features)
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+
+    return response
+
+
+# Disclaimer Middleware (Week 11 Day 3)
+@app.middleware("http")
+async def add_disclaimer_to_json_responses(request, call_next):
+    """
+    Add legal disclaimer to all JSON responses.
+
+    Week 11 Day 3: Legal compliance requirement.
+
+    Adds 'disclaimer' field to all JSON responses containing analysis results.
+    """
+    response = await call_next(request)
+
+    # Only add disclaimer to JSON responses
+    if response.headers.get("content-type", "").startswith("application/json"):
+        # Skip for health/metrics endpoints
+        if request.url.path in ["/health", "/metrics", "/docs", "/redoc", "/openapi.json"]:
+            return response
+
+        # Read response body
+        response_body = b""
+        async for chunk in response.body_iterator:
+            response_body += chunk
+
+        try:
+            # Parse JSON
+            data = json.loads(response_body.decode())
+
+            # Add disclaimer if not already present
+            if isinstance(data, dict) and "disclaimer" not in data:
+                data["disclaimer"] = LEGAL_DISCLAIMER
+
+            # Re-encode response
+            new_body = json.dumps(data).encode()
+
+            # Create new response with updated body
+            return JSONResponse(
+                content=data,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type="application/json"
+            )
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            # If not valid JSON, return original response
+            return JSONResponse(
+                content=response_body.decode(),
+                status_code=response.status_code,
+                headers=dict(response.headers)
+            )
 
     return response
 
@@ -953,6 +1018,55 @@ async def general_exception_handler(request, exc: Exception):
 # Startup/Shutdown Events
 # ============================================================================
 
+@app.get("/disclaimer", tags=["Legal"], response_class=JSONResponse)
+async def get_disclaimer():
+    """
+    Get full legal disclaimer.
+
+    Week 11 Day 3: Legal compliance endpoint.
+
+    Returns the complete legal disclaimer text and metadata.
+    For full documentation, see DISCLAIMER.md in the project root.
+    """
+    import os
+    from pathlib import Path
+
+    # Try to read DISCLAIMER.md
+    disclaimer_path = Path(__file__).parent.parent.parent / "DISCLAIMER.md"
+    full_text = None
+
+    if disclaimer_path.exists():
+        try:
+            with open(disclaimer_path, "r", encoding="utf-8") as f:
+                full_text = f.read()
+        except Exception as e:
+            logger.warning(f"Failed to read DISCLAIMER.md: {e}")
+
+    return {
+        "disclaimer": LEGAL_DISCLAIMER,
+        "full_text": full_text,
+        "notice": (
+            "By using this API, you acknowledge that you have read, understood, "
+            "and agree to be bound by this disclaimer. This software provides "
+            "automated financial analysis for informational purposes only and "
+            "does not constitute professional financial advice."
+        ),
+        "key_points": [
+            "Not financial advice - consult a qualified advisor",
+            "Past performance does not guarantee future results",
+            "AI-generated analysis may contain errors or biases",
+            "All investments carry risk, including loss of principal",
+            "Users must be 18+ years old",
+            "Software provided 'AS IS' without warranty"
+        ],
+        "contact": {
+            "documentation": "/docs",
+            "github": "https://github.com/yourusername/ape-2026",
+            "issues": "File a GitHub issue for questions"
+        }
+    }
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup."""
@@ -960,6 +1074,7 @@ async def startup_event():
     logger.info("📊 Initializing components...")
     # TODO: Initialize database connections, load models, etc.
     logger.info("✅ API ready")
+    logger.info("⚖️  Legal disclaimer enabled (Week 11 Day 3)")  # Week 11 Day 3
 
 
 @app.on_event("shutdown")
