@@ -545,5 +545,91 @@ def process_query(query: str) -> Report:
 
 ---
 
+## 8. **Prompt Methodology Pattern** (NEW - Week 4)
+
+**Философия**: Prompt Compiler, а не Prompt Library
+
+**Reference**: See `promptMethodology.md` for full details
+
+### Meta-Prompt Engine
+```python
+# Единый META_PROMPT генерирует промпты для любых задач
+class APEPromptCompiler:
+    def compile(self, task_description: str, context: dict) -> str:
+        # 1. CLASSIFY: code_generation | validation | analysis | debate
+        # 2. SELECT techniques: Chain-of-Thought, Structured Output, etc.
+        # 3. COMPOSE: 6 блоков (ROLE, TASK, CONSTRAINTS, INPUT, OUTPUT, EDGE CASES)
+        # 4. VALIDATE: testable, minimal, unambiguous
+        return compiled_prompt
+```
+
+### Task Taxonomy (6 Categories)
+
+| Category | APE Components | Status | Technique |
+|----------|----------------|--------|-----------|
+| A: Code Generation | PLAN Node | ✅ v1 (need v2+ DSPy) | Structured Output + Constraints |
+| B: Adversarial Validation | Doubter, TIM | ✅ Implemented | Adversarial Framing + Checklist |
+| C: Multi-Perspective | Debate (planned) | ⏸️ Week 5-6 | Role Assignment + Synthesis |
+| D: Evaluation | Ground Truth | ✅ Implemented | Rubric-based + CoT |
+| E: Data Extraction | Truth Gate | ✅ (deterministic) | Structured Output |
+| F: Temporal Validation | TIM | ✅ (rule-based) | Rule Injection + Checklist |
+
+### Prompt Composition (6 Blocks)
+
+Every APE prompt built from:
+1. **ROLE** (1 sentence) — only when domain expertise matters
+2. **TASK** (imperative) — ALWAYS
+3. **CONSTRAINTS** (explicit prohibitions) — high-risk tasks only
+4. **INPUT FORMAT** — when input != plain text
+5. **OUTPUT FORMAT** (Pydantic schema) — ALWAYS if code parses output
+6. **EDGE CASES** — real cases from production, not invented
+
+### Hardcoded vs Compiled Strategy
+
+| Component | Strategy | Rationale |
+|-----------|----------|-----------|
+| META_PROMPT | Hardcoded | Core compiler, changes rarely |
+| PLAN Node | Hardcoded v1 → DSPy v2+ | Critical path, will optimize |
+| Doubter | Compiled (Week 4 Day 4) | Varies by fact type |
+| Truth Gate | N/A (code) | Deterministic, no LLM |
+| TIM | Hardcoded rules | Physical constants (T+90 etc.) |
+| VEE | N/A (code) | Execution only |
+
+### Anti-Patterns
+
+❌ 1000 prompts library → невозможно поддерживать
+✅ Meta-prompt + 6 categories → покрывает всё
+
+❌ Few-shot everywhere → раздувает контекст
+✅ Few-shot только для non-obvious format
+
+❌ "Be helpful and accurate" → пустые слова
+✅ "NEVER output raw numbers" → конкретный constraint
+
+❌ Hardcoded strings в коде → невозможно A/B test
+✅ Configurable prompts → эволюция с продуктом
+
+### Prompt Lifecycle (TDD for Prompts)
+
+```
+v0: Meta-Prompt generates draft (2 min)
+  ↓
+v1: TDD with 5 test cases (30 min)
+  ↓
+v2: DSPy optimization [optional] (2-4 hours)
+  ↓
+v3+: Production feedback loop (ongoing)
+```
+
+### Immediate Action Items (Week 4-5)
+
+1. ✅ Integrate methodology into memory bank (Week 4 Day 3)
+2. 🔴 Create `APEPromptCompiler` (Week 4 Day 4-5)
+3. 🔴 Refactor Doubter to use compiled prompts
+4. 🟡 DSPy optimization for PLAN Node (Week 5)
+5. 🟡 Add prompt versioning system
+
+---
+
 *Этот файл обновляется при появлении новых архитектурных паттернов*
-*Last Updated: 2026-02-07*
+*Last Updated: 2026-02-08 (Added Prompt Methodology Pattern)*
