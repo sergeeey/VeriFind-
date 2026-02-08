@@ -10,7 +10,7 @@ Endpoints:
 - GET /health - Health check
 """
 
-from fastapi import FastAPI, HTTPException, Depends, status, Header, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Depends, status, Header, Query, WebSocket, WebSocketDisconnect, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Optional, List, Dict, Any, Set
@@ -354,13 +354,67 @@ async def broadcast_query_update(
 
 
 # ============================================================================
+# Background Tasks
+# ============================================================================
+
+def run_query_orchestrator(query_id: str, query_text: str, direct_code: Optional[str] = None):
+    """
+    Background task to run orchestrator.
+
+    This function runs in a background thread and executes the full APE pipeline.
+
+    Args:
+        query_id: Query identifier
+        query_text: User query
+        direct_code: Optional direct code for testing
+    """
+    try:
+        logger.info(f"Starting orchestrator for query {query_id}")
+
+        orchestrator = get_orchestrator()
+
+        # Run orchestrator (this will broadcast updates via WebSocket)
+        final_state = orchestrator.run(
+            query_id=query_id,
+            query_text=query_text,
+            direct_code=direct_code
+        )
+
+        if final_state.status.value == 'completed':
+            logger.info(f"Query {query_id} completed successfully")
+        else:
+            logger.error(f"Query {query_id} failed: {final_state.error_message}")
+
+    except Exception as e:
+        logger.error(f"Orchestrator failed for query {query_id}: {e}", exc_info=True)
+
+        # Broadcast failure
+        try:
+            asyncio.run(
+                broadcast_query_update(
+                    query_id=query_id,
+                    status="failed",
+                    current_node=None,
+                    progress=0.0,
+                    verified_facts_count=0,
+                    error=f"Orchestrator exception: {str(e)}"
+                )
+            )
+        except:
+            pass  # Best effort
+
+
+# ============================================================================
 # Dependency Injection
 # ============================================================================
 
 def get_orchestrator() -> LangGraphOrchestrator:
-    """Get orchestrator instance (singleton pattern in production)."""
+    """Get orchestrator instance with WebSocket broadcast callback."""
     # TODO: Implement proper dependency injection with singleton
-    return LangGraphOrchestrator()
+    return LangGraphOrchestrator(
+        claude_api_key=None,  # Not needed for testing with direct_code
+        broadcast_callback=broadcast_query_update
+    )
 
 
 def get_timescale_store() -> TimescaleDBStore:
@@ -423,14 +477,16 @@ async def health_check():
 @app.post("/query", response_model=QueryResponse, tags=["Query"], status_code=status.HTTP_202_ACCEPTED)
 async def submit_query(
     request: QueryRequest,
-    api_key: str = Depends(check_rate_limit),
-    orchestrator: LangGraphOrchestrator = Depends(get_orchestrator)
+    background_tasks: BackgroundTasks,
+    api_key: str = Depends(check_rate_limit)
 ):
     """
     Submit a financial analysis query for execution.
 
     The query will be processed asynchronously through the APE pipeline:
     PLAN → FETCH → VEE → GATE → DEBATE
+
+    Real-time updates will be broadcast via WebSocket to subscribed clients.
 
     Returns a query ID for status tracking.
     """
@@ -450,15 +506,23 @@ async def submit_query(
             metadata={"priority": request.priority, "query_text": request.query}
         )
 
-        # TODO: Implement async execution (background task or queue)
-        # When orchestrator runs, it should call broadcast_query_update() at each node
-        # Example:
-        # - At PLAN node: broadcast_query_update(query_id, "processing", "PLAN", 0.2)
-        # - At FETCH node: broadcast_query_update(query_id, "processing", "FETCH", 0.4)
-        # - At VEE node: broadcast_query_update(query_id, "processing", "VEE", 0.6)
-        # - At GATE node: broadcast_query_update(query_id, "processing", "GATE", 0.8)
-        # - At DEBATE node: broadcast_query_update(query_id, "processing", "DEBATE", 0.9)
-        # - On completion: broadcast_query_update(query_id, "completed", None, 1.0, facts_count)
+        # Example code for testing (calculates 2+2)
+        # In production, this would come from PLAN node (Claude API)
+        test_code = """
+import json
+result = 2 + 2
+output = {"calculation": "2+2", "result": result}
+print(json.dumps(output))
+"""
+
+        # Run orchestrator in background
+        # This will automatically broadcast updates at each node via WebSocket
+        background_tasks.add_task(
+            run_query_orchestrator,
+            query_id=query_id,
+            query_text=request.query,
+            direct_code=test_code  # Remove this in production
+        )
 
         # Estimate completion time (simple heuristic)
         estimated_seconds = 10 if request.priority == "high" else 30
@@ -467,7 +531,7 @@ async def submit_query(
         return QueryResponse(
             query_id=query_id,
             status="accepted",
-            message="Query accepted for processing",
+            message="Query accepted for processing. Subscribe to WebSocket for real-time updates.",
             estimated_completion=estimated_completion
         )
 

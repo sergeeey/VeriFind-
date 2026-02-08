@@ -19,10 +19,12 @@ INITIALIZED → PLAN → (FETCH?) → VEE → GATE → DEBATE → COMPLETED
 """
 
 from dataclasses import dataclass, field, asdict
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Callable
 from enum import Enum
 from datetime import datetime, UTC
 import time
+import asyncio
+import logging
 
 from src.vee.sandbox_runner import SandboxRunner, ExecutionResult
 from src.truth_boundary.gate import TruthBoundaryGate, VerifiedFact
@@ -30,6 +32,9 @@ from src.adapters.yfinance_adapter import YFinanceAdapter, MarketData
 from src.debate.debater_agent import DebaterAgent
 from src.debate.synthesizer_agent import SynthesizerAgent
 from src.debate.schemas import Perspective, DebateContext, DebateReport, Synthesis
+
+# Logger for orchestrator
+logger = logging.getLogger(__name__)
 
 
 class StateStatus(str, Enum):
@@ -127,27 +132,33 @@ class LangGraphOrchestrator:
     """
     LangGraph-based state machine orchestrator.
 
-    Coordinates PLAN→FETCH→VEE→GATE flow with error handling.
+    Coordinates PLAN→FETCH→VEE→GATE→DEBATE flow with error handling.
+
+    Week 9 Day 1: Integrated with WebSocket for real-time updates.
     """
 
     def __init__(
         self,
-        claude_api_key: str,
+        claude_api_key: str = None,
         enable_retry: bool = True,
         max_retries: int = 3,
-        vee_config: Optional[Dict[str, Any]] = None
+        vee_config: Optional[Dict[str, Any]] = None,
+        broadcast_callback: Optional[Callable] = None
     ):
         """
         Initialize LangGraph orchestrator.
 
         Args:
-            claude_api_key: Claude API key for PLAN node
+            claude_api_key: Claude API key for PLAN node (optional for testing)
             enable_retry: Enable automatic retry on errors
             max_retries: Maximum retry attempts
             vee_config: VEE sandbox configuration
+            broadcast_callback: Optional async callback for broadcasting status updates
+                               Should have signature: (query_id, status, node, progress, facts_count, error, metadata)
         """
         self.enable_retry = enable_retry
         self.max_retries = max_retries
+        self.broadcast_callback = broadcast_callback
 
         # Initialize components
         vee_config = vee_config or {}
@@ -159,6 +170,55 @@ class LangGraphOrchestrator:
 
         self.truth_gate = TruthBoundaryGate()
         self.yfinance_adapter = YFinanceAdapter()
+
+    def _broadcast_update(
+        self,
+        query_id: str,
+        status: str,
+        current_node: Optional[str] = None,
+        progress: float = 0.0,
+        verified_facts_count: int = 0,
+        error: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
+        """
+        Broadcast status update via callback (if provided).
+
+        Handles async callback from sync context using asyncio.
+
+        Args:
+            query_id: Query identifier
+            status: Current status ("processing", "completed", "failed")
+            current_node: Current pipeline node
+            progress: Progress 0.0 to 1.0
+            verified_facts_count: Number of facts verified
+            error: Error message if failed
+            metadata: Additional metadata
+        """
+        if not self.broadcast_callback:
+            return
+
+        try:
+            # Run async callback in event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is already running, schedule as task
+                asyncio.create_task(
+                    self.broadcast_callback(
+                        query_id, status, current_node, progress,
+                        verified_facts_count, error, metadata
+                    )
+                )
+            else:
+                # If no loop running, run in new loop
+                asyncio.run(
+                    self.broadcast_callback(
+                        query_id, status, current_node, progress,
+                        verified_facts_count, error, metadata
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Failed to broadcast update: {e}", exc_info=True)
 
     def plan_node(
         self,
@@ -179,6 +239,16 @@ class LangGraphOrchestrator:
         state.status = StateStatus.PLANNING
         state.nodes_visited.append('PLAN')
 
+        # Broadcast: Starting PLAN node
+        self._broadcast_update(
+            query_id=state.query_id,
+            status="processing",
+            current_node="PLAN",
+            progress=0.2,
+            verified_facts_count=0,
+            metadata={"query_text": state.query_text}
+        )
+
         if direct_code:
             # Test mode: use direct code
             state.plan = {
@@ -190,6 +260,16 @@ class LangGraphOrchestrator:
             # Production mode: would call Claude API
             state.error_message = 'PLAN node requires Claude API'
             state.status = StateStatus.FAILED
+
+            # Broadcast: PLAN failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="PLAN",
+                progress=0.2,
+                verified_facts_count=0,
+                error=state.error_message
+            )
 
         return state
 
@@ -207,9 +287,29 @@ class LangGraphOrchestrator:
         state.status = StateStatus.FETCHING
         state.nodes_visited.append('FETCH')
 
+        # Broadcast: Starting FETCH node
+        self._broadcast_update(
+            query_id=state.query_id,
+            status="processing",
+            current_node="FETCH",
+            progress=0.4,
+            verified_facts_count=0
+        )
+
         if not state.plan:
             state.error_message = 'No plan available for fetching'
             state.status = StateStatus.FAILED
+
+            # Broadcast: FETCH failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="FETCH",
+                progress=0.4,
+                verified_facts_count=0,
+                error=state.error_message
+            )
+
             return state
 
         # Extract fetch parameters from plan
@@ -253,6 +353,16 @@ class LangGraphOrchestrator:
             state.error_message = f'Fetch error: {str(e)}'
             state.status = StateStatus.FAILED
 
+            # Broadcast: FETCH failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="FETCH",
+                progress=0.4,
+                verified_facts_count=0,
+                error=state.error_message
+            )
+
         return state
 
     def vee_node(self, state: APEState) -> APEState:
@@ -269,9 +379,29 @@ class LangGraphOrchestrator:
         state.status = StateStatus.EXECUTING
         state.nodes_visited.append('VEE')
 
+        # Broadcast: Starting VEE node
+        self._broadcast_update(
+            query_id=state.query_id,
+            status="processing",
+            current_node="VEE",
+            progress=0.6,
+            verified_facts_count=0
+        )
+
         if not state.plan or 'code' not in state.plan:
             state.error_message = 'No code to execute'
             state.status = StateStatus.FAILED
+
+            # Broadcast: VEE failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="VEE",
+                progress=0.6,
+                verified_facts_count=0,
+                error=state.error_message
+            )
+
             return state
 
         try:
@@ -282,9 +412,29 @@ class LangGraphOrchestrator:
                 state.error_message = exec_result.stderr or 'Execution failed'
                 state.status = StateStatus.FAILED
 
+                # Broadcast: VEE execution failed
+                self._broadcast_update(
+                    query_id=state.query_id,
+                    status="failed",
+                    current_node="VEE",
+                    progress=0.6,
+                    verified_facts_count=0,
+                    error=state.error_message
+                )
+
         except Exception as e:
             state.error_message = str(e)
             state.status = StateStatus.FAILED
+
+            # Broadcast: VEE exception
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="VEE",
+                progress=0.6,
+                verified_facts_count=0,
+                error=state.error_message
+            )
 
         return state
 
@@ -302,9 +452,29 @@ class LangGraphOrchestrator:
         state.status = StateStatus.VALIDATING
         state.nodes_visited.append('GATE')
 
+        # Broadcast: Starting GATE node
+        self._broadcast_update(
+            query_id=state.query_id,
+            status="processing",
+            current_node="GATE",
+            progress=0.8,
+            verified_facts_count=0
+        )
+
         if not state.execution_result:
             state.error_message = 'No execution result to validate'
             state.status = StateStatus.FAILED
+
+            # Broadcast: GATE failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="GATE",
+                progress=0.8,
+                verified_facts_count=0,
+                error=state.error_message
+            )
+
             return state
 
         try:
@@ -313,6 +483,17 @@ class LangGraphOrchestrator:
             if not validation.is_valid:
                 state.error_message = validation.error_message
                 state.status = StateStatus.FAILED
+
+                # Broadcast: GATE validation failed
+                self._broadcast_update(
+                    query_id=state.query_id,
+                    status="failed",
+                    current_node="GATE",
+                    progress=0.8,
+                    verified_facts_count=0,
+                    error=state.error_message
+                )
+
                 return state
 
             # Create VerifiedFact
@@ -327,11 +508,21 @@ class LangGraphOrchestrator:
             )
 
             state.verified_fact = verified_fact
-            state.status = StateStatus.COMPLETED
+            # Note: Don't set to COMPLETED yet - DEBATE node comes next
 
         except Exception as e:
             state.error_message = str(e)
             state.status = StateStatus.FAILED
+
+            # Broadcast: GATE exception
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="GATE",
+                progress=0.8,
+                verified_facts_count=0,
+                error=state.error_message
+            )
 
         return state
 
@@ -351,9 +542,29 @@ class LangGraphOrchestrator:
         state.status = StateStatus.DEBATING
         state.nodes_visited.append('DEBATE')
 
+        # Broadcast: Starting DEBATE node
+        self._broadcast_update(
+            query_id=state.query_id,
+            status="processing",
+            current_node="DEBATE",
+            progress=0.9,
+            verified_facts_count=1 if state.verified_fact else 0
+        )
+
         if not state.verified_fact:
             state.error_message = 'No verified fact to debate'
             state.status = StateStatus.FAILED
+
+            # Broadcast: DEBATE failed
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="DEBATE",
+                progress=0.9,
+                verified_facts_count=0,
+                error=state.error_message
+            )
+
             return state
 
         try:
@@ -397,9 +608,32 @@ class LangGraphOrchestrator:
 
             state.status = StateStatus.COMPLETED
 
+            # Broadcast: DEBATE completed (final update before COMPLETED)
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="processing",
+                current_node="DEBATE",
+                progress=0.95,
+                verified_facts_count=1,
+                metadata={
+                    "verdict": synthesis.verdict.value,
+                    "adjusted_confidence": synthesis.adjusted_confidence
+                }
+            )
+
         except Exception as e:
             state.error_message = f'Debate failed: {str(e)}'
             state.status = StateStatus.FAILED
+
+            # Broadcast: DEBATE exception
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="DEBATE",
+                progress=0.9,
+                verified_facts_count=1 if state.verified_fact else 0,
+                error=state.error_message
+            )
 
         return state
 
@@ -507,11 +741,41 @@ class LangGraphOrchestrator:
                 state = self.vee_node(state)
             elif next_node == 'GATE':
                 state = self.gate_node(state)
+            elif next_node == 'DEBATE':
+                state = self.debate_node(state)
             elif next_node == 'ERROR':
                 state = self.error_node(state)
 
                 # Check if we should give up
                 if state.error_count >= self.max_retries:
                     break
+
+        # Broadcast final status
+        if state.status == StateStatus.COMPLETED:
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="completed",
+                current_node=None,
+                progress=1.0,
+                verified_facts_count=1 if state.verified_fact else 0,
+                metadata={
+                    "duration_ms": int((time.time() - state.start_time) * 1000),
+                    "nodes_visited": state.nodes_visited
+                }
+            )
+        elif state.status == StateStatus.FAILED:
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node=state.current_node,
+                progress=0.0,
+                verified_facts_count=0,
+                error=state.error_message,
+                metadata={
+                    "duration_ms": int((time.time() - state.start_time) * 1000),
+                    "nodes_visited": state.nodes_visited,
+                    "error_count": state.error_count
+                }
+            )
 
         return state
