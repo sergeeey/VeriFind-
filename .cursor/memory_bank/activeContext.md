@@ -1,9 +1,9 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Week 4 Day 4 - Doubter + TIM Integration
-📍 **Focus**: 206 Tests Passing - Adversarial Validation with Temporal Checks
-🚦 **Status**: ✅ Week 4 Day 4 COMPLETE - Doubter Detects Temporal Violations
+🎯 **Phase**: Week 5 Day 1 - DSPy Optimization Infrastructure
+📍 **Focus**: 226 Tests Passing - PLAN Node Prompt Optimization Framework
+🚦 **Status**: ✅ Week 5 Day 1 COMPLETE - DSPy Infrastructure Ready
 
 ## Последняя Сессия (2026-02-08, Week 3 Day 4 COMPLETE - Autonomous 156 Tests)
 ### Выполнено:
@@ -180,6 +180,16 @@
   - Suggested improvements for temporal violations
   - Integration tests: 12/12 passing (test_doubter_tim_integration.py)
   - **TOTAL: 206/206 tests passing (100%)**
+- ✅ **WEEK 5 DAY 1 ЗАВЕРШЕН: DSPy Optimization Infrastructure**
+  - DSPy 3.1.3 framework installed
+  - Quality metrics implemented: ExecutabilityMetric, CodeQualityMetric, TemporalValidityMetric
+  - CompositeMetric for weighted evaluation (50% exec, 30% quality, 20% temporal)
+  - PlanOptimizer class with training example management
+  - Mock optimization for testing without API key
+  - Optimized prompt export functionality
+  - DSPy Signature and Module for PLAN generation
+  - Unit tests: 20/20 passing (test_plan_optimizer.py)
+  - **TOTAL: 226/226 tests passing (100%)**
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -211,26 +221,24 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: ✅ **WEEK 4 DAY 4 COMPLETE** - Doubter + TIM Integrated, 206 Tests Passing
+**Current**: ✅ **WEEK 5 DAY 1 COMPLETE** - DSPy Infrastructure Ready, 226 Tests Passing
 
-**Week 4 Progress Summary**: Days 1-4 DONE ✅ (MILESTONE 1 @ 100%)
-- ✅ Day 1: Doubter Agent (7/7 tests) - Adversarial validation
-- ✅ Day 2: Real PLAN Node API Integration (10 tests created, infrastructure complete)
-- ✅ Day 3: Temporal Integrity Module (25 tests) - Look-ahead bias prevention
-- ✅ Day 4: Doubter + TIM Integration (12/12 tests) - Temporal violations in review
-- ✅ VEE Integration: TIM blocks violations before Docker execution
-- ✅ **Total: 206/206 tests passing (100%)**
+**Week 5 Progress Summary**: Day 1 DONE ✅
+- ✅ Day 1: DSPy Optimization Infrastructure (20/20 tests) - PLAN Node optimization framework
+- ✅ **Total: 226/226 tests passing (100%)**
 
-**Week 4 Day 5: Week 4 Summary & Milestone 1 Review (OPTIONAL)**
-- [ ] Create WEEK4_SUMMARY.md (comprehensive week overview)
-- [ ] Update progress.md with Milestone 1 completion status
-- [ ] Review all blockers from Arakul Assessment
-- [ ] Plan Week 5 priorities (DSPy optimization, Debate system)
-- [ ] OR: Skip to Week 5 if user prefers to continue development
+**Week 5 Day 2: Debate System - Phase 1 (NEXT STEP)**
+- [ ] Create Debate architecture (Multiple agents with different perspectives)
+- [ ] Implement Debater agent (generates arguments for/against)
+- [ ] Implement Synthesizer agent (combines perspectives)
+- [ ] Debate protocol (3 agents: Bull, Bear, Neutral)
+- [ ] Integration tests for Debate system
+- [ ] Target: ~15 new tests
 
-**Week 5 Planned**: Milestone 2 Start
-- Week 5 Day 1: DSPy optimization for PLAN Node
-- Week 5 Day 2-3: Debate System (Multi-Perspective Analysis)
+**Week 5 Planned** (Milestone 2):
+- ✅ Day 1: DSPy Infrastructure (complete)
+- Day 2-3: Debate System (Multi-Perspective Analysis)
+- Day 4-5: Real DSPy optimization with API key (when available)
 
 **Critical Blocker Resolution Status** (from Arakul Assessment):
 1. ⏳ **PLAN Node (4/10)**: Infrastructure complete, pending API key validation (Week 4 Day 2)
@@ -261,20 +269,20 @@ Performance:
 
 ## Метрики Прогресса
 ```
-Overall: [██████░░░░] 62.5% (Week 4 Day 4: 10/16 weeks)
+Overall: [██████░░░░] 65.6% (Week 5 Day 1: 10.5/16 weeks)
 
 Milestones:
 - M1 (Week 1-4):  [██████████] 100% (COMPLETE ✅) - Core Pipeline + TIM
-- M2 (Week 5-8):  [░░░░░░░░░░] 0%
+- M2 (Week 5-8):  [██░░░░░░░░] 12.5% (Week 5 Day 1 complete)
 - M3 (Week 9-12): [░░░░░░░░░░] 0%
 - M4 (Week 13-16):[░░░░░░░░░░] 0%
 
-Week 4 Day 4 Stats:
-- Tests: 206 total (206 passing + 10 real API pending validation)
-- Passing rate: 100% (206/206 non-API tests)
-- Code: ~10,500 lines (+500 LOC from Week 4 Day 4)
-- Files: 43 created (+1 file: Doubter+TIM integration tests)
-- Components: 13 modules fully tested
+Week 5 Day 1 Stats:
+- Tests: 226 total (226 passing + 10 real API pending validation)
+- Passing rate: 100% (226/226 non-API tests)
+- Code: ~11,500 lines (+1000 LOC from Week 5 Day 1)
+- Files: 47 created (+4 files: DSPy optimization module)
+- Components: 14 modules fully tested
   - VEE Sandbox ✅
   - YFinance Adapter ✅
   - Truth Boundary Gate ✅
@@ -287,17 +295,20 @@ Week 4 Day 4 Stats:
   - TimescaleDB Storage ✅
   - Neo4j Graph ✅
   - FETCH Node ✅
-  - Doubter Agent ✅ (NEW!)
+  - Doubter Agent ✅
+  - TIM (Temporal Integrity) ✅
+  - DSPy Optimization ✅ (NEW!)
 - State Machine: Full PLAN→FETCH→VEE→GATE flow functional
 - Performance: <5s end-to-end для simple queries
 - Testing Infrastructure: pytest markers, CI/CD docs
+- Optimization Framework: DSPy-based prompt optimization ready
 ```
 
 ## Последний Тест
 ```bash
-# Week 4 Day 4 Test Suite (all tests)
+# Week 5 Day 1 Test Suite (all tests)
 pytest tests/ -v --tb=short
-# Result: 206/206 tests PASSED ✅ (100% success rate 🎉)
+# Result: 226/226 tests PASSED ✅ (100% success rate 🎉)
 # Components:
 # - ChromaDB: 10/10 ✅
 # - PLAN node (mocked): 17/17 ✅
@@ -313,12 +324,13 @@ pytest tests/ -v --tb=short
 # - Neo4j Graph: 10/10 ✅
 # - E2E Pipeline: 6/6 ✅
 # - Doubter Agent: 7/7 ✅
-# - TIM Unit Tests: 15/15 ✅ (NEW!)
-# - VEE+TIM Integration: 10/10 ✅ (NEW!)
-# - Doubter+TIM Integration: 12/12 ✅ (NEW!)
-# Total: 16 test suites, 43 files, ~10,500 LOC
-# Goal: 100+ tests ✅ EXCEEDED (206 tests!)
-# Duration: 83s (1:23)
+# - TIM Unit Tests: 15/15 ✅
+# - VEE+TIM Integration: 10/10 ✅
+# - Doubter+TIM Integration: 12/12 ✅
+# - DSPy Optimization: 20/20 ✅ (NEW!)
+# Total: 17 test suites, 47 files, ~11,500 LOC
+# Goal: 100+ tests ✅ EXCEEDED (226 tests!)
+# Duration: 89s (1:29)
 
 # Real API Tests (pending validation):
 pytest -m realapi -v
@@ -334,8 +346,8 @@ pytest -m realapi -v
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 22:00 UTC (Autonomous Session - Week 4 Day 4)*
-*Next Review: Перед началом Week 5 (DSPy Optimization / Debate System)*
-*Session Duration: ~12 hours (Week 4 Days 1-4 COMPLETE)*
-*Achievement: 206 tests passing, Milestone 1 COMPLETE (100%) 🎉*
-*Critical Blocker #2 RESOLVED: TIM 3/10 → 9/10, Doubter+TIM integration ✅*
+*Last Updated: 2026-02-08 23:30 UTC (Autonomous Session - Week 5 Day 1)*
+*Next Review: Week 5 Day 2 (Debate System Implementation)*
+*Session Duration: ~13.5 hours (Week 4 complete + Week 5 Day 1)*
+*Achievement: 226 tests passing, Milestone 2 started (12.5%) 🎉*
+*DSPy Infrastructure Complete: Metrics, Optimizer, Mock testing ✅*
