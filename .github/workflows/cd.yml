@@ -1,0 +1,338 @@
+# ============================================================================
+# Continuous Deployment Workflow
+# Week 7 Day 4 - APE 2026
+#
+# Triggers: Push to main, Manual dispatch, Release
+# Jobs: Build, Push to Registry, Deploy, Health Check, Rollback
+# ============================================================================
+
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      rollback_version:
+        description: 'Rollback to version (leave empty for normal deploy)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/api
+
+jobs:
+  # ==========================================================================
+  # Build & Push Docker Image
+  # ==========================================================================
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+      - name: Generate build report
+        run: |
+          echo "## 🐳 Docker Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags:** \`${{ steps.meta.outputs.tags }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size:** $(docker image inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format='{{.Size}}' | numfmt --to=iec-i --suffix=B)" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================================================
+  # Deploy to Staging
+  # ==========================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.api.ape2026.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create deployment directory
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "mkdir -p /opt/ape-2026"
+
+      - name: Copy deployment files
+        run: |
+          scp docker-compose.yml ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:/opt/ape-2026/
+          scp -r config ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:/opt/ape-2026/
+          scp .env.production.template ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:/opt/ape-2026/.env
+
+      - name: Deploy via SSH
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd /opt/ape-2026
+
+            # Pull latest image
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker pull ${{ needs.build-and-push.outputs.image_tag }}
+
+            # Backup current state
+            docker-compose exec -T timescaledb pg_dump -U ape ape_timeseries > backup_$(date +%Y%m%d_%H%M%S).sql || true
+
+            # Deploy
+            docker-compose up -d --force-recreate api
+
+            # Wait for health check
+            sleep 30
+          EOF
+
+      - name: Health check
+        run: |
+          HEALTH_URL="https://staging.api.ape2026.com/health"
+          for i in {1..10}; do
+            if curl -f $HEALTH_URL; then
+              echo "✅ Staging deployment successful"
+              exit 0
+            fi
+            echo "Waiting for service to be ready... ($i/10)"
+            sleep 10
+          done
+          echo "❌ Health check failed"
+          exit 1
+
+      - name: Run smoke tests
+        run: |
+          curl -f https://staging.api.ape2026.com/docs
+          curl -f https://staging.api.ape2026.com/openapi.json
+
+  # ==========================================================================
+  # Deploy to Production
+  # ==========================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://api.ape2026.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create backup
+        run: |
+          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /opt/ape-2026
+            mkdir -p backups/$(date +%Y%m%d_%H%M%S)
+
+            # Backup databases
+            docker-compose exec -T timescaledb pg_dump -U ape ape_timeseries > backups/$(date +%Y%m%d_%H%M%S)/timescaledb.sql
+            docker-compose exec -T neo4j neo4j-admin database dump neo4j --to-path=/backups
+            docker cp ape-neo4j:/backups backups/$(date +%Y%m%d_%H%M%S)/neo4j_backup
+          EOF
+
+      - name: Blue-Green Deployment
+        run: |
+          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /opt/ape-2026
+
+            # Pull new image
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker pull ${{ needs.build-and-push.outputs.image_tag }}
+
+            # Start new containers (green)
+            docker-compose up -d --no-deps --scale api=4 --no-recreate api
+
+            # Wait for new containers to be healthy
+            sleep 30
+
+            # Health check on new containers
+            for i in {1..5}; do
+              if docker-compose exec -T api curl -f http://localhost:8000/health; then
+                echo "✅ New containers healthy"
+                break
+              fi
+              sleep 10
+            done
+
+            # Remove old containers (blue)
+            docker-compose up -d --scale api=4 --remove-orphans
+          EOF
+
+      - name: Health check
+        run: |
+          HEALTH_URL="https://api.ape2026.com/health"
+          for i in {1..10}; do
+            if curl -f $HEALTH_URL; then
+              echo "✅ Production deployment successful"
+              exit 0
+            fi
+            echo "Waiting for service to be ready... ($i/10)"
+            sleep 10
+          done
+          echo "❌ Health check failed - initiating rollback"
+          exit 1
+
+      - name: Send deployment notification
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: |
+            🚀 Production Deployment Successful
+            Version: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 Release ${{ github.ref_name }}
+
+            **Docker Image:** `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}`
+            **Commit:** ${{ github.sha }}
+
+            ### Changes
+            See commit history for details.
+          draft: false
+          prerelease: false
+
+  # ==========================================================================
+  # Rollback (Manual)
+  # ==========================================================================
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: github.event.inputs.rollback_version != ''
+    environment:
+      name: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Rollback to version
+        run: |
+          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /opt/ape-2026
+
+            # Pull rollback version
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.rollback_version }}
+
+            # Stop current containers
+            docker-compose down api
+
+            # Start rollback version
+            docker-compose up -d api
+
+            # Wait for health check
+            sleep 30
+          EOF
+
+      - name: Verify rollback
+        run: |
+          HEALTH_URL="https://${{ github.event.inputs.environment }}.api.ape2026.com/health"
+          if curl -f $HEALTH_URL; then
+            echo "✅ Rollback successful"
+          else
+            echo "❌ Rollback failed"
+            exit 1
+          fi
+
+      - name: Send rollback notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "⚠️ Rollback initiated",
+              attachments: [{
+                color: 'warning',
+                text: `Environment: ${{ github.event.inputs.environment }}\nRolled back to: ${{ github.event.inputs.rollback_version }}\nTriggered by: ${{ github.actor }}`
+              }]
+            }
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

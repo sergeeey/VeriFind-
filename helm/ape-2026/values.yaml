@@ -1,0 +1,315 @@
+# ============================================================================
+# Default Values for APE 2026 Helm Chart
+# Week 8 Day 1
+# ============================================================================
+
+# Global settings
+global:
+  storageClass: "standard"
+  imagePullSecrets: []
+
+# Namespace
+namespace: ape-2026
+
+# ============================================================================
+# API Service
+# ============================================================================
+api:
+  enabled: true
+  replicaCount: 3
+
+  image:
+    repository: ghcr.io/yourorg/ape-2026/api
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    annotations: {}
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: api.ape2026.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: api-tls
+        hosts:
+          - api.ape2026.com
+
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  env:
+    - name: ENV
+      value: "production"
+    - name: LOG_LEVEL
+      value: "info"
+    - name: API_WORKERS
+      value: "4"
+
+  envFrom:
+    - configMapRef:
+        name: api-config
+    - secretRef:
+        name: api-secrets
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ============================================================================
+# PostgreSQL (TimescaleDB)
+# ============================================================================
+postgresql:
+  enabled: true
+  auth:
+    username: ape
+    password: changeme  # Override in production
+    database: ape_timeseries
+  primary:
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: "fast-ssd"
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1000m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+    configuration: |
+      shared_buffers = 2GB
+      effective_cache_size = 4GB
+      work_mem = 64MB
+      maintenance_work_mem = 512MB
+      max_connections = 100
+      random_page_cost = 1.1
+      effective_io_concurrency = 200
+
+# ============================================================================
+# Redis
+# ============================================================================
+redis:
+  enabled: true
+  auth:
+    enabled: false  # Enable in production
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+  replica:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 10Gi
+
+# ============================================================================
+# Neo4j
+# ============================================================================
+neo4j:
+  enabled: true
+  name: neo4j
+  replicaCount: 1
+
+  image:
+    repository: neo4j
+    tag: "5.14-community"
+    pullPolicy: IfNotPresent
+
+  auth:
+    username: neo4j
+    password: changeme  # Override in production
+
+  service:
+    type: ClusterIP
+    ports:
+      http: 7474
+      bolt: 7687
+
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: "fast-ssd"
+
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+  config:
+    dbms.memory.heap.initial_size: "2g"
+    dbms.memory.heap.max_size: "4g"
+    dbms.memory.pagecache.size: "2g"
+
+# ============================================================================
+# Prometheus
+# ============================================================================
+prometheus:
+  enabled: true
+  alertmanager:
+    enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 50Gi
+    retention: "30d"
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+
+# ============================================================================
+# Grafana
+# ============================================================================
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: changeme  # Override in production
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-server
+          isDefault: true
+
+# ============================================================================
+# ConfigMaps
+# ============================================================================
+configMaps:
+  api:
+    POSTGRES_HOST: "ape-2026-postgresql"
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: "ape_timeseries"
+    REDIS_HOST: "ape-2026-redis-master"
+    REDIS_PORT: "6379"
+    NEO4J_URI: "bolt://ape-2026-neo4j:7687"
+
+# ============================================================================
+# Secrets (use external secret manager in production)
+# ============================================================================
+secrets:
+  api:
+    CLAUDE_API_KEY: ""  # Set via --set or values override
+    DEEPSEEK_API_KEY: ""
+    POSTGRES_PASSWORD: ""
+    NEO4J_PASSWORD: ""
+    SECRET_KEY: ""
+
+# ============================================================================
+# Persistence
+# ============================================================================
+persistence:
+  data:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
+  vee:
+    enabled: true
+    size: 20Gi
+    storageClass: "standard"
+
+# ============================================================================
+# Network Policies
+# ============================================================================
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# ============================================================================
+# Service Monitor (Prometheus Operator)
+# ============================================================================
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+# ============================================================================
+# Pod Disruption Budget
+# ============================================================================
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# ============================================================================
+# RBAC
+# ============================================================================
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: ape-2026
+  annotations: {}

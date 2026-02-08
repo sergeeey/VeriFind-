@@ -1,0 +1,37 @@
+{{- if .Values.persistence.data.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ape-2026.fullname" . }}-data
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ape-2026.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size }}
+  {{- if .Values.persistence.data.storageClass }}
+  storageClassName: {{ .Values.persistence.data.storageClass }}
+  {{- end }}
+{{- end }}
+---
+{{- if .Values.persistence.vee.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ape-2026.fullname" . }}-vee
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ape-2026.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.vee.size }}
+  {{- if .Values.persistence.vee.storageClass }}
+  storageClassName: {{ .Values.persistence.vee.storageClass }}
+  {{- end }}
+{{- end }}

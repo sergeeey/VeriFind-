@@ -1,0 +1,287 @@
+# ============================================================================
+# Release Workflow
+# Week 7 Day 4 - APE 2026
+#
+# Triggers: Manual dispatch, Tag push
+# Jobs: Create Release, Generate Changelog, Build Assets
+# ============================================================================
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.2.3)'
+        required: true
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # ==========================================================================
+  # Create Release
+  # ==========================================================================
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # Get latest tag
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+            VERSION=${LATEST_TAG#v}
+
+            # Increment version based on type
+            IFS='.' read -ra PARTS <<< "$VERSION"
+            MAJOR=${PARTS[0]}
+            MINOR=${PARTS[1]}
+            PATCH=${PARTS[2]}
+
+            case "${{ github.event.inputs.release_type }}" in
+              major)
+                VERSION="$((MAJOR + 1)).0.0"
+                ;;
+              minor)
+                VERSION="${MAJOR}.$((MINOR + 1)).0"
+                ;;
+              patch)
+                VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+                ;;
+            esac
+          fi
+
+          echo "version=v${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: v${VERSION}"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LATEST_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Categorize commits
+          FEATURES=$(echo "$COMMITS" | grep -i "^- feat" || true)
+          FIXES=$(echo "$COMMITS" | grep -i "^- fix" || true)
+          DOCS=$(echo "$COMMITS" | grep -i "^- docs" || true)
+          OTHERS=$(echo "$COMMITS" | grep -viE "^- (feat|fix|docs)" || true)
+
+          # Build changelog
+          CHANGELOG="## What's Changed\n\n"
+
+          if [ -n "$FEATURES" ]; then
+            CHANGELOG+="### ✨ Features\n${FEATURES}\n\n"
+          fi
+
+          if [ -n "$FIXES" ]; then
+            CHANGELOG+="### 🐛 Bug Fixes\n${FIXES}\n\n"
+          fi
+
+          if [ -n "$DOCS" ]; then
+            CHANGELOG+="### 📚 Documentation\n${DOCS}\n\n"
+          fi
+
+          if [ -n "$OTHERS" ]; then
+            CHANGELOG+="### 🔧 Other Changes\n${OTHERS}\n\n"
+          fi
+
+          # Save to file for later use
+          echo -e "$CHANGELOG" > CHANGELOG.tmp
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.tmp >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update version in files
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION_NUMBER="${VERSION#v}"
+
+          # Update pyproject.toml if exists
+          if [ -f pyproject.toml ]; then
+            sed -i "s/^version = .*/version = \"${VERSION_NUMBER}\"/" pyproject.toml
+          fi
+
+          # Update __init__.py
+          if [ -f src/__init__.py ]; then
+            echo "__version__ = \"${VERSION_NUMBER}\"" > src/__init__.py
+          fi
+
+          # Update docker-compose.yml
+          if [ -f docker-compose.yml ]; then
+            sed -i "s/image: ape-2026\/api:.*/image: ape-2026\/api:${VERSION}/" docker-compose.yml
+          fi
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}" || true
+          git tag ${{ steps.version.outputs.version }}
+          git push origin main --tags
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          body: |
+            # APE 2026 - ${{ steps.version.outputs.version }}
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## 🐳 Docker Image
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}/api:${{ steps.version.outputs.version }}
+            ```
+
+            ## 📦 Installation
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd ape-2026
+            git checkout ${{ steps.version.outputs.version }}
+            ./scripts/deployment/deploy.sh
+            ```
+
+            ## 📊 Metrics
+            - **Commit SHA:** ${{ github.sha }}
+            - **Release Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            - **Author:** @${{ github.actor }}
+
+            ---
+            **Full Changelog:** https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 HEAD^)...${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease }}
+
+  # ==========================================================================
+  # Build Release Assets
+  # ==========================================================================
+  build-assets:
+    name: Build Release Assets
+    runs-on: ubuntu-latest
+    needs: create-release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release.outputs.version }}
+
+      - name: Create source archive
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          tar -czf ape-2026-${VERSION}.tar.gz \
+            --exclude='.git' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.pytest_cache' \
+            --exclude='htmlcov' \
+            --exclude='vee/workspace' \
+            .
+
+      - name: Generate checksum
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          sha256sum ape-2026-${VERSION}.tar.gz > ape-2026-${VERSION}.tar.gz.sha256
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./ape-2026-${{ needs.create-release.outputs.version }}.tar.gz
+          asset_name: ape-2026-${{ needs.create-release.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./ape-2026-${{ needs.create-release.outputs.version }}.tar.gz.sha256
+          asset_name: ape-2026-${{ needs.create-release.outputs.version }}.tar.gz.sha256
+          asset_content_type: text/plain
+
+  # ==========================================================================
+  # Notify
+  # ==========================================================================
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [create-release, build-assets]
+    if: always()
+
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            🎉 New Release: ${{ needs.create-release.outputs.version }}
+
+            ${{ needs.create-release.outputs.changelog }}
+
+            View release: https://github.com/${{ github.repository }}/releases/tag/${{ needs.create-release.outputs.version }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Send email notification
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[APE 2026] Release ${{ needs.create-release.outputs.version }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: APE 2026 CI/CD <noreply@ape2026.com>
+          body: |
+            New release ${{ needs.create-release.outputs.version }} has been published.
+
+            View release: https://github.com/${{ github.repository }}/releases/tag/${{ needs.create-release.outputs.version }}
+
+            Changes:
+            ${{ needs.create-release.outputs.changelog }}

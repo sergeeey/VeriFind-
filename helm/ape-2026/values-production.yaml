@@ -1,0 +1,266 @@
+# ============================================================================
+# Production Values for APE 2026
+# Week 8 Day 1 - Use with: helm install -f values-production.yaml
+# ============================================================================
+
+# API Service - Production Configuration
+api:
+  enabled: true
+  replicaCount: 5  # Higher for production load
+
+  image:
+    repository: ghcr.io/yourorg/ape-2026/api
+    tag: "v1.0.0"  # Use specific version, not latest
+    pullPolicy: IfNotPresent
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    hosts:
+      - host: api.ape2026.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: api-tls-prod
+        hosts:
+          - api.ape2026.com
+
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 70
+
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+
+# PostgreSQL - Production Configuration
+postgresql:
+  enabled: true
+  auth:
+    username: ape
+    password: ""  # Set via --set or external secrets
+    database: ape_timeseries
+
+  primary:
+    persistence:
+      enabled: true
+      size: 200Gi
+      storageClass: "fast-ssd"
+
+    resources:
+      requests:
+        memory: "8Gi"
+        cpu: "4000m"
+      limits:
+        memory: "16Gi"
+        cpu: "8000m"
+
+    configuration: |
+      # Performance tuning for production
+      shared_buffers = 4GB
+      effective_cache_size = 12GB
+      work_mem = 128MB
+      maintenance_work_mem = 1GB
+      max_connections = 200
+      random_page_cost = 1.1
+      effective_io_concurrency = 200
+      wal_buffers = 16MB
+      min_wal_size = 2GB
+      max_wal_size = 8GB
+      checkpoint_completion_target = 0.9
+
+# Redis - Production Configuration with HA
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: ""  # Set via --set or external secrets
+
+  master:
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: "fast-ssd"
+
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+
+  replica:
+    replicaCount: 3  # High availability
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: "fast-ssd"
+
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+
+  sentinel:
+    enabled: true
+    quorum: 2
+
+# Neo4j - Production Configuration
+neo4j:
+  enabled: true
+  name: neo4j
+  replicaCount: 1  # Community edition (Enterprise supports clustering)
+
+  image:
+    repository: neo4j
+    tag: "5.14-community"
+    pullPolicy: IfNotPresent
+
+  auth:
+    username: neo4j
+    password: ""  # Set via --set or external secrets
+
+  persistence:
+    enabled: true
+    size: 200Gi
+    storageClass: "fast-ssd"
+
+  resources:
+    requests:
+      memory: "8Gi"
+      cpu: "4000m"
+    limits:
+      memory: "16Gi"
+      cpu: "8000m"
+
+  config:
+    dbms.memory.heap.initial_size: "8g"
+    dbms.memory.heap.max_size: "12g"
+    dbms.memory.pagecache.size: "4g"
+    dbms.memory.transaction.total.max: "2g"
+
+# Prometheus - Production Monitoring
+prometheus:
+  enabled: true
+  alertmanager:
+    enabled: true
+    persistence:
+      size: 10Gi
+
+  server:
+    persistentVolume:
+      enabled: true
+      size: 100Gi
+      storageClass: "standard"
+    retention: "90d"  # 3 months retention
+
+    resources:
+      requests:
+        memory: "4Gi"
+        cpu: "1000m"
+      limits:
+        memory: "8Gi"
+        cpu: "2000m"
+
+# Grafana - Production Dashboards
+grafana:
+  enabled: true
+  adminUser: admin
+  adminPassword: ""  # Set via --set or external secrets
+
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "standard"
+
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://ape-2026-prometheus-server
+          isDefault: true
+          access: proxy
+
+# Persistence
+persistence:
+  data:
+    enabled: true
+    size: 50Gi
+    storageClass: "fast-ssd"
+
+  vee:
+    enabled: true
+    size: 100Gi
+    storageClass: "fast-ssd"
+
+# Network Policies - Enabled for security
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Service Monitor - For Prometheus Operator
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+# Pod Disruption Budget - Ensure availability
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2  # At least 2 pods must be available
+
+# RBAC
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: ape-2026-prod
+  annotations:
+    # For AWS IRSA
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ape-2026-prod
+
+# Secrets - Use external secret manager in production
+# DO NOT commit actual secrets to git
+secrets:
+  api:
+    CLAUDE_API_KEY: ""  # Set via --set secrets.api.CLAUDE_API_KEY=xxx
+    DEEPSEEK_API_KEY: ""
+    POSTGRES_PASSWORD: ""
+    NEO4J_PASSWORD: ""
+    SECRET_KEY: ""  # Generate with: openssl rand -hex 32

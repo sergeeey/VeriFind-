@@ -1,0 +1,116 @@
+================================================================================
+  APE 2026 - Autonomous Predictive Analytics Engine
+  Successfully deployed to {{ .Values.namespace }}!
+================================================================================
+
+Your release is named: {{ .Release.Name }}
+Chart version: {{ .Chart.Version }}
+App version: {{ .Chart.AppVersion }}
+
+{{- if .Values.api.enabled }}
+
+🚀 API Service:
+{{- if .Values.api.ingress.enabled }}
+{{- range .Values.api.ingress.hosts }}
+  URL: https://{{ .host }}
+{{- end }}
+{{- else }}
+  export API_POD=$(kubectl get pods -n {{ .Values.namespace }} -l "app.kubernetes.io/component=api" -o jsonpath="{.items[0].metadata.name}")
+  kubectl port-forward -n {{ .Values.namespace }} $API_POD 8000:8000
+
+  Then visit: http://localhost:8000
+{{- end }}
+
+  API Docs: /docs
+  OpenAPI: /openapi.json
+  Health: /health
+
+{{- end }}
+
+{{- if .Values.grafana.enabled }}
+
+📊 Grafana Dashboard:
+  Username: {{ .Values.grafana.adminUser }}
+  Password: Run this command to get password:
+
+  kubectl get secret {{ include "ape-2026.fullname" . }}-grafana \
+    -n {{ .Values.namespace }} \
+    -o jsonpath="{.data.admin-password}" | base64 --decode
+
+  {{- if .Values.grafana.ingress.enabled }}
+  URL: Check ingress configuration
+  {{- else }}
+  Port Forward:
+  kubectl port-forward -n {{ .Values.namespace }} svc/{{ include "ape-2026.fullname" . }}-grafana 3000:80
+
+  Then visit: http://localhost:3000
+  {{- end }}
+
+{{- end }}
+
+{{- if .Values.prometheus.enabled }}
+
+📈 Prometheus:
+  kubectl port-forward -n {{ .Values.namespace }} svc/{{ include "ape-2026.fullname" . }}-prometheus-server 9090:80
+
+  Then visit: http://localhost:9090
+
+{{- end }}
+
+================================================================================
+⚙️  Useful Commands:
+================================================================================
+
+# Check deployment status:
+  kubectl get all -n {{ .Values.namespace }}
+
+# View API logs:
+  kubectl logs -n {{ .Values.namespace }} -l app.kubernetes.io/component=api -f
+
+# Scale API:
+  kubectl scale deployment {{ include "ape-2026.fullname" . }}-api \
+    --replicas=5 -n {{ .Values.namespace }}
+
+# Update configuration:
+  helm upgrade {{ .Release.Name }} ./helm/ape-2026 \
+    -f values.yaml -n {{ .Values.namespace }}
+
+# Rollback:
+  helm rollback {{ .Release.Name }} -n {{ .Values.namespace }}
+
+================================================================================
+📚 Documentation:
+================================================================================
+
+  Chart README: helm/ape-2026/README.md
+  Values: helm show values ./helm/ape-2026
+
+================================================================================
+⚠️  Important Notes:
+================================================================================
+
+{{- if not .Values.secrets.api.CLAUDE_API_KEY }}
+⚠️  CLAUDE_API_KEY not set! Set it via:
+  --set secrets.api.CLAUDE_API_KEY=sk-ant-xxx
+{{- end }}
+
+{{- if not .Values.secrets.api.SECRET_KEY }}
+⚠️  SECRET_KEY not set! Generate and set it via:
+  --set secrets.api.SECRET_KEY=$(openssl rand -hex 32)
+{{- end }}
+
+{{- if eq .Values.api.image.tag "latest" }}
+⚠️  Using 'latest' tag is not recommended for production!
+  Set specific version: --set api.image.tag=v1.0.0
+{{- end }}
+
+{{- if not .Values.api.autoscaling.enabled }}
+⚠️  Autoscaling is disabled. Enable for production:
+  --set api.autoscaling.enabled=true
+{{- end }}
+
+================================================================================
+
+For support, visit: https://github.com/yourorg/ape-2026/issues
+
+Happy analyzing! 🎯

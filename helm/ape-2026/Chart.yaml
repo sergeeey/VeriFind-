@@ -1,0 +1,60 @@
+# ============================================================================
+# Helm Chart Metadata
+# Week 8 Day 1 - APE 2026
+# ============================================================================
+
+apiVersion: v2
+name: ape-2026
+description: APE 2026 - Autonomous Predictive Analytics Engine
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - analytics
+  - ai
+  - machine-learning
+  - financial-analysis
+  - multi-agent
+
+home: https://github.com/yourorg/ape-2026
+sources:
+  - https://github.com/yourorg/ape-2026
+
+maintainers:
+  - name: APE Team
+    email: team@ape2026.com
+
+# Chart dependencies
+dependencies:
+  - name: postgresql
+    version: "12.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+    tags:
+      - database
+
+  - name: redis
+    version: "18.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+    tags:
+      - cache
+
+  - name: prometheus
+    version: "25.x.x"
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled
+    tags:
+      - monitoring
+
+  - name: grafana
+    version: "7.x.x"
+    repository: https://grafana.github.io/helm-charts
+    condition: grafana.enabled
+    tags:
+      - monitoring
+
+annotations:
+  category: Analytics
+  licenses: MIT

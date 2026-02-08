@@ -6,9 +6,10 @@ Tests for parallel execution, agent coordination, and message passing.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 from src.orchestration.parallel_orchestrator import (
     ParallelOrchestrator,
@@ -22,8 +23,33 @@ from src.orchestration.parallel_orchestrator import (
 
 
 # ============================================================================
+# Mocks and Fixtures
+# ============================================================================
+
+class MockLangGraphOrchestrator:
+    """Mock LangGraph orchestrator for testing."""
+    def __init__(self):
+        self.calls = []
+
+    async def plan_node(self, state):
+        """Mock plan generation."""
+        self.calls.append(('plan_node', state))
+        return {
+            "description": f"Plan for: {state.query}",
+            "code": "# Generated code",
+            "data_requirements": {}
+        }
+
+
+# ============================================================================
 # Fixtures
 # ============================================================================
+
+@pytest.fixture
+def mock_orchestrator():
+    """Create mock LangGraph orchestrator."""
+    return MockLangGraphOrchestrator()
+
 
 @pytest.fixture
 def shared_state():
@@ -37,11 +63,12 @@ def orchestrator():
     return ParallelOrchestrator(max_parallel_agents=5)
 
 
-@pytest.fixture
-async def initialized_orchestrator(orchestrator):
+@pytest_asyncio.fixture
+async def initialized_orchestrator():
     """Create initialized orchestrator with session."""
-    await orchestrator.initialize_session("Test query")
-    return orchestrator
+    orch = ParallelOrchestrator(max_parallel_agents=5)
+    await orch.initialize_session("Test query")
+    return orch
 
 
 # ============================================================================
@@ -68,21 +95,27 @@ async def test_shared_state_set_get_result(shared_state):
 async def test_shared_state_add_fact(shared_state):
     """Test thread-safe fact addition."""
     from src.truth_boundary.gate import VerifiedFact
+    from datetime import datetime
 
     fact = VerifiedFact(
         fact_id="fact_1",
         query_id="query_1",
-        statement="Test fact",
-        value=100.0,
-        confidence_score=0.9,
+        plan_id="plan_1",
+        code_hash="abc123",
+        status="verified",
+        extracted_values={"value": 100.0},
+        execution_time_ms=50,
+        memory_used_mb=10.5,
+        created_at=datetime.utcnow(),
         source_code="test code",
-        execution_result={}
+        confidence_score=0.9
     )
 
     await shared_state.add_fact(fact)
 
     assert len(shared_state.verified_facts) == 1
-    assert shared_state.verified_facts[0].statement == "Test fact"
+    assert shared_state.verified_facts[0].fact_id == "fact_1"
+    assert shared_state.verified_facts[0].status == "verified"
 
 
 @pytest.mark.asyncio
@@ -106,12 +139,13 @@ async def test_shared_state_concurrent_access(shared_state):
 # ParallelAgent Tests
 # ============================================================================
 
-def test_agent_creation(shared_state):
+def test_agent_creation(shared_state, mock_orchestrator):
     """Test agent creation with role."""
     agent = ParallelAgent(
         agent_id="agent_1",
         role=AgentRole.PLANNER,
-        shared_state=shared_state
+        shared_state=shared_state,
+        orchestrator=mock_orchestrator
     )
 
     assert agent.agent_id == "agent_1"
@@ -121,12 +155,13 @@ def test_agent_creation(shared_state):
 
 
 @pytest.mark.asyncio
-async def test_agent_send_message(shared_state):
+async def test_agent_send_message(shared_state, mock_orchestrator):
     """Test agent message sending."""
     agent = ParallelAgent(
         agent_id="agent_1",
         role=AgentRole.PLANNER,
-        shared_state=shared_state
+        shared_state=shared_state,
+        orchestrator=mock_orchestrator
     )
 
     message = await agent.send_message(
@@ -142,12 +177,13 @@ async def test_agent_send_message(shared_state):
 
 
 @pytest.mark.asyncio
-async def test_agent_execute_planning_task(shared_state):
+async def test_agent_execute_planning_task(shared_state, mock_orchestrator):
     """Test agent executing planning task."""
     agent = ParallelAgent(
         agent_id="planner_1",
         role=AgentRole.PLANNER,
-        shared_state=shared_state
+        shared_state=shared_state,
+        orchestrator=mock_orchestrator
     )
 
     task = AgentTask(
@@ -165,7 +201,7 @@ async def test_agent_execute_planning_task(shared_state):
 
 
 @pytest.mark.asyncio
-async def test_agent_execute_aggregation_task(shared_state):
+async def test_agent_execute_aggregation_task(shared_state, mock_orchestrator):
     """Test agent executing aggregation task."""
     # Pre-populate shared state with dependency results
     await shared_state.set_result("task_1", {"value": 1.5})
@@ -174,7 +210,8 @@ async def test_agent_execute_aggregation_task(shared_state):
     agent = ParallelAgent(
         agent_id="aggregator_1",
         role=AgentRole.AGGREGATOR,
-        shared_state=shared_state
+        shared_state=shared_state,
+        orchestrator=mock_orchestrator
     )
 
     task = AgentTask(
@@ -192,12 +229,13 @@ async def test_agent_execute_aggregation_task(shared_state):
 
 
 @pytest.mark.asyncio
-async def test_agent_task_failure_handling(shared_state):
+async def test_agent_task_failure_handling(shared_state, mock_orchestrator):
     """Test agent handles task failures gracefully."""
     agent = ParallelAgent(
         agent_id="planner_1",
         role=AgentRole.PLANNER,
-        shared_state=shared_state
+        shared_state=shared_state,
+        orchestrator=mock_orchestrator
     )
 
     # Create task with invalid context to trigger error

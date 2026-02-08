@@ -95,7 +95,7 @@ class SharedState:
         """Thread-safe fact addition."""
         async with self.lock:
             self.verified_facts.append(fact)
-            logger.debug(f"Added verified fact: {fact.statement}")
+            logger.debug(f"Added verified fact: {fact.fact_id}")
 
 
 class ParallelAgent:
@@ -120,7 +120,7 @@ class ParallelAgent:
         self.agent_id = agent_id
         self.role = role
         self.shared_state = shared_state
-        self.orchestrator = orchestrator or LangGraphOrchestrator()
+        self.orchestrator = orchestrator  # Don't create default orchestrator to avoid requiring API key
 
         # Message queue (asyncio.Queue for async support)
         self.message_queue: asyncio.Queue[AgentMessage] = asyncio.Queue()
@@ -202,9 +202,8 @@ class ParallelAgent:
 
         # Use LangGraph orchestrator to generate plan
         state = APEState(
-            query=task.query,
             query_id=task.task_id,
-            context=task.context
+            query_text=task.query
         )
 
         # Execute just the PLAN node

@@ -1,0 +1,77 @@
+# ============================================================================
+# Prometheus Configuration
+# Week 7 Day 3 - Metrics Collection
+# ============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'ape-2026'
+    environment: 'production'
+
+# Alerting configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - 'alertmanager:9093'
+
+# Scrape configurations
+scrape_configs:
+  # ============================================================================
+  # Prometheus Self-Monitoring
+  # ============================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ============================================================================
+  # API Service Metrics
+  # ============================================================================
+  - job_name: 'api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:8000']
+    metric_relabel_configs:
+      # Drop high-cardinality metrics if needed
+      - source_labels: [__name__]
+        regex: 'http_request_duration_seconds_bucket'
+        action: keep
+
+  # ============================================================================
+  # TimescaleDB Metrics (postgres_exporter)
+  # ============================================================================
+  - job_name: 'timescaledb'
+    static_configs:
+      - targets: ['timescaledb:9187']
+    # Uncomment if using postgres_exporter sidecar
+
+  # ============================================================================
+  # Redis Metrics (redis_exporter)
+  # ============================================================================
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+    # Uncomment if using redis_exporter sidecar
+
+  # ============================================================================
+  # Neo4j Metrics
+  # ============================================================================
+  - job_name: 'neo4j'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['neo4j:2004']
+    # Uncomment if Neo4j metrics are enabled
+
+  # ============================================================================
+  # Node Exporter (system metrics)
+  # ============================================================================
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    # Uncomment if using node_exporter
+
+# Recording rules for precomputed metrics
+rule_files:
+  # - 'rules/*.yml'
