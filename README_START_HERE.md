@@ -1,8 +1,8 @@
 # 🚀 APE 2026 - START HERE (Для нового LLM)
 
 **Проект:** Autonomous Prediction Engine 2026
-**Статус:** Week 8 Day 2 Complete ✅
-**Следующий шаг:** Week 8 Day 3 - Query Builder + WebSocket
+**Статус:** Week 8 Day 4 Complete ✅
+**Следующий шаг:** Week 8 Day 5 - Financial Visualizations + Production Polish
 
 ---
 
@@ -39,15 +39,19 @@ npm run dev
 
 ---
 
-### 3️⃣ Начни Week 8 Day 3
+### 3️⃣ Начни Week 8 Day 5
 
-**Открой:** `CONTINUATION_PLAN.md` секция "Week 8 Day 3"
+**Открой:** `CONTINUATION_PLAN.md` или `activeContext.md` для деталей
 
 **Создай 8 файлов по чек-листу:**
-- [ ] QueryBuilder component
-- [ ] WebSocket Provider
-- [ ] QueryStatus component
-- [ ] Query pages (new, [id])
+- [ ] CandlestickChart (TradingView)
+- [ ] ConfidenceTrendChart (Recharts)
+- [ ] DebateDistributionChart (Pie chart)
+- [ ] ExecutionTimeHistogram (Bar chart)
+- [ ] FactTimelineChart (Area chart)
+- [ ] ChartContainer (Wrapper)
+- [ ] TimeRangeSelector (Range buttons)
+- [ ] types/charts.ts (TypeScript types)
 - [ ] TypeScript types
 
 **Следуй чек-листу → Тестируй → Создай summary**
@@ -93,30 +97,38 @@ E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\
 - ✅ Kubernetes Helm charts
 - ✅ Blue-green deployment
 
-### Frontend (40% Complete) ← LAST WORK
+### Frontend (80% Complete) ← LAST WORK
 - ✅ **Day 2 Complete:** Next.js 14 setup (35 files, 3,200 LOC)
   - Pages: Landing, Login, Register, Dashboard
   - Components: Navbar, Sidebar, 11 shadcn/ui
   - API client, Zustand store, Utils
-- 📋 **Day 3 Next:** Query Builder + WebSocket (8 files, 800 LOC)
-- 📋 **Day 4:** Results Dashboard (10 files, 1,500 LOC)
-- 📋 **Day 5:** Visualizations (8 files, 1,000 LOC)
+- ✅ **Day 3 Complete:** Query Builder + WebSocket (8 files, 810 LOC)
+  - QueryBuilder, QueryStatus, WebSocketProvider
+  - Real-time updates, polling fallback
+- ✅ **Day 4 Complete:** Results Dashboard (11 files, 1,620 LOC)
+  - FactsTable (sortable, paginated)
+  - DebateViewer, SynthesisCard, CodeViewer
+  - Export JSON/CSV, Tabs navigation
+- 📋 **Day 5 Next:** Visualizations (8 files, 1,000 LOC)
 
 ---
 
-## 🎯 Next Task: Week 8 Day 3
+## 🎯 Next Task: Week 8 Day 5
 
-**Цель:** Query Builder с real-time status updates
+**Цель:** Financial Visualizations + Production Polish
 
 **Deliverables:**
-1. Query Builder form (textarea + examples)
-2. WebSocket Provider (real-time updates)
-3. QueryStatus component (visual pipeline)
-4. Query pages (submission + status)
+1. TradingView Lightweight Charts (candlestick charts)
+2. Recharts analytics (confidence trends, metrics)
+3. Time range selector (1D, 1W, 1M, 3M, 1Y, ALL)
+4. Verified fact markers on timeline
+5. Framer Motion animations
+6. Performance optimization (Lighthouse >90)
+7. Production build
 
-**Время:** 6-8 часов
+**Время:** 8-10 часов
 
-**Детали:** См. `CONTINUATION_PLAN.md` секция "Week 8 Day 3"
+**Детали:** См. `activeContext.md` секция "Week 8 Day 5"
 
 ---
 
@@ -145,11 +157,11 @@ E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\
 
 | Metric | Value |
 |--------|-------|
-| **Overall Progress** | 84% (Week 8 Day 2 complete) |
+| **Overall Progress** | 88% (Week 8 Day 4 complete) |
 | **Backend** | 95% complete |
-| **Frontend** | 40% complete (Day 2/5) |
+| **Frontend** | 80% complete (Day 4/5) |
 | **Tests** | 290 backend tests (95.5% passing) |
-| **Code** | ~20,200 LOC (17K backend + 3.2K frontend) |
+| **Code** | ~22,630 LOC (17K backend + 5.6K frontend) |
 
 ---
 
@@ -200,30 +212,32 @@ npm install
 
 ---
 
-## 🎯 Success Criteria для Week 8 Day 3
+## 🎯 Success Criteria для Week 8 Day 5
 
-- [ ] Query Builder form работает
-- [ ] WebSocket connection (или polling fallback)
-- [ ] Real-time status updates (<500ms latency)
-- [ ] Visual pipeline (PLAN → FETCH → VEE → GATE)
-- [ ] Error handling with toasts
+- [ ] TradingView candlestick charts работают
+- [ ] Recharts analytics отображаются
+- [ ] Time range selector функционирует
+- [ ] Verified fact markers на timeline
+- [ ] Framer Motion animations smooth
 - [ ] Mobile responsive
-- [ ] Summary создан (`week_08_day_03_summary.md`)
+- [ ] Production build успешен
+- [ ] Lighthouse score >90
+- [ ] Summary создан (`week_08_day_05_summary.md`)
 - [ ] Memory Bank обновлен (activeContext, progress)
 
 ---
 
 ## 🚀 Let's Go!
 
-1. **Читай:** `CLAUDE.md` → `activeContext.md` → `CONTINUATION_PLAN.md`
+1. **Читай:** `CLAUDE.md` → `activeContext.md` → `progress.md`
 2. **Установи:** `cd frontend && npm install`
 3. **Проверь:** `npm run dev` (localhost:3000 должен открыться)
-4. **Начинай:** Week 8 Day 3 по чек-листу из `CONTINUATION_PLAN.md`
+4. **Начинай:** Week 8 Day 5 по плану из `activeContext.md`
 
 **Удачи!** 🎉
 
 ---
 
 *Этот файл - точка входа для нового LLM*
-*Обновлен: 2026-02-08 22:00 UTC*
-*Статус: Week 8 Day 2 Complete, Ready for Day 3*
+*Обновлен: 2026-02-09 01:30 UTC*
+*Статус: Week 8 Day 4 Complete, Ready for Day 5 (Final Sprint!)*
