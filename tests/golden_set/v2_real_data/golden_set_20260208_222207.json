@@ -1,0 +1,251 @@
+{
+  "metadata": {
+    "created_at": "20260208_222207",
+    "total_queries": 20,
+    "successful": 5,
+    "source": "yfinance",
+    "description": "Ground truth calculated from real market data"
+  },
+  "results": [
+    {
+      "query_id": "sharpe_spy_2023",
+      "type": "sharpe",
+      "query_params": {
+        "ticker": "SPY",
+        "year": 2023,
+        "rf": 0.0525
+      },
+      "error": "The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "sharpe_qqq_2023",
+      "type": "sharpe",
+      "query_params": {
+        "ticker": "QQQ",
+        "year": 2023,
+        "rf": 0.0525
+      },
+      "error": "The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "sharpe_btc_2022",
+      "type": "sharpe",
+      "query_params": {
+        "ticker": "BTC-USD",
+        "year": 2022,
+        "rf": 0.04
+      },
+      "error": "The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "sharpe_tsla_2023",
+      "type": "sharpe",
+      "query_params": {
+        "ticker": "TSLA",
+        "year": 2023,
+        "rf": 0.0525
+      },
+      "error": "The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "sharpe_aapl_2023",
+      "type": "sharpe",
+      "query_params": {
+        "ticker": "AAPL",
+        "year": 2023,
+        "rf": 0.0525
+      },
+      "error": "The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "corr_spy_qqq_2023",
+      "type": "correlation",
+      "query_params": {
+        "t1": "SPY",
+        "t2": "QQQ",
+        "year": 2023
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "corr_btc_spy_2022",
+      "type": "correlation",
+      "query_params": {
+        "t1": "BTC-USD",
+        "t2": "SPY",
+        "year": 2022
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "corr_gld_slv_2023",
+      "type": "correlation",
+      "query_params": {
+        "t1": "GLD",
+        "t2": "SLV",
+        "year": 2023
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "corr_aapl_tsla_2022",
+      "type": "correlation",
+      "query_params": {
+        "t1": "AAPL",
+        "t2": "TSLA",
+        "year": 2022
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "corr_xle_xlu_2021",
+      "type": "correlation",
+      "query_params": {
+        "t1": "XLE",
+        "t2": "XLU",
+        "year": 2021
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "vol_btc_2022",
+      "type": "volatility",
+      "query_params": {
+        "ticker": "BTC-USD",
+        "year": 2022
+      },
+      "value": 0.5344,
+      "confidence": 1.0,
+      "data_points": 363
+    },
+    {
+      "query_id": "vol_eth_2022",
+      "type": "volatility",
+      "query_params": {
+        "ticker": "ETH-USD",
+        "year": 2022
+      },
+      "value": 0.7257,
+      "confidence": 1.0,
+      "data_points": 363
+    },
+    {
+      "query_id": "vol_arkk_2020",
+      "type": "volatility",
+      "query_params": {
+        "ticker": "ARKK",
+        "year": 2020
+      },
+      "value": 0.4961,
+      "confidence": 1.0,
+      "data_points": 251
+    },
+    {
+      "query_id": "vol_tqqq_2022",
+      "type": "volatility",
+      "query_params": {
+        "ticker": "TQQQ",
+        "year": 2022
+      },
+      "value": 0.963,
+      "confidence": 1.0,
+      "data_points": 250
+    },
+    {
+      "query_id": "vol_tsla_2023",
+      "type": "volatility",
+      "query_params": {
+        "ticker": "TSLA",
+        "year": 2023
+      },
+      "value": 0.5239,
+      "confidence": 1.0,
+      "data_points": 249
+    },
+    {
+      "query_id": "beta_msft_2023",
+      "type": "beta",
+      "query_params": {
+        "ticker": "MSFT",
+        "market": "SPY",
+        "start": "2023-01-01",
+        "end": "2023-12-31"
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "beta_aapl_3y",
+      "type": "beta",
+      "query_params": {
+        "ticker": "AAPL",
+        "market": "SPY",
+        "start": "2020-01-01",
+        "end": "2022-12-31"
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "beta_tsla_2023",
+      "type": "beta",
+      "query_params": {
+        "ticker": "TSLA",
+        "market": "SPY",
+        "start": "2023-01-01",
+        "end": "2023-12-31"
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "beta_arkk_3y",
+      "type": "beta",
+      "query_params": {
+        "ticker": "ARKK",
+        "market": "SPY",
+        "start": "2020-01-01",
+        "end": "2022-12-31"
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    },
+    {
+      "query_id": "beta_btc_3y",
+      "type": "beta",
+      "query_params": {
+        "ticker": "BTC-USD",
+        "market": "SPY",
+        "start": "2020-01-01",
+        "end": "2022-12-31"
+      },
+      "error": "If using all scalar values, you must pass an index",
+      "value": null,
+      "confidence": 0.0
+    }
+  ]
+}
