@@ -126,11 +126,14 @@ def test_gate_node_validates_output(lg_orchestrator):
 
 def test_state_machine_routing_success_path(lg_orchestrator):
     """Test state machine routes through success path."""
-    # PLAN → VEE → GATE → COMPLETED
+    # PLAN → should_fetch → (FETCH or VEE) → GATE → COMPLETED
     routing = lg_orchestrator.get_next_node(StateStatus.INITIALIZED)
     assert routing == 'PLAN'
 
     routing = lg_orchestrator.get_next_node(StateStatus.PLANNING)
+    assert routing == 'should_fetch'  # Conditional routing
+
+    routing = lg_orchestrator.get_next_node(StateStatus.FETCHING)
     assert routing == 'VEE'
 
     routing = lg_orchestrator.get_next_node(StateStatus.EXECUTING)

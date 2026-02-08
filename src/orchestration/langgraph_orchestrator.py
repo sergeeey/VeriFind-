@@ -24,6 +24,7 @@ import time
 
 from src.vee.sandbox_runner import SandboxRunner, ExecutionResult
 from src.truth_boundary.gate import TruthBoundaryGate, VerifiedFact
+from src.adapters.yfinance_adapter import YFinanceAdapter, MarketData
 
 
 class StateStatus(str, Enum):
@@ -147,6 +148,7 @@ class LangGraphOrchestrator:
         )
 
         self.truth_gate = TruthBoundaryGate()
+        self.yfinance_adapter = YFinanceAdapter()
 
     def plan_node(
         self,
@@ -195,8 +197,51 @@ class LangGraphOrchestrator:
         state.status = StateStatus.FETCHING
         state.nodes_visited.append('FETCH')
 
-        # Placeholder: would fetch from YFinance/TimescaleDB
-        state.fetched_data = {}
+        if not state.plan:
+            state.error_message = 'No plan available for fetching'
+            state.status = StateStatus.FAILED
+            return state
+
+        # Extract fetch parameters from plan
+        tickers = state.plan.get('tickers', [])
+        data_type = state.plan.get('data_type', 'OHLCV')
+        start_date = state.plan.get('start_date')
+        end_date = state.plan.get('end_date')
+
+        if not tickers:
+            state.error_message = 'No tickers specified in plan'
+            state.status = StateStatus.FAILED
+            return state
+
+        # Fetch data for each ticker
+        fetched_data = {}
+
+        try:
+            for ticker in tickers:
+                if data_type.lower() == 'fundamentals':
+                    # Fetch fundamentals
+                    fundamentals = self.yfinance_adapter.fetch_fundamentals(ticker)
+                    fetched_data[ticker] = fundamentals
+                else:
+                    # Fetch OHLCV (default)
+                    if not start_date or not end_date:
+                        state.error_message = f'start_date and end_date required for OHLCV data'
+                        state.status = StateStatus.FAILED
+                        return state
+
+                    df = self.yfinance_adapter.fetch_ohlcv(
+                        ticker=ticker,
+                        start_date=start_date,
+                        end_date=end_date,
+                        interval=state.plan.get('interval', '1d')
+                    )
+                    fetched_data[ticker] = df
+
+            state.fetched_data = fetched_data
+
+        except Exception as e:
+            state.error_message = f'Fetch error: {str(e)}'
+            state.status = StateStatus.FAILED
 
         return state
 
@@ -315,7 +360,7 @@ class LangGraphOrchestrator:
         """
         routing = {
             StateStatus.INITIALIZED: 'PLAN',
-            StateStatus.PLANNING: 'VEE',  # Skip FETCH for now
+            StateStatus.PLANNING: 'should_fetch',  # Conditional: FETCH or VEE
             StateStatus.FETCHING: 'VEE',
             StateStatus.EXECUTING: 'GATE',
             StateStatus.VALIDATING: 'END',
@@ -344,7 +389,8 @@ class LangGraphOrchestrator:
         self,
         query_id: str,
         query_text: str,
-        direct_code: Optional[str] = None
+        direct_code: Optional[str] = None,
+        use_plan: bool = False
     ) -> APEState:
         """
         Run state machine end-to-end.
@@ -353,6 +399,7 @@ class LangGraphOrchestrator:
             query_id: Query identifier
             query_text: User query
             direct_code: Direct code (for testing)
+            use_plan: Enable PLAN node (requires Claude API)
 
         Returns:
             Final state
@@ -366,6 +413,10 @@ class LangGraphOrchestrator:
 
             if next_node == 'END':
                 break
+
+            # Handle conditional edge
+            if next_node == 'should_fetch':
+                next_node = self.should_fetch(state)
 
             # Execute node
             if next_node == 'PLAN':
