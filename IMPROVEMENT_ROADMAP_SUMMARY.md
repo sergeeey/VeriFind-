@@ -1,0 +1,209 @@
+# 📋 Дорожная карта улучшений APE 2026 - Executive Summary
+
+**Основа:** Комплексная оценка Claude Opus 4.6
+**Текущая оценка:** 6.1/10 → **Целевая:** 8.5/10
+**Срок:** 4 недели (Week 11-14)
+**Стратегия:** Critical Fixes → Performance → UX/Security → Polish
+
+---
+
+## 🎯 Ключевые проблемы и решения
+
+| # | Проблема | Текущий статус | Решение | Приоритет |
+|---|----------|----------------|---------|-----------|
+| 1 | LLM = NotImplementedError | ✅ **FIXED** (Week 11 Day 1) | Интеграция с orchestrator | 🔴 |
+| 2 | Нет disclaimer | ❌ Critical risk | API + UI disclaimers | 🔴 |
+| 3 | Все тесты на моках | ❌ Не проверено в production | Real LLM + Golden Set | 🔴 |
+| 4 | Нет cost tracking | ❌ Blind spot | Middleware + dashboard | 🔴 |
+| 5 | God Object (main.py 947 LOC) | ❌ Maintenance hell | Разбить на routers | 🟡 |
+| 6 | Sync orchestrator | ❌ Bottleneck | Async + background tasks | 🟡 |
+| 7 | Нет load testing | ❌ Unknown capacity | Locust baseline | 🟡 |
+| 8 | Нет distributed tracing | ❌ Debug nightmare | OpenTelemetry + Jaeger | 🟡 |
+| 9 | Нет E2E tests (frontend) | ❌ UI untested | Playwright | 🟢 |
+| 10 | Нет Alembic | ❌ Manual migrations | Alembic integration | 🟢 |
+
+---
+
+## 📅 4-Week Plan
+
+### **Week 11: CRITICAL FIXES** ⚡
+**Goal:** Production blockers устранены
+
+**Deliverables:**
+- ✅ LLM integrated with orchestrator (OpenAI, Gemini, DeepSeek)
+- ✅ Disclaimer в API responses и UI
+- ✅ Cost tracking per query operational
+- ✅ Golden Set baseline с реальным LLM (accuracy ≥90%)
+- ✅ Async LLM calls (non-blocking)
+
+**Success Metric:** Can deploy to production без legal/technical risks
+
+---
+
+### **Week 12: PERFORMANCE & OBSERVABILITY** 🚀
+**Goal:** Scale-ready система
+
+**Deliverables:**
+- ✅ Load test baseline (100 users, P95 <5s)
+- ✅ Async orchestrator (10x throughput)
+- ✅ Distributed tracing (OpenTelemetry + Jaeger)
+- ✅ main.py refactored (routers)
+- ✅ Auto-scaling (HPA) configured
+
+**Success Metric:** Handles 100 concurrent users with <5s latency
+
+---
+
+### **Week 13: UX & SECURITY** 🛡️
+**Goal:** Production-grade quality
+
+**Deliverables:**
+- ✅ Playwright E2E tests (10+ tests)
+- ✅ JWT authentication для frontend
+- ✅ Alembic database migrations
+- ✅ Audit trail immutable (WORM)
+- ✅ Alerting configured (Prometheus)
+
+**Success Metric:** E2E tests passing, security hardened
+
+---
+
+### **Week 14: POLISH & VALIDATION** ✨
+**Goal:** Production-ready certification
+
+**Deliverables:**
+- ✅ Penetration test passed (external)
+- ✅ WebSocket state в Redis (stateless)
+- ✅ Full E2E pipeline test (PLAN→VEE→GATE→DEBATE)
+- ✅ MLflow integration (experiment tracking)
+- ✅ Final validation + documentation
+
+**Success Metric:** All acceptance criteria met, ready for beta launch
+
+---
+
+## 💰 Cost & ROI
+
+| Item | Cost | Timeline |
+|------|------|----------|
+| Development time (solo) | 4 weeks | Week 11-14 |
+| External pentest | $2K-5K | Week 13 |
+| LLM API costs (testing) | $500/month | Ongoing |
+| Infrastructure | $200/month | Ongoing |
+| **Total** | **~$7K** | **One-time + recurring** |
+
+**ROI:**
+- Risk mitigation: Legal compliance (priceless)
+- Performance: 10x throughput → support 10x users
+- Quality: 95% test coverage → fewer bugs → less maintenance
+- **Value:** From prototype (6.1/10) → Production-ready (8.5/10)
+
+---
+
+## 📊 Прогнозируемый результат
+
+```
+ТЕКУЩЕЕ СОСТОЯНИЕ (6.1/10):
+  - Отличная архитектура и документация
+  - Но: LLM на моках, нет compliance, untested в production
+
+ПОСЛЕ 4 НЕДЕЛЬ (8.5/10):
+  - ✅ Real LLM integration working
+  - ✅ Legal compliance (disclaimers, audit trail)
+  - ✅ Load tested (100 users, <5s latency)
+  - ✅ E2E tested (Playwright)
+  - ✅ Cost tracking operational
+  - ✅ Security hardened (pentest passed)
+  - ✅ Production-ready ✨
+```
+
+---
+
+## 🚦 Go/No-Go Criteria
+
+**BEFORE Week 11:**
+- [ ] Week 11 Day 1 complete ✅ (LLM integration реализован)
+- [ ] Budget approved ($500/month LLM API)
+- [ ] Legal contact для disclaimer review
+
+**AFTER Week 11 (Go to Week 12):**
+- [ ] Real LLM working in orchestrator
+- [ ] Disclaimer approved by legal
+- [ ] Cost tracking shows <$0.001 per query
+
+**AFTER Week 12 (Go to Week 13):**
+- [ ] Load test baseline met
+- [ ] Async pipeline operational
+- [ ] Distributed tracing working
+
+**AFTER Week 13 (Go to Week 14):**
+- [ ] E2E tests passing
+- [ ] JWT authentication working
+- [ ] Alembic migrations operational
+
+**AFTER Week 14 (Go to Production):**
+- [ ] Pentest passed (0 critical vulnerabilities)
+- [ ] Full E2E pipeline test passed
+- [ ] All documentation complete
+- [ ] Monitoring & alerting operational
+
+---
+
+## 🎯 Quick Wins (можно сделать прямо сейчас)
+
+1. **Disclaimer** (4 hours) → Снимает юридический риск
+2. **Cost tracking middleware** (1 day) → Visibility в расходы
+3. **Alembic setup** (1 day) → Профессиональные миграции
+4. **Разбить main.py** (2 days) → Улучшает maintainability
+5. **Запустить load test** (1 day) → Baseline метрики
+
+**Совет:** Начать с Quick Wins в Week 11 для раннего импакта.
+
+---
+
+## 📈 Success Metrics Dashboard
+
+**Рекомендуемый dashboard (Grafana):**
+
+```
+┌─────────────────────────────────────────┐
+│ APE 2026 Production Readiness Dashboard│
+├─────────────────────────────────────────┤
+│ Technical Health                        │
+│  ├─ Test Coverage:        95% ✅        │
+│  ├─ Golden Set Accuracy:  92% ✅        │
+│  ├─ Load Test P95:        4.2s ✅       │
+│  ├─ E2E Tests Passing:    10/10 ✅      │
+│  └─ Security Score:       A ✅          │
+├─────────────────────────────────────────┤
+│ Business Health                         │
+│  ├─ Compliance:           100% ✅       │
+│  ├─ Cost per Query:       $0.00032 ✅   │
+│  ├─ Audit Coverage:       100% ✅       │
+│  └─ Unit Economics:       Positive ✅   │
+├─────────────────────────────────────────┤
+│ Operational Health                      │
+│  ├─ Uptime (7d):          99.95% ✅     │
+│  ├─ Alerts:               0 critical ✅  │
+│  ├─ Deployment:           Automated ✅   │
+│  └─ Documentation:        Complete ✅    │
+└─────────────────────────────────────────┘
+
+Overall Score: 8.5/10 - PRODUCTION READY ✅
+```
+
+---
+
+## 🔗 Related Documents
+
+- **Full Technical Spec:** `TECHNICAL_SPECIFICATION_IMPROVEMENTS.md`
+- **Original Audit:** `C:\Users\serge\Downloads\APE_2026_Comprehensive_Evaluation.md`
+- **Validation Report:** `AUDIT_VALIDATION_REPORT.md`
+- **Week 11 Day 1:** Commit `4fe874f` (LLM Integration Complete)
+
+---
+
+**Version:** 1.0
+**Created:** 2026-02-08
+**Status:** Ready for execution
+**Next Action:** Begin Week 11 Day 2 (Disclaimer Integration)
