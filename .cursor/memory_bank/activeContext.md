@@ -1,11 +1,11 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Week 3 Day 1 - LangGraph State Machine
-📍 **Focus**: 124 Tests Passing - State-Based Orchestration
-🚦 **Status**: ✅ Week 3 Day 1 COMPLETE - LangGraph Orchestrator Functional
+🎯 **Phase**: Week 3 Day 2 - TimescaleDB Storage
+📍 **Focus**: 135 Tests Passing - VerifiedFacts Persistence
+🚦 **Status**: ✅ Week 3 Day 2 COMPLETE - TimescaleDB Integration Functional
 
-## Последняя Сессия (2026-02-08, Week 3 Day 1 COMPLETE - Autonomous 124 Tests)
+## Последняя Сессия (2026-02-08, Week 3 Day 2 COMPLETE - Autonomous 135 Tests)
 ### Выполнено:
 - ✅ Изучено ТЗ v2.1 (1860 строк)
 - ✅ Изучена методология (439 строк)
@@ -107,6 +107,17 @@
   - End-to-end state machine execution
   - All 15/15 unit tests pass
   - **TOTAL: 124/124 tests passing (100%)**
+- ✅ **WEEK 3 DAY 2 ЗАВЕРШЕН: TimescaleDB Storage**
+  - VerifiedFacts persistent storage in TimescaleDB
+  - Hypertable on created_at for time-series optimization
+  - Composite PRIMARY KEY (fact_id, created_at) for TimescaleDB compatibility
+  - JSONB storage for extracted_values
+  - Indexes on query_id, status with created_at DESC
+  - Query methods: by ID, by query_id, by status, by time range
+  - Aggregation metrics for execution statistics
+  - Integration with Truth Boundary Gate
+  - All 11/11 integration tests pass
+  - **TOTAL: 135/135 tests passing (100%)**
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -138,23 +149,18 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: 🎉 **WEEK 2 ЗАВЕРШЕНО!** → Week 3 Day 1 (LangGraph) ⏳
+**Current**: 🎉 **WEEK 3 DAY 1-2 ЗАВЕРШЕНО!** → Week 3 Day 3 ⏳
 
-**Week 2 Complete Summary**: ALL DAYS DONE ✅
-- ✅ Day 1: VEE Sandbox (16/16 tests) - Docker security isolation
-- ✅ Day 2: YFinance Adapter (14/14 tests) - Market data ingestion
-- ✅ Day 3: Truth Boundary Gate (14/14 tests) - Zero-hallucination enforcement
-- ✅ Day 4: Integration Testing (9/9 tests) - End-to-end pipeline validation
-- ✅ Day 5: APE Orchestrator (11/11 tests) - Pipeline coordination
+**Week 3 Progress Summary**: Days 1-2 DONE ✅
+- ✅ Day 1: LangGraph State Machine (15/15 tests) - State-based orchestration with retry
+- ✅ Day 2: TimescaleDB Storage (11/11 tests) - VerifiedFacts persistence with hypertables
 - ✅ TDD RED→GREEN cycle успешен для всех компонентов
-- ✅ **Total: 109/109 tests passing (100% success rate 🎉🎉🎉)**
+- ✅ **Total: 135/135 tests passing (100% success rate 🎉🎉🎉)**
 
-**Week 3 Day 1: LangGraph State Machine (Next)**
-- [ ] LangGraph integration (state-based orchestration)
-- [ ] PLAN→FETCH→VEE→GATE state flow
-- [ ] Async execution support
-- [ ] Multi-step plan execution
-- [ ] Error recovery and retry logic
+**Week 3 Day 3: [Next Component] (Next)**
+- [ ] To be determined based on project roadmap
+- [ ] Continue TDD workflow
+- [ ] Maintain 100% test success rate
 
 **Week 1 Success Criteria:** ✅ MET
 - Infrastructure ready
@@ -178,19 +184,19 @@ Performance:
 
 ## Метрики Прогресса
 ```
-Overall: [█████░░░░░] 48.1% (Week 3 Day 1: 6.7/16 weeks)
+Overall: [█████░░░░░] 49.4% (Week 3 Day 2: 7.0/16 weeks)
 
 Milestones:
-- M1 (Week 1-4):  [█████░░░░░] 52% (Week 1-2 + 3.1) ⏳
+- M1 (Week 1-4):  [█████░░░░░] 54% (Week 1-2 + 3.1-3.2) ⏳
 - M2 (Week 5-8):  [░░░░░░░░░░] 0%
 - M3 (Week 9-12): [░░░░░░░░░░] 0%
 - M4 (Week 13-16):[░░░░░░░░░░] 0%
 
-Week 3 Day 1 Stats:
-- Tests: 124/124 passing (100% 🎉)
-- Code: ~6000 lines (+500 LOC)
-- Files: 28 created (+2 LangGraph files)
-- Components: 8 modules fully tested
+Week 3 Day 2 Stats:
+- Tests: 135/135 passing (100% 🎉)
+- Code: ~6500 lines (+500 LOC)
+- Files: 30 created (+2 storage files)
+- Components: 9 modules fully tested
   - VEE Sandbox ✅
   - YFinance Adapter ✅
   - Truth Boundary Gate ✅
@@ -198,16 +204,17 @@ Week 3 Day 1 Stats:
   - PLAN Node ✅
   - Evaluation ✅
   - Orchestrator ✅
-  - LangGraph State Machine ✅ (NEW!)
-- State Machine: PLAN→FETCH→VEE→GATE с retry logic
+  - LangGraph State Machine ✅
+  - TimescaleDB Storage ✅ (NEW!)
+- TimescaleDB: Hypertable с composite key (fact_id, created_at)
 - Performance: <5s end-to-end для simple queries
 ```
 
 ## Последний Тест
 ```bash
-# Week 3 Day 1 Test Suite
+# Week 3 Day 2 Test Suite
 pytest tests/ -q
-# Result: 124/124 tests PASSED ✅ (100% success rate 🎉)
+# Result: 135/135 tests PASSED ✅ (100% success rate 🎉)
 # Components:
 # - ChromaDB: 10/10 ✅
 # - PLAN node: 17/17 ✅
@@ -217,9 +224,10 @@ pytest tests/ -q
 # - Truth Boundary Gate: 14/14 ✅
 # - PLAN→VEE→Gate Integration: 9/9 ✅
 # - APE Orchestrator: 11/11 ✅
-# - LangGraph State Machine: 15/15 ✅ (NEW!)
-# Total: 9 test suites, 28 files, ~6000 LOC
-# Goal: 100+ tests ✅ EXCEEDED (124 tests!)
+# - LangGraph State Machine: 15/15 ✅
+# - TimescaleDB Storage: 11/11 ✅ (NEW!)
+# Total: 10 test suites, 30 files, ~6500 LOC
+# Goal: 100+ tests ✅ EXCEEDED (135 tests!)
 ```
 
 ## Заметки для будущих сессий
@@ -229,7 +237,7 @@ pytest tests/ -q
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 08:00 UTC (Autonomous Session)*
-*Next Review: Перед началом Week 3 Day 2*
-*Session Duration: ~3 hours (Week 2 COMPLETE + Week 3 Day 1)*
-*Achievement: 124 tests passing! 🎉*
+*Last Updated: 2026-02-08 10:00 UTC (Autonomous Session)*
+*Next Review: Перед началом Week 3 Day 3*
+*Session Duration: ~4 hours (Week 2 COMPLETE + Week 3 Days 1-2)*
+*Achievement: 135 tests passing! 🎉*

@@ -8,7 +8,7 @@ import os
 import time
 import json
 from typing import Optional, Dict, Any, Type
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import anthropic
 from pydantic import BaseModel, ValidationError
@@ -26,7 +26,7 @@ class RateLimiter:
     def __init__(self, requests_per_day: int = 1000):
         self.requests_per_day = requests_per_day
         self.requests_today = 0
-        self.current_date = datetime.utcnow().date()
+        self.current_date = datetime.now(UTC).date()
 
     def check_and_increment(self) -> bool:
         """
@@ -35,7 +35,7 @@ class RateLimiter:
         Returns:
             True if request allowed, False otherwise
         """
-        today = datetime.utcnow().date()
+        today = datetime.now(UTC).date()
 
         # Reset counter if new day
         if today > self.current_date:
