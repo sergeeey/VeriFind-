@@ -1,11 +1,11 @@
 # Active Context — APE 2026
 
 ## Текущий Режим
-🎯 **Phase**: Week 2 Development (VEE Implementation)
-📍 **Focus**: Verifiable Execution Environment Complete
-🚦 **Status**: ✅ Week 2 Day 1 COMPLETE - Security sandbox functional
+🎯 **Phase**: Week 2 Development (Data Ingestion)
+📍 **Focus**: YFinance Adapter Complete → Truth Boundary Gate
+🚦 **Status**: ✅ Week 2 Day 2 COMPLETE - Market data ingestion functional
 
-## Последняя Сессия (2026-02-08, Week 2 Day 1 COMPLETE - Autonomous)
+## Последняя Сессия (2026-02-08, Week 2 Day 2 COMPLETE - Autonomous)
 ### Выполнено:
 - ✅ Изучено ТЗ v2.1 (1860 строк)
 - ✅ Изучена методология (439 строк)
@@ -57,6 +57,15 @@
   - Code hash tracking для audit
   - All 16/16 unit tests pass (TDD RED→GREEN cycle)
   - Container cleanup verified
+- ✅ **WEEK 2 DAY 2 ЗАВЕРШЕН: YFinance Adapter (TDD)**
+  - OHLCV data fetching from Yahoo Finance
+  - Fundamental data (PE ratios, market cap, etc.)
+  - In-memory caching with TTL (prevents redundant API calls)
+  - Rate limiting (0.1s delay between calls)
+  - MarketData dataclass для structured output
+  - Graceful error handling for invalid tickers
+  - All 14/14 unit tests pass (TDD RED→GREEN cycle)
+  - Multi-ticker batch fetching functional
 
 ### Архитектурные Решения (Opus $6-8):
 - ✅ **ADR-005**: TimescaleDB для time-series (vs ClickHouse/DuckDB)
@@ -88,19 +97,20 @@ Performance:
 ```
 
 ## Следующий Шаг
-**Current**: 🎉 **WEEK 2 DAY 1 ЗАВЕРШЕН!** → Week 2 Day 2-5 ⏳
+**Current**: 🎉 **WEEK 2 DAY 2 ЗАВЕРШЕН!** → Week 2 Day 3-5 ⏳
 
-**Week 2 Day 1 Summary**: COMPLETE ✅
-- ✅ VEE Sandbox implementation (16/16 tests)
-- ✅ Docker security isolation working
+**Week 2 Day 2 Summary**: COMPLETE ✅
+- ✅ YFinance Adapter implementation (14/14 tests)
+- ✅ OHLCV + fundamentals fetching working
+- ✅ Caching and rate limiting functional
 - ✅ TDD RED→GREEN cycle успешен
-- ✅ **Total: 60/61 tests passing** (98.4% success rate)
+- ✅ **Total: 74/75 tests passing** (98.7% success rate)
 
-**Week 2 Day 2-5: YFinance & Truth Boundary**
-- [ ] YFinance Adapter (TDD) - Week 2 Day 2
-- [ ] Truth Boundary Gate - Week 2 Day 3
-- [ ] VEE Security Review (Opus session)
-- [ ] Integration: PLAN→VEE→Gate pipeline
+**Week 2 Day 3-5: Truth Boundary & Integration**
+- [ ] Truth Boundary Gate (TDD) - Week 2 Day 3
+- [ ] Integration: PLAN→VEE→Gate pipeline - Week 2 Day 4
+- [ ] VEE Security Review (Opus session) - Week 2 Day 5
+- [ ] End-to-end testing
 
 **Week 1 Success Criteria:** ✅ MET
 - Infrastructure ready
@@ -124,32 +134,33 @@ Performance:
 
 ## Метрики Прогресса
 ```
-Overall: [████░░░░░░] 34.4% (Week 2 Day 1 Complete: 5.2/16 weeks)
+Overall: [████░░░░░░] 36.9% (Week 2 Day 2 Complete: 5.4/16 weeks)
 
 Milestones:
-- M1 (Week 1-4):  [███░░░░░░░] 30% (Week 1 + Day 1) ⏳
+- M1 (Week 1-4):  [███░░░░░░░] 35% (Week 1 + Day 1-2) ⏳
 - M2 (Week 5-8):  [░░░░░░░░░░] 0%
 - M3 (Week 9-12): [░░░░░░░░░░] 0%
 - M4 (Week 13-16):[░░░░░░░░░░] 0%
 
-Week 2 Day 1 Stats:
-- Tests: 60/61 passing (98.4%)
-- Code: ~3500 lines (+500 LOC)
-- Files: 17 created (+2 VEE files)
-- Docker security: ✅ Read-only FS, network isolation, timeout, subprocess blocking
+Week 2 Day 2 Stats:
+- Tests: 74/75 passing (98.7%)
+- Code: ~4000 lines (+500 LOC)
+- Files: 20 created (+3 YFinance files)
+- Components: VEE ✅, YFinance ✅, ChromaDB ✅, PLAN ✅, Evaluation ✅
 ```
 
 ## Последний Тест
 ```bash
-# Week 2 Day 1 Complete Test Suite
+# Week 2 Day 2 Complete Test Suite
 pytest tests/ -v
-# Result: 60/61 tests PASSED ✅ (98.4% success rate)
+# Result: 74/75 tests PASSED ✅ (98.7% success rate)
 # Components:
 # - ChromaDB: 9/10 ✅ (latency test flaky на Windows)
 # - PLAN node: 17/17 ✅
 # - Evaluation: 18/18 ✅
-# - VEE Sandbox: 16/16 ✅ (NEW!)
-# Total: 4 modules, 17 files, ~3500 LOC
+# - VEE Sandbox: 16/16 ✅
+# - YFinance Adapter: 14/14 ✅ (NEW!)
+# Total: 5 modules, 20 files, ~4000 LOC
 ```
 
 ## Заметки для будущих сессий
@@ -159,6 +170,6 @@ pytest tests/ -v
 - После архитектурных решений: записывать в decisions.md (ADR)
 
 ---
-*Last Updated: 2026-02-08 05:30 UTC (Autonomous Session)*
-*Next Review: Перед началом Week 2 Day 2 (YFinance Adapter)*
-*Session Duration: ~30 min (Week 2 Day 1 GREEN phase)*
+*Last Updated: 2026-02-08 06:00 UTC (Autonomous Session)*
+*Next Review: Перед началом Week 2 Day 3 (Truth Boundary Gate)*
+*Session Duration: ~1 hour (Week 2 Days 1-2 TDD cycles)*
