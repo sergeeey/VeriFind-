@@ -25,8 +25,10 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Any
 from enum import Enum
 import logging
+from datetime import datetime
 
 from src.truth_boundary.gate import VerifiedFact
+from src.temporal.integrity_checker import TemporalIntegrityChecker
 
 
 class DoubterVerdict(str, Enum):
@@ -67,15 +69,27 @@ class DoubterAgent:
     - Overfitting indicators
     """
 
-    def __init__(self, enable_doubter: bool = True):
+    def __init__(
+        self,
+        enable_doubter: bool = True,
+        enable_temporal_checks: bool = False
+    ):
         """
         Initialize Doubter agent.
 
         Args:
             enable_doubter: Enable adversarial validation (disable for testing)
+            enable_temporal_checks: Enable Temporal Integrity Module (TIM) checks
         """
         self.enable_doubter = enable_doubter
+        self.enable_temporal_checks = enable_temporal_checks
         self.logger = logging.getLogger(__name__)
+
+        # Initialize Temporal Integrity Module if enabled
+        if enable_temporal_checks:
+            self.tim = TemporalIntegrityChecker(enable_checks=True)
+        else:
+            self.tim = None
 
     def review(
         self,
@@ -151,6 +165,49 @@ class DoubterAgent:
             concerns.append('Execution < 10ms - may be hardcoded/mocked value')
             confidence_penalty += 0.05
 
+        # Check 6: Temporal integrity violations (TIM integration)
+        if self.enable_temporal_checks and self.tim:
+            query_date = None
+            if query_context and 'query_date' in query_context:
+                query_date = query_context['query_date']
+
+            if query_date:
+                tim_result = self.tim.check_code(source_code, query_date=query_date)
+
+                if tim_result.has_violations:
+                    # Separate critical and warning violations
+                    critical_violations = tim_result.get_critical_violations()
+                    warning_violations = [v for v in tim_result.violations if v.severity == 'warning']
+
+                    # Add concerns for each violation
+                    for violation in tim_result.violations:
+                        concern = f"Temporal violation (Line {violation.line_number}): {violation.description}"
+                        concerns.append(concern)
+
+                    # Critical violations: REJECT or CHALLENGE with severe penalty
+                    if critical_violations:
+                        confidence_penalty += 0.4  # 40% penalty for temporal violations
+                        if verdict == DoubterVerdict.ACCEPT:
+                            verdict = DoubterVerdict.CHALLENGE
+
+                        # Extremely severe: shift(-N) with high correlation → REJECT
+                        has_lookahead_shift = any(
+                            'shift(-' in v.description for v in critical_violations
+                        )
+                        has_high_correlation = (
+                            'correlation' in verified_fact.extracted_values and
+                            abs(verified_fact.extracted_values.get('correlation', 0)) > 0.9
+                        )
+                        if has_lookahead_shift and has_high_correlation:
+                            verdict = DoubterVerdict.REJECT
+                            confidence_penalty = 1.0  # 100% penalty
+
+                    # Warning violations: smaller penalty
+                    elif warning_violations:
+                        confidence_penalty += 0.1  # 10% penalty for warnings
+                        if verdict == DoubterVerdict.ACCEPT:
+                            verdict = DoubterVerdict.CHALLENGE
+
         # Generate reasoning
         if verdict == DoubterVerdict.ACCEPT:
             reasoning = 'No significant concerns identified. Fact appears valid.'
@@ -167,6 +224,14 @@ class DoubterAgent:
             suggestions.append('Include p-value to assess statistical significance')
         if any('overfitting' in c for c in concerns):
             suggestions.append('Perform cross-validation or use holdout set')
+        if any('Temporal violation' in c for c in concerns):
+            # Suggest fixes based on violation type
+            if any('shift(-' in c for c in concerns):
+                suggestions.append('Replace .shift(-N) with .shift(+N) to use lagged features instead of look-ahead')
+            if any('future' in c.lower() for c in concerns):
+                suggestions.append('Use only dates ≤ query_date to prevent look-ahead bias')
+            if any('iloc' in c.lower() for c in concerns):
+                suggestions.append('Filter DataFrame by date before using iloc to ensure temporal validity')
 
         self.logger.info(f'Doubter verdict: {verdict.value} (penalty: {confidence_penalty:.2f})')
 
