@@ -1,0 +1,440 @@
+<answer>
+
+Ты докрутил ровно те 3 рычага, которые в 2026 дают скачок надёжности: **inference-time compute**, **code-as-truth**, **ensemble/debate**. Я доработаю методологию до “10/10”, но с одной важной правкой:
+
+* <fact> “Галлюцинации = 0” **в абсолюте** недостижимы для *всего текста*, потому что остаются риски: неверная интерпретация, неверный выбор источника, неверные допущения, неверная единица измерения, неверное окно расчёта.
+* <inference> Реально достижимая цель: **0% не-верифицированных чисел/дат/котировок** + **0% утверждений без источника** + **fail-closed** при неопределённости. Это и есть “практический ноль” для финансового decision-support.
+
+Дальше — “APE 2026 v2.1” (интеграция твоих улучшений + закрытие слабых мест).
+
+<feasibility>7/10</feasibility> для команды 2–5 человек, если MVP = decision-support + shadow-mode + строгий execution layer.
+
+---
+
+# APE 2026 v2.1 — эталонная методология (Reasoning + Code + Ensemble)
+
+## 0) Контракт истинности: Truth Boundary (новый базовый слой)
+
+**Правило TB-1 (Numbers are illegal):**
+Любая цифра/дата/процент/коэффициент в ответе должна быть:
+
+* либо `VerifiedFact` (результат исполнения кода/запроса),
+* либо `DerivedFact` (формально вычислено из VerifiedFact и это записано как выражение),
+* либо **запрещено** (fail).
+
+**Правило TB-2 (Claims need backing):**
+Любое существенное утверждение обязано иметь:
+
+* `EvidenceRef[]` (ссылка на источник/документ/узел графа),
+* или `ComputationRef` (ссылка на лог выполнения кода).
+
+**Правило TB-3 (Fail-Closed):**
+Если доказательность недостаточна или агенты расходятся — вывод: **“Неопределённость / данных недостаточно”** (не “примерно”, не “кажется”).
+
+---
+
+## 1) Новый слой: Verifiable Execution Environment (VEE)
+
+### 1.1. Роли
+
+* **LLM**: интент → план → код → объяснение (без чисел “из головы”)
+* **VEE**: исполнение (Python/SQL/API) → возврат `VerifiedFact`
+* **Policy Guard**: фильтры истинности (TB-1..3) + комплаенс
+
+### 1.2. Типы фактов (строго)
+
+* `VerifiedFact`: `{id, value, unit, timestamp, source, method, query_hash, output_hash}`
+* `DerivedFact`: `{id, expression, inputs:[VerifiedFact ids], value, unit}`
+* `Claim`: `{text_span, evidence_refs:[...], confidence, claim_type}`
+
+### 1.3. “Ноль галлюцинаций” — как формальное свойство
+
+* <inference> Ноль достигается **не “моделью”**, а **типовой системой запретов**:
+  *в тексте нельзя иметь числа, которые не пришли из `VerifiedFact/DerivedFact`*.
+
+---
+
+## 2) Inference-Time Compute как стандартный протокол (System-2 pipeline)
+
+Вместо `Prompt -> Answer` используем **4-фазный протокол**:
+
+### Phase A — Reasoning Plan (модель-мыслитель, DeepSeek-R1 / o1-подобные)
+
+Выход — не ответ, а структура:
+
+* какие данные нужны,
+* какие формулы,
+* какие проверки,
+* какие альтернативы/контркейс,
+* критерии остановки (stop conditions).
+
+**Артефакт:** `InvestigationPlan` (JSON).
+
+### Phase B — Execution (VEE)
+
+* выполнение запросов к данным,
+* расчёты статистик,
+* извлечение параметров из графа,
+* формирование `VerifiedFact[]`.
+
+**Артефакт:** `EvidenceBundle` + `ExecutionLog`.
+
+### Phase C — Debate / Ensemble (дешёвые параллельные модели, DeepSeek-V3 / Llama)
+
+Запускаем фиксированные роли (минимум 3, максимум 7):
+
+* Bull
+* Bear
+* Quant
+* Data QA (ищет баги данных/окна/единиц)
+* Compliance (ищет опасные формулировки)
+* Retrieval Auditor (ищет несоответствие “сказано” ↔ “доказано”)
+
+**Артефакт:** `PanelReports[]` с ссылками только на `VerifiedFact`.
+
+### Phase D — Synthesis & Calibration
+
+Meta-agent делает:
+
+* сводку,
+* оценку согласия,
+* расчёт uncertainty,
+* финальный ответ **только поверх фактов**.
+
+**Ключ:** confidence вычисляется *не “ощущением модели”*, а агрегируется из:
+
+* согласия ролей (vote entropy),
+* качества доказательств (coverage),
+* стабильности расчётов (sensitivity),
+* исторической точности по аналогичным режимам.
+
+---
+
+## 3) Validation Loop v2.1: валидатор теперь тоже “думает”
+
+Ты прав: валидатор в 2026 — не “регэкспы”, а **reasoning validator**, но с железными замками.
+
+### 3.1. Двухслойная валидация
+
+**Layer 1: Deterministic Guards (жёсткие)**
+
+* TB-1 numbers-only-from-facts
+* наличие EvidenceRef/ComputationRef
+* запрет советов “buy/sell”
+* формат выводов (probabilities, intervals)
+* unit/scale sanity
+
+**Layer 2: Adversarial Reasoning (Doubter / Red Team)**
+
+* пытается опровергнуть вывод,
+* проверяет альтернативные окна, базисы, режимы,
+* ищет противоречащие факты в том же EvidenceBundle (и/или расширяет поиск).
+
+**Решение:**
+
+* если Doubter находит противоречие с высокой доказательностью → **block / request human**
+* если расхождение между ролями высокое → **return uncertainty**
+
+---
+
+## 4) Memory Layer v2.1: “Trajectory memory”, но без хранения CoT
+
+Тут важно аккуратно:
+
+* <fact> Сырые “Chain-of-Thought” хранить нельзя/не нужно (это и риск утечек, и риск самообмана).
+* <inference> Правильная “trajectory memory” = хранить **структурированные причины**, **шаблоны ошибок**, **сводки шагов** и **ссылки на артефакты исполнения**, а не буквальный CoT.
+
+### 4.1. Что хранить вместо CoT
+
+* `ReasoningSummary`: короткая “карта решения” (без скрытых рассуждений), например:
+
+  * “использовано окно 252 дня; volatility = stdev(log returns); проверены corporate actions; regime=shock”
+* `DecisionTrace`: список **операторов**, не мыслей:
+
+  * retrieval(query_id) → compute(volatility, window=252) → compare(pre/post event) → calibrate(ensemble)
+* `FailureMode`: тип ошибки
+* `Counterexample`: какой факт опроверг
+* `Patch`: что изменили (правило/порог/источник/окно)
+
+---
+
+## 5) Ensemble: как сделать “совет директоров” не театром, а математикой
+
+### 5.1. Метрики согласия
+
+* `vote_entropy` (чем больше, тем хуже уверенность)
+* `pairwise_contradiction_rate`
+* `evidence_coverage` (сколько ключевых утверждений имеет доказательства)
+* `sensitivity_score` (если окно 60/252 дней меняет знак вывода — уверенность падает)
+
+### 5.2. Агрегатор (простая, надёжная версия)
+
+* если Bull vs Bear расходятся по направлению, а Quant говорит “не значимо” → вывод “неопределённость”
+* если все сходятся + coverage высокий + sanity проходит → выдаём прогноз с интервалом и вероятностью
+
+---
+
+# 6) Implementation Pack v2.1 (готово к “копипасте в репо”)
+
+## File 1: `APE_OnePager.md` (обновлённый контракт — добавлены VEE, Ensemble, Fail-Closed)
+
+```markdown
+# APE (Autonomous Prediction Engine) — Project Manifest (v2.1)
+
+## 1. Problem Statement
+Decision-support система для финансовой аналитики, минимизирующая риск решений на неверифицированных данных.
+
+## 2. Success Axis: Reliability & Calibration
+North Star: Expected Calibration Error (ECE) + 0% Unverified Numbers Rate.
+Система должна предпочитать "I don't know" любому недоказанному утверждению.
+
+## 3. Definition of Done (v1.0)
+1) Pipeline: Query -> Plan (Reasoning) -> Exec (Code) -> Debate -> Validate -> Report
+2) Truth Boundary: в тексте нет чисел/дат без VerifiedFact/DerivedFact
+3) Audit Trail: для каждого ответа доступны execution logs + источники
+4) Shadow Mode: 3+ месяца deferred validation на реальных исходах
+5) Latency: < 120 сек для стандартного отчёта
+
+## 4. Constraints
+- No Trading: read-only
+- Human-in-the-loop for critical decisions
+- Fail-Closed on uncertainty
+```
+
+## File 2: `GraphSchema.cypher` (добавлены TraceSummary и Patches)
+
+```cypher
+CREATE CONSTRAINT FOR (e:Episode) REQUIRE e.id IS UNIQUE;
+CREATE CONSTRAINT FOR (f:VerifiedFact) REQUIRE f.hash IS UNIQUE;
+CREATE CONSTRAINT FOR (d:DerivedFact) REQUIRE d.hash IS UNIQUE;
+CREATE CONSTRAINT FOR (o:Outcome) REQUIRE o.id IS UNIQUE;
+CREATE CONSTRAINT FOR (m:FailureMode) REQUIRE m.id IS UNIQUE;
+CREATE CONSTRAINT FOR (p:Patch) REQUIRE p.id IS UNIQUE;
+CREATE CONSTRAINT FOR (t:TraceSummary) REQUIRE t.id IS UNIQUE;
+
+//
+// Relations
+// (Episode)-[:BASED_ON]->(VerifiedFact)
+// (Episode)-[:DERIVED]->(DerivedFact)
+// (Episode)-[:HAS_TRACE]->(TraceSummary)
+// (Episode)-[:PREDICTED]->(Outcome)
+// (Outcome)-[:INVALIDATED]->(TraceSummary)
+// (Episode)-[:FAILED_AS]->(FailureMode)
+// (Patch)-[:FIXED]->(FailureMode)
+// (Patch)-[:DEPLOYED_IN]->(PolicyVersion)
+```
+
+## File 3: `TrustFilter.py` (жёсткие guards + coverage)
+
+```python
+import re
+from dataclasses import dataclass
+from typing import List, Dict, Any
+
+NUM_RE = re.compile(r"(?<![A-Za-z0-9])[-+]?\d+(?:[\.,]\d+)?%?(?![A-Za-z0-9])")
+
+@dataclass
+class ValidationResult:
+    passed: bool
+    reason: str
+    stats: Dict[str, Any]
+
+def extract_numbers(text: str) -> List[str]:
+    return [m.group(0).replace(",", ".") for m in NUM_RE.finditer(text)]
+
+def trust_filter(llm_text: str, verified_facts: List[Dict[str, Any]], evidence_refs: List[str]) -> ValidationResult:
+    text_nums = extract_numbers(llm_text)
+
+    vf_nums = set()
+    for f in verified_facts:
+        # store both raw and formatted variants
+        v = str(f.get("value"))
+        vf_nums.add(v)
+        vf_nums.add(v.replace(",", "."))
+        vf_nums.add(v.replace(".", ","))
+
+    missing = [n for n in text_nums if n not in vf_nums]
+    if missing:
+        return ValidationResult(
+            passed=False,
+            reason=f"TruthBoundaryFail: numbers not derived from code execution: {missing[:10]}",
+            stats={"text_numbers": len(text_nums), "missing": len(missing)}
+        )
+
+    if not evidence_refs:
+        return ValidationResult(
+            passed=False,
+            reason="EvidenceFail: no EvidenceRef/ComputationRef provided.",
+            stats={}
+        )
+
+    return ValidationResult(
+        passed=True,
+        reason="OK",
+        stats={"text_numbers": len(text_nums), "evidence_refs": len(evidence_refs)}
+    )
+```
+
+---
+
+# 7) Adversarial Validator для LangGraph (реальный код узла)
+
+Ниже — минимально-практичный узел “Doubter”, который:
+
+1. получает `final_draft` + `EvidenceBundle` + `VerifiedFacts`,
+2. пытается опровергнуть,
+3. при успехе возвращает `BLOCK` или “NEED_HUMAN”, иначе `PASS`,
+4. **не может вводить новые числа** — только оперирует фактами/логами.
+
+```python
+from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Optional
+
+Verdict = Literal["PASS", "BLOCK", "NEED_HUMAN", "UNCERTAIN"]
+
+@dataclass
+class DoubterOutput:
+    verdict: Verdict
+    issues: List[str]
+    counter_evidence_refs: List[str]
+    confidence_penalty: float  # 0..1
+
+def build_doubter_prompt(final_draft: str, evidence_summaries: str) -> str:
+    return f"""
+You are the DOUBTER agent. Your only goal is to disprove the draft using the provided evidence.
+Rules:
+- Do NOT invent facts or numbers.
+- Only cite EvidenceRef IDs that exist in the provided bundle.
+- If evidence is insufficient to disprove, say so.
+- If you find contradictions, specify the exact claim and the exact counter-evidence.
+
+DRAFT:
+{final_draft}
+
+EVIDENCE (summaries + IDs):
+{evidence_summaries}
+
+Return JSON:
+{{
+  "verdict": "PASS|BLOCK|NEED_HUMAN|UNCERTAIN",
+  "issues": ["..."],
+  "counter_evidence_refs": ["EVID-..."],
+  "confidence_penalty": 0.0
+}}
+""".strip()
+
+def summarize_evidence_for_doubter(evidence_bundle: List[Dict[str, Any]], max_items: int = 30) -> str:
+    lines = []
+    for item in evidence_bundle[:max_items]:
+        evid = item.get("evidence_id", "EVID-UNKNOWN")
+        title = item.get("title", "untitled")
+        summary = item.get("summary", "")[:400]
+        lines.append(f"- {evid} | {title}: {summary}")
+    return "\n".join(lines)
+
+async def adversarial_validator_node(state: Dict[str, Any], llm_call) -> Dict[str, Any]:
+    """
+    LangGraph node signature style: consumes 'state', returns dict of updates.
+    llm_call(prompt: str) -> dict  (your wrapper)
+    """
+    final_draft: str = state["final_draft"]
+    evidence_bundle: List[Dict[str, Any]] = state.get("evidence_bundle", [])
+    verified_facts: List[Dict[str, Any]] = state.get("verified_facts", [])
+
+    # 1) Build doubter prompt using ONLY evidence summaries
+    evidence_summaries = summarize_evidence_for_doubter(evidence_bundle)
+    prompt = build_doubter_prompt(final_draft, evidence_summaries)
+
+    # 2) Doubter LLM call (cheap model OK)
+    doubter_json = await llm_call(prompt)
+
+    # 3) Deterministic guard: if doubter cites non-existent evidence IDs -> downgrade
+    known_ids = {e.get("evidence_id") for e in evidence_bundle}
+    cited = set(doubter_json.get("counter_evidence_refs", []))
+    invalid_cites = [c for c in cited if c not in known_ids]
+
+    issues = list(doubter_json.get("issues", []))
+    verdict: Verdict = doubter_json.get("verdict", "UNCERTAIN")
+    penalty = float(doubter_json.get("confidence_penalty", 0.0))
+
+    if invalid_cites:
+        issues.append(f"DoubterInvalidCitations: {invalid_cites[:10]}")
+        verdict = "NEED_HUMAN" if verdict == "BLOCK" else "UNCERTAIN"
+        penalty = max(penalty, 0.25)
+
+    # 4) Hard TruthBoundary check for the FINAL draft (numbers must be from verified_facts)
+    # (You can call your trust_filter here; simplified inline check)
+    text_nums = state.get("text_numbers", None)  # optionally pre-extracted earlier
+    if text_nums is None:
+        # quick extractor can be reused from TrustFilter.py
+        import re
+        NUM_RE = re.compile(r"(?<![A-Za-z0-9])[-+]?\d+(?:[\.,]\d+)?%?(?![A-Za-z0-9])")
+        text_nums = [m.group(0).replace(",", ".") for m in NUM_RE.finditer(final_draft)]
+
+    vf_nums = set(str(f.get("value")).replace(",", ".") for f in verified_facts)
+    missing = [n for n in text_nums if n not in vf_nums]
+    if missing:
+        return {
+            "validation": {
+                "verdict": "BLOCK",
+                "issues": [f"TruthBoundaryFail: unverified numbers in final draft: {missing[:10]}"],
+                "counter_evidence_refs": [],
+                "confidence_penalty": 1.0,
+            }
+        }
+
+    # 5) Return update
+    return {
+        "validation": {
+            "verdict": verdict,
+            "issues": issues,
+            "counter_evidence_refs": list(cited),
+            "confidence_penalty": penalty,
+        }
+    }
+```
+
+**Как встраивать в граф (логика переходов):**
+
+* `SYNTHESIS -> ADV_VALIDATOR`
+* если verdict = PASS → `FINALIZE`
+* если verdict = UNCERTAIN → `RETURN_UNCERTAINTY` (или `HUMAN_REVIEW` по политике)
+* если verdict = NEED_HUMAN → `HUMAN_REVIEW`
+* если verdict = BLOCK → `REVISE` (возврат к synthesis с учётом issues) или `HUMAN_REVIEW`
+
+---
+
+# 8) Что ещё нужно для “10/10” (2 недостающих болта)
+
+## 8.1. Temporal Integrity (Time-Aware Truth)
+
+В финансах самая частая “галлюцинация” — не факт, а **время факта**.
+Добавь обязательные поля:
+
+* `asof_timestamp` (на момент чего истинно)
+* `publication_lag` (когда стало известно)
+* `window_definition` (какое окно расчёта)
+
+И детерминированное правило:
+
+* нельзя использовать факты, опубликованные после `asof_timestamp` для ретроспективной симуляции.
+
+## 8.2. Sensitivity Harness (устойчивость к окнам/параметрам)
+
+Авто-проверка: пересчитать ключевые метрики на нескольких окнах (например 20/60/252 дней).
+Если знак/ранг меняется — confidence режется, вывод становится “uncertain”.
+
+---
+
+## Результат: что изменилось по сравнению с v2.0
+
+* валидатор стал **reasoning-first**, но с **железными замками** (TruthBoundary)
+* “ноль” стал формально достижимым для чисел/дат/котировок
+* ensemble стал **калибруемой машиной**, а не “театр агентов”
+* память стала **безопасной и полезной** (summary/operators вместо CoT)
+
+Если дальше докручивать без вопросов: следующим логическим файлом будет `LangGraph_State_Schema.py` (типизированный state + контракты узлов) и `ExecutionAdapters/` (FRED/YF/Neo4j/ClickHouse) с единым интерфейсом `run_query()` и автологированием `VerifiedFact`.
+
+</answer>
+
+<confidence>0.83</confidence>

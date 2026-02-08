@@ -1,0 +1,37 @@
+[
+  {
+    "query": "What is the correlation between SPY and QQQ in 2024?",
+    "context": {
+      "date": "2024-12-31",
+      "market_regime": "bull_market"
+    }
+  },
+  {
+    "query": "Will Apple's revenue grow in Q1 2025?",
+    "context": {
+      "ticker": "AAPL",
+      "current_date": "2024-12-31"
+    }
+  },
+  {
+    "query": "What is the P/E ratio of Microsoft compared to sector average?",
+    "context": {
+      "ticker": "MSFT",
+      "sector": "Technology"
+    }
+  },
+  {
+    "query": "Is the S&P 500 overvalued based on historical metrics?",
+    "context": {
+      "index": "SPY",
+      "metrics": ["pe_ratio", "shiller_cape", "buffett_indicator"]
+    }
+  },
+  {
+    "query": "What caused the recent volatility spike in Tesla stock?",
+    "context": {
+      "ticker": "TSLA",
+      "date_range": "2024-12-01 to 2024-12-31"
+    }
+  }
+]

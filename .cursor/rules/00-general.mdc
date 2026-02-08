@@ -1,0 +1,341 @@
+# General Behavior Rules — APE 2026
+
+## G-001: No Yapping
+- **Straight to the point**: Без "Конечно, я помогу вам..."
+- **Concise responses**: Краткие и четкие ответы
+- **Action-first**: Сначала действие, потом объяснение (если нужно)
+
+```
+❌ BAD:
+"Конечно! Я с радостью помогу вам реализовать Truth Boundary Gate.
+Это очень важный компонент для обеспечения zero hallucination..."
+
+✅ GOOD:
+"Реализую Truth Boundary Gate..."
+[код/действие]
+```
+
+---
+
+## G-002: Language
+- **Code \& Comments**: English
+- **Chat \& Documentation**: Russian (unless specified)
+- **Variable names**: English, descriptive (no single letters except loops)
+
+```python
+# ✅ GOOD
+def validate_truth_boundary(text: str, facts: List[VerifiedFact]) -> ValidationResult:
+    """Проверяет, что все числа в тексте подтверждены фактами."""
+
+# ❌ BAD
+def proverka(t: str, f: list) -> dict:  # Bad: transliteration, cryptic names
+```
+
+---
+
+## G-003: Completeness (CRITICAL)
+**НИКАКИХ плейсхолдеров, НИКОГДА.**
+
+```python
+# ❌ BAD — Плейсхолдеры запрещены
+def execute_in_vee(code: str) -> Result:
+    # Validate code
+    # ... rest of implementation ...  # ❌ NO!
+    pass
+
+# ✅ GOOD — Полная реализация
+def execute_in_vee(code: str) -> Result:
+    validate_code_safety(code)
+    validate_code_syntax(code)
+
+    container = docker.from_env().containers.run(
+        image="ape-sandbox:latest",
+        command=["python", "-c", code],
+        network_mode="custom",
+        mem_limit="2g",
+        timeout=60,
+        detach=False
+    )
+
+    return Result(
+        stdout=container.logs().decode(),
+        exit_code=container.attrs['State']['ExitCode']
+    )
+```
+
+**Enforcement:**
+- Code review: "Есть ли '...' или 'rest of implementation'?" → BLOCK
+- CI lint check: grep для `# ...` patterns
+
+---
+
+## G-004: Documentation
+- **Docstrings**: Google style для всех public функций/классов
+- **Type hints**: Обязательны для всех функций
+- **Comments**: Только для неочевидной логики (код должен быть self-explanatory)
+
+```python
+def calculate_sensitivity_score(
+    base_value: float,
+    variations: List[float]
+) -> float:
+    """Calculate stability score from parameter variations.
+
+    Higher score = more stable calculation across parameters.
+
+    Args:
+        base_value: Original calculation result
+        variations: Results with different parameters
+
+    Returns:
+        Score from 0.0 (unstable) to 1.0 (perfectly stable)
+
+    Raises:
+        ValueError: If variations is empty
+
+    Example:
+        >>> calculate_sensitivity_score(15.3, [14.8, 15.1, 15.9])
+        0.87
+    """
+    if not variations:
+        raise ValueError("variations cannot be empty")
+
+    deltas = [(v - base_value) / base_value for v in variations]
+    return 1.0 / (1.0 + np.std(deltas))
+```
+
+---
+
+## G-005: Error Handling
+- **Fail-fast для критичных ошибок**: Security violations, data corruption
+- **Fail-gracefully для некритичных**: API timeouts, cache misses
+- **Always log errors**: С полным context (episode_id, timestamp, stack trace)
+
+```python
+# Fail-fast (критично)
+def validate_sandbox_isolation():
+    if can_access_host_filesystem():
+        raise SecurityViolation("Sandbox not isolated! CRITICAL.")
+
+# Fail-gracefully (некритично)
+def fetch_market_data(symbol: str) -> Optional[pd.DataFrame]:
+    try:
+        return yfinance.download(symbol)
+    except Exception as e:
+        logger.warning(f"YFinance failed for {symbol}: {e}, using cache")
+        return cache.get(symbol)  # Fallback
+```
+
+---
+
+## G-006: Code Style
+- **Formatter**: Black (line length 100)
+- **Linter**: Ruff (fast)
+- **Type checker**: mypy (strict mode)
+- **Pre-commit hooks**: Автоформатирование + проверки
+
+```bash
+# Pre-commit check
+black src/ tests/ --check
+ruff check src/ tests/
+mypy src/
+```
+
+---
+
+## G-007: Git Commits
+- **Conventional Commits**: `type(scope): message`
+- **Types**: feat, fix, docs, test, refactor, chore
+- **Scope**: component name (vee, truth-gate, api, etc.)
+
+```bash
+# ✅ GOOD
+git commit -m "feat(vee): add Docker network isolation"
+git commit -m "fix(truth-gate): handle percentages correctly"
+git commit -m "test(temporal): add publication lag edge cases"
+
+# ❌ BAD
+git commit -m "fixed bug"
+git commit -m "WIP"
+git commit -m "update"
+```
+
+---
+
+## G-008: No Over-Engineering
+- **YAGNI**: You Aren't Gonna Need It
+- **Implement только что требуется сейчас**: Не добавлять "на будущее"
+- **Prefer simple over clever**: Читаемость > краткость
+
+```python
+# ❌ BAD — Over-engineered для MVP
+class AbstractFactoryStrategyObserverVisitor:
+    def create_dynamic_configurable_validator_chain(...):
+        # 500 lines of abstraction hell
+
+# ✅ GOOD — Simple, direct
+def validate_truth_boundary(text: str, facts: List[VerifiedFact]) -> ValidationResult:
+    numbers = extract_numbers(text)
+    fact_refs = extract_fact_references(text)
+
+    for num in numbers:
+        if not has_matching_fact(num, facts):
+            return ValidationResult(verdict="BLOCK", reason=f"Unverified: {num}")
+
+    return ValidationResult(verdict="PASS")
+```
+
+---
+
+## G-009: Memory Bank Discipline
+**После каждой significant сессии (обязательно):**
+
+1. Update `activeContext.md`:
+   - Что сделали
+   - Что обнаружили
+   - Следующий шаг
+   - Блокеры
+
+2. Update `progress.md`:
+   - Отметить выполненные задачи [x]
+   - Обновить progress bars
+   - Записать activity log
+
+3. Update `decisions.md`:
+   - Если приняли архитектурное решение → новый ADR
+   - Если решение изменилось → update ADR status
+
+4. Git commit:
+   ```bash
+   git add .cursor/memory_bank/
+   git commit -m "docs: update memory bank after session [component]"
+   ```
+
+**Frequency:**
+- activeContext.md: После каждой сессии (ежедневно)
+- progress.md: После завершения задачи
+- decisions.md: После архитектурного решения (редко)
+
+---
+
+## G-010: AI Delegation Protocol
+**Когда делегировать подзадачи другим AI:**
+
+| Task | Delegate To | Why |
+|------|-------------|-----|
+| Рефакторинг без изменения логики | Cursor Composer | Локальные изменения, fast |
+| Unit tests generation | Codex/GPT | Boilerplate, patterns |
+| Docstrings | Codex/GPT | Formulaic |
+| Анализ больших файлов (>50KB) | Kimi | Long context |
+| Архитектурные решения | Opus 4.6 | Deep reasoning |
+| Security audit | Opus 4.6 | Critical thinking |
+
+**Format делегации:**
+```
+ДЕЛЕГАЦИЯ → [Opus]
+
+Проведи security audit VEE sandbox:
+- [context]
+- [specific checks]
+
+Формат: security_audit_report.md
+
+---
+Сообщи результат когда готово
+```
+
+---
+
+## G-011: Opus/Sonnet Switching Strategy
+**Default: Sonnet** (экономия $50 промо)
+
+**Escalate to Opus ONLY when:**
+- Архитектурное решение (database choice, workflow design)
+- Security review/audit (критично)
+- Complex debugging (неочевидный баг, race conditions)
+- Research новых технологий (DeepSeek-R1 evaluation)
+
+```bash
+# Начало сессии — всегда Sonnet
+/model sonnet
+
+# Если застряли или нужна архитектура
+/model opus
+"[глубокий вопрос]"
+
+# Получили ответ — сразу обратно
+/model sonnet
+```
+
+**Не использовать Opus для:**
+- Генерация boilerplate кода
+- Simple CRUD operations
+- Рефакторинг
+- Docstrings
+- Коммит-сообщения
+
+---
+
+## G-012: Code Review Checklist
+Перед каждым PR/commit проверить:
+
+- [ ] Tests написаны ПЕРЕД кодом (TDD)
+- [ ] Coverage >= 80% (95% для critical components)
+- [ ] Нет плейсхолдеров (`...`, `TODO`, `FIXME` без issue)
+- [ ] Type hints на всех функциях
+- [ ] Docstrings на public API
+- [ ] Secrets через environment variables
+- [ ] Black + Ruff passed
+- [ ] mypy passed
+- [ ] activeContext.md updated
+- [ ] progress.md updated (если задача завершена)
+
+---
+
+## G-013: Performance Guidelines
+- **Optimize ТОЛЬКО после profiling**: "Premature optimization is the root of all evil"
+- **Target latencies**:
+  - Truth Boundary Gate: <1 sec для 10K chars
+  - VEE execution: <60 sec per step
+  - Neo4j query: <500 ms
+  - Full workflow: <120 sec (P95)
+
+- **Caching strategy**:
+  - L1 (in-memory): лямбды, hot path
+  - L2 (Redis): API responses, 1-hour TTL
+  - L3 (Neo4j): immutable facts, forever
+
+---
+
+## G-014: No Emojis (Unless Explicit Request)
+- **Default**: Clean, professional text
+- **Exception**: User explicitly asks ("добавь эмодзи")
+
+```
+❌ BAD:
+"Отлично! ✨ Реализую Truth Boundary! 🚀"
+
+✅ GOOD:
+"Реализую Truth Boundary."
+```
+
+---
+
+## G-015: Context Management
+- **Before tool calls**: Check if necessary (не читать файл, который только что читали)
+- **Minimize context bloat**: Не добавлять лишние файлы в контекст
+- **Use /compact**: Если контекст >70% (методология требует)
+
+```
+# BAD: чтение всех файлов подряд
+Read entire codebase → blow up context
+
+# GOOD: таргетированное чтение
+Read truth_boundary.py → analyze → done
+```
+
+---
+
+*Эти правила обязательны для всех сессий разработки APE 2026*
+*Violations = technical debt*
+*Last Updated: 2026-02-07*

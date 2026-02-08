@@ -1,0 +1,164 @@
+# Security Rules — APE 2026
+
+## S-001: Secrets Management
+- **NO hardcoded secrets**: API keys, passwords, tokens ONLY via environment variables
+- **NO secrets in logs**: Redact sensitive data before logging
+- **NO secrets in Git**: Use `.env.example` for templates, actual `.env` in `.gitignore`
+
+```python
+# ❌ BAD
+FRED_API_KEY = "abc123def456"
+
+# ✅ GOOD
+from os import environ
+FRED_API_KEY = environ.get("FRED_API_KEY")
+if not FRED_API_KEY:
+    raise ValueError("FRED_API_KEY not set")
+```
+
+---
+
+## S-002: VEE Sandbox Isolation
+- **Network whitelist ONLY**: Docker containers can ONLY access approved hosts
+- **Filesystem restrictions**: NO access to host filesystem
+- **Resource limits**: 2GB memory, 60 sec timeout, 2 CPU cores
+- **Pre-execution validation**: Code must pass safety checks before execution
+
+**Forbidden patterns in generated code:**
+```python
+FORBIDDEN = [
+    r"import os",           # OS interaction
+    r"import subprocess",   # Shell access
+    r"open\(['\"]\/",       # Absolute path file access
+    r"__import__",          # Dynamic imports
+    r"eval\(",              # Code injection
+    r"exec\(",              # Code injection
+]
+```
+
+---
+
+## S-003: CoT Storage Prohibition (CRITICAL)
+**ЗАПРЕЩЕНО хранить raw Chain-of-Thought в любом виде.**
+
+### Почему:
+1. **Утечка sensitive reasoning**: CoT может содержать конфиденциальную логику
+2. **Self-reinforcement**: Система начнет подтверждать свои ошибки
+3. **Раздувание storage**: CoT не нужен для audit trail
+4. **GDPR risk**: CoT может содержать PII через context
+
+### ✅ ALLOWED:
+```python
+@dataclass
+class TraceSummary:
+    id: UUID
+    episode_id: UUID
+
+    # Structured decisions ONLY
+    decision_operators: List[str]  # ["retrieve(FRED)", "compute(vol)", "compare(pre/post)"]
+    reasoning_summary: str         # 2-3 sentences MAX (high-level only)
+    failure_mode: Optional[FailureMode]
+    patch_applied: Optional[Patch]
+```
+
+### ❌ FORBIDDEN:
+```python
+# NO!
+class BadTraceSummary:
+    raw_cot: str                  # ❌ NO буквальный thinking process
+    thinking_steps: List[str]     # ❌ NO подробные рассуждения
+    model_internal_state: dict    # ❌ NO model internals
+```
+
+### Enforcement:
+- Code review checklist: "Does this store raw CoT?"
+- Schema validation: TraceSummary must NOT have `raw_cot` field
+- Neo4j constraints: MAX length for `reasoning_summary` = 500 chars
+
+---
+
+## S-004: Input Validation
+- **All user inputs validated**: Pydantic models with validators
+- **SQL injection prevention**: Parameterized queries ONLY
+- **XSS prevention**: Escape HTML in generated reports
+- **Path traversal prevention**: Validate file paths before access
+
+```python
+from pydantic import BaseModel, validator
+
+class QueryRequest(BaseModel):
+    query: str
+    asof_timestamp: datetime
+
+    @validator('query')
+    def query_sanitized(cls, v):
+        if len(v) > 1000:
+            raise ValueError('Query too long')
+        if any(char in v for char in ['<', '>', ';']):
+            raise ValueError('Invalid characters')
+        return v
+```
+
+---
+
+## S-005: Destructive Operations Require Confirmation
+- **NO automatic destructive ops**: Deleting episodes, purging cache, dropping tables
+- **User confirmation required**: Before any data deletion
+- **Immutable audit logs**: WORM storage, cannot be modified after creation
+
+---
+
+## S-006: Dependency Security
+- **Pin versions**: `requirements.txt` must have exact versions (`==`, not `>=`)
+- **Regular audits**: `pip audit` в CI/CD pipeline
+- **No untrusted sources**: PyPI only, no custom indexes without review
+
+```bash
+# Pre-commit hook
+pip-audit --requirement requirements.txt
+```
+
+---
+
+## S-007: GDPR Compliance
+- **NO PII storage**: Unless explicit user consent
+- **Data retention**: 90 days default, configurable
+- **Right to deletion**: `DELETE /api/v1/episodes/{id}` endpoint
+- **Audit logs separate**: Compliance logs (7 years) vs operational data (90 days)
+
+---
+
+## S-008: Rate Limiting
+- **Per-user limits**: 20 queries/hour, 100 queries/day
+- **IP-based limits**: 100 queries/hour per IP (anti-abuse)
+- **Cost-based limits**: $10/day per user (prevent runaway costs)
+
+---
+
+## S-009: Authentication \& Authorization
+- **JWT tokens**: Short-lived (15 min), refresh tokens (7 days)
+- **API keys**: For programmatic access, rotatable
+- **RBAC**: User / Admin / Auditor roles
+- **Session management**: Invalidate on logout, expire on inactivity
+
+---
+
+## S-010: Error Handling (Secure)
+- **NO sensitive data in errors**: User-facing errors are generic
+- **Detailed logs server-side**: Full stack traces ONLY in server logs
+- **Rate limit error messages**: Prevent information leakage through error timing
+
+```python
+# ❌ BAD
+return {"error": f"Database connection failed: {db_host}:{db_port}"}
+
+# ✅ GOOD
+logger.error(f"DB connection failed: {db_host}:{db_port}")
+return {"error": "Internal server error. Please contact support."}
+```
+
+---
+
+*Эти правила обязательны для всех компонентов APE 2026*
+*Violations = блокирующие issues в code review*
+*Last Updated: 2026-02-07*

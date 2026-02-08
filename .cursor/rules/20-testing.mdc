@@ -1,0 +1,409 @@
+# Testing Standards — APE 2026
+
+## T-001: TDD Workflow (MANDATORY)
+**Red → Green → Refactor → Update Memory**
+
+### CRITICAL: Тест СНАЧАЛА, код ПОТОМ
+
+```python
+# Week 2 Example: VEE Sandbox
+
+# Day 1: RED (write FAILING tests first)
+def test_sandbox_timeout_kills_process():
+    """VEE должен убить процесс через 60 сек"""
+    code = "import time; time.sleep(120)"
+    with pytest.raises(TimeoutError):
+        execute_in_sandbox(code, timeout=60)
+
+def test_sandbox_network_isolation():
+    """VEE НЕ должен иметь доступ к незарегистрированным хостам"""
+    code = "import requests; requests.get('https://evil.com')"
+    with pytest.raises(NetworkBlockedError):
+        execute_in_sandbox(code)
+
+# Day 2-3: GREEN (implement до прохождения тестов)
+def execute_in_sandbox(code: str, timeout: int) -> Result:
+    container = docker.run(
+        image="ape-sandbox:latest",
+        command=["python", "-c", code],
+        timeout=timeout,
+        network_mode="custom",  # Whitelist only
+    )
+    # ... implementation ...
+
+# Day 4: REFACTOR (cleanup без изменения поведения)
+
+# Day 5: UPDATE MEMORY (progress.md, activeContext.md)
+```
+
+**Enforcement:**
+- CI/CD блокирует PR если coverage <80%
+- Code review checklist: "Are tests written BEFORE code?"
+- No code merge without passing tests
+
+---
+
+## T-002: Coverage Requirements
+| Component | Min Coverage | Critical Coverage |
+|-----------|--------------|-------------------|
+| **Truth Boundary Gate** | 95% | 100% (zero hallucination блокирующая) |
+| **Temporal Integrity** | 95% | 100% (look-ahead bias блокирующая) |
+| **VEE Sandbox** | 90% | N/A |
+| **Adapters** | 80% | N/A |
+| **API endpoints** | 85% | N/A |
+| **LangGraph nodes** | 80% | N/A |
+
+```bash
+# CI/CD check
+pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+```
+
+---
+
+## T-003: Test Categories
+
+### Unit Tests (Fast, Isolated)
+```python
+# tests/unit/test_truth_boundary.py
+def test_truth_gate_blocks_unverified_numbers():
+    draft = "Volatility increased to 15.3%"
+    facts = []  # No facts
+
+    result = validate_truth_boundary(draft, facts)
+
+    assert result.verdict == "BLOCK"
+    assert "UNVERIFIED_NUMBER" in result.issues[0]["type"]
+
+# Run: pytest tests/unit (должны проходить за <10 сек)
+```
+
+### Integration Tests (Slower, Multi-Component)
+```python
+# tests/integration/test_vee_yfinance.py
+@pytest.mark.integration
+def test_vee_executes_yfinance_query():
+    """End-to-end: VEE → YFinance → VerifiedFact"""
+    code = """
+import yfinance as yf
+data = yf.download('SPY', period='1d')
+return {'close': float(data['Close'].iloc[-1])}
+"""
+
+    fact = execute_in_vee(code)
+
+    assert fact.source.name == "yfinance"
+    assert fact.unit == "USD"
+    assert fact.value > 0
+
+# Run: pytest tests/integration -m integration (могут занимать минуты)
+```
+
+### End-to-End Tests (Slowest, Full Pipeline)
+```python
+# tests/e2e/test_simple_query.py
+@pytest.mark.e2e
+@pytest.mark.slow
+def test_full_pipeline_historical_query():
+    """Complete workflow: Query → Report"""
+    query = "What was SPY volatility on 2024-12-31?"
+
+    result = run_ape_workflow(
+        query=query,
+        asof_timestamp="2024-12-31T00:00:00Z"
+    )
+
+    assert result.status == "success"
+    assert result.hallucination_rate == 0.0
+    assert result.confidence_score > 0.7
+
+# Run: pytest tests/e2e -m e2e (могут занимать 10+ минут)
+```
+
+---
+
+## T-004: Mocking Strategy
+
+### Mock External APIs (ALWAYS)
+```python
+import responses
+
+@responses.activate
+def test_yfinance_adapter_handles_api_failure():
+    # Mock YFinance API failure
+    responses.add(
+        responses.GET,
+        "https://query1.finance.yahoo.com/v7/finance/download/SPY",
+        status=500
+    )
+
+    adapter = YFinanceAdapter()
+    result = adapter.fetch_ohlcv("SPY")
+
+    assert result.status == "error"
+    assert "API failure" in result.message
+```
+
+### Mock LLM Calls (Cost Savings)
+```python
+@patch('openai.ChatCompletion.create')
+def test_plan_node_generates_investigation_plan(mock_llm):
+    mock_llm.return_value = {
+        "choices": [{
+            "message": {
+                "content": json.dumps({
+                    "title": "Volatility Analysis",
+                    "steps": [...]
+                })
+            }
+        }]
+    }
+
+    plan = plan_node(query="Calculate volatility")
+
+    assert plan.title == "Volatility Analysis"
+    assert len(plan.steps) > 0
+```
+
+### Mock Docker (Speed)
+```python
+@patch('docker.from_env')
+def test_vee_timeout_logic(mock_docker):
+    # Don't actually run Docker in unit tests
+    mock_container = Mock()
+    mock_container.wait.side_effect = docker.errors.Timeout
+    mock_docker.return_value.containers.run.return_value = mock_container
+
+    with pytest.raises(TimeoutError):
+        execute_in_sandbox("time.sleep(120)", timeout=60)
+```
+
+---
+
+## T-005: Test Data Management
+
+### Fixtures in conftest.py
+```python
+# tests/conftest.py
+import pytest
+from datetime import datetime, timezone
+
+@pytest.fixture
+def sample_episode():
+    return EpisodeState(
+        episode_id=uuid4(),
+        asof_timestamp=datetime(2024, 1, 15, tzinfo=timezone.utc),
+        user_id="test_user"
+    )
+
+@pytest.fixture
+def sample_verified_fact():
+    return VerifiedFact(
+        id=uuid4(),
+        value=0.153,
+        unit="ratio",
+        asof_timestamp=datetime(2024, 1, 15, tzinfo=timezone.utc),
+        publication_lag=timedelta(0),
+        source={"name": "yfinance", "version": "0.2.32"},
+        method="python_script"
+    )
+
+@pytest.fixture
+def mock_neo4j():
+    # In-memory Neo4j для integration tests
+    from neo4j import GraphDatabase
+    driver = GraphDatabase.driver("bolt://localhost:7687")
+    yield driver
+    driver.close()
+```
+
+---
+
+## T-006: TDD for Immediate Failure (Anti-Hallucination)
+
+**Принцип:** Если LLM галлюцинирует метод — тест падает МГНОВЕННО.
+
+```python
+# Example: LLM generates code that calls non-existent method
+
+# Test (written FIRST)
+def test_generated_code_only_uses_whitelisted_methods():
+    """VEE должен блокировать вызовы несуществующих методов"""
+    code = """
+import pandas as pd
+df = pd.DataFrame({'a': [1, 2, 3]})
+result = df.magic_method()  # LLM hallucinated this
+"""
+
+    with pytest.raises(AttributeError):
+        execute_in_vee(code)
+
+# Implementation (validates code BEFORE execution)
+def execute_in_vee(code: str) -> Result:
+    # Static analysis before running
+    validate_code_syntax(code)  # Checks imports, methods exist
+    validate_code_safety(code)  # Checks no os/subprocess/eval
+
+    # Now safe to execute
+    return run_in_docker(code)
+```
+
+**Result:** Когда LLM галлюцинирует — тест падает ДО того как код попадет в production.
+
+---
+
+## T-007: Property-Based Testing (Optional, для критичных компонентов)
+
+```python
+from hypothesis import given, strategies as st
+
+@given(
+    value=st.floats(min_value=-1000, max_value=1000),
+    unit=st.sampled_from(["USD", "percent", "ratio"])
+)
+def test_verified_fact_roundtrip(value, unit):
+    """VerifiedFact должен сериализоваться/десериализоваться без потерь"""
+    fact = VerifiedFact(value=value, unit=unit, ...)
+    json_str = fact.json()
+    reconstructed = VerifiedFact.parse_raw(json_str)
+
+    assert reconstructed.value == pytest.approx(fact.value)
+    assert reconstructed.unit == fact.unit
+```
+
+---
+
+## T-008: Regression Tests
+
+Когда находится баг в production:
+1. Написать тест, который ВОСПРОИЗВОДИТ баг (Red)
+2. Исправить баг (Green)
+3. Тест становится regression test (остается в suite навсегда)
+
+```python
+# tests/regression/test_issue_042_temporal_violation.py
+def test_issue_042_fred_publication_lag_not_applied():
+    """
+    Bug: FRED GDP data использовалась без publication lag.
+    Fixed: 2026-02-XX
+    Regression test: ensures fix persists
+    """
+    fact = VerifiedFact(
+        source={"name": "FRED", "series": "GDP"},
+        asof_timestamp=datetime(2024, 1, 15),
+        publication_lag=timedelta(days=90)  # GDP has 90-day lag
+    )
+    episode = EpisodeState(asof_timestamp=datetime(2024, 1, 20))
+
+    # Should BLOCK because GDP not available yet
+    with pytest.raises(TemporalViolation):
+        check_temporal_integrity(fact, episode)
+```
+
+---
+
+## T-009: Performance Tests
+
+```python
+import pytest
+
+@pytest.mark.performance
+def test_truth_boundary_performance():
+    """Truth Gate должен обрабатывать 10K символов за <1 сек"""
+    text = "The value is 15.3%. " * 500  # 10K chars
+    facts = [VerifiedFact(value=0.153, unit="ratio", ...)]
+
+    import time
+    start = time.time()
+    validate_truth_boundary(text, facts)
+    elapsed = time.time() - start
+
+    assert elapsed < 1.0, f"Too slow: {elapsed:.2f}s"
+```
+
+---
+
+## T-010: Test Organization
+
+```
+tests/
+├── unit/                   # Fast, isolated (<10 sec total)
+│   ├── test_truth_boundary.py
+│   ├── test_temporal_integrity.py
+│   └── test_vee_sandbox.py
+├── integration/            # Multi-component (minutes)
+│   ├── test_vee_yfinance.py
+│   ├── test_neo4j_storage.py
+│   └── test_langgraph_workflow.py
+├── e2e/                    # Full pipeline (10+ minutes)
+│   ├── test_simple_query.py
+│   └── test_complex_query.py
+├── regression/             # Known bugs (永久)
+│   └── test_issue_042.py
+├── performance/            # Benchmarks
+│   └── test_latency.py
+├── conftest.py             # Fixtures
+└── fixtures/               # Test data
+    ├── task_suite.json
+    └── sample_reports/
+```
+
+**Run strategies:**
+```bash
+# Quick check (only unit tests)
+pytest tests/unit
+
+# Pre-commit (unit + critical integration)
+pytest tests/unit tests/integration -m "not slow"
+
+# Full CI (all tests)
+pytest tests/
+
+# Only regression tests
+pytest tests/regression
+```
+
+---
+
+## T-011: CI/CD Integration
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: |
+          pytest tests/ \
+            --cov=src \
+            --cov-report=xml \
+            --cov-fail-under=80
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+```
+
+---
+
+*Эти стандарты обязательны для всех компонентов APE 2026*
+*TDD is not optional — это фундаментальная практика для zero hallucination*
+*Last Updated: 2026-02-07*

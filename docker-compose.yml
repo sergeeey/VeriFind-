@@ -1,0 +1,169 @@
+# APE 2026 - Infrastructure Stack
+# Neo4j + TimescaleDB + Redis (ChromaDB embedded, no service)
+# Team: 1-2 developers
+# Environment: Windows WSL2 / Linux / macOS
+
+name: ape-2026
+
+services:
+  # ============================================================================
+  # Neo4j - Episode Graph, Fact Lineage, ADR Tracking
+  # ============================================================================
+  neo4j:
+    image: neo4j:5.14-community
+    container_name: ape-neo4j
+    restart: unless-stopped
+
+    ports:
+      - "7475:7474"  # HTTP (browser UI)
+      - "7688:7687"  # Bolt protocol
+
+    environment:
+      # Authentication
+      - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-ape_neo4j_password}
+
+      # Memory settings (dev: 2GB heap, prod: 4GB)
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=2g
+      - NEO4J_server_memory_pagecache_size=1g
+
+      # Performance tuning
+      - NEO4J_dbms_memory_transaction_total_max=512m
+      - NEO4J_dbms_connector_bolt_thread__pool__max__size=400
+
+      # Logging
+      - NEO4J_dbms_logs_query_enabled=INFO
+      - NEO4J_dbms_logs_query_threshold=1s
+
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+    networks:
+      - ape-network
+
+  # ============================================================================
+  # TimescaleDB - Time-Series (OHLCV, Execution Logs)
+  # ============================================================================
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: ape-timescaledb
+    restart: unless-stopped
+
+    ports:
+      - "5433:5432"
+
+    environment:
+      # Authentication
+      - POSTGRES_USER=${POSTGRES_USER:-ape}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ape_timescale_password}
+      - POSTGRES_DB=${POSTGRES_DB:-ape_timeseries}
+
+      # Performance (shared_buffers = 25% of RAM, effective_cache_size = 50% of RAM)
+      - POSTGRES_SHARED_BUFFERS=1GB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=2GB
+      - POSTGRES_WORK_MEM=16MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=256MB
+
+      # TimescaleDB specific
+      - TIMESCALEDB_TELEMETRY=off
+
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      # Init scripts (создание hypertables)
+      - ./init_scripts/timescaledb:/docker-entrypoint-initdb.d
+
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=1GB"
+      - "-c"
+      - "effective_cache_size=2GB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ape} -d ${POSTGRES_DB:-ape_timeseries}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      - ape-network
+
+  # ============================================================================
+  # Redis - Caching Layer (L2 cache для API responses)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ape-redis
+    restart: unless-stopped
+
+    ports:
+      - "6380:6379"
+
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - ape-network
+
+# ==============================================================================
+# Volumes (persistent storage)
+# ==============================================================================
+volumes:
+  neo4j_data:
+    name: ape_neo4j_data
+  neo4j_logs:
+    name: ape_neo4j_logs
+  neo4j_import:
+    name: ape_neo4j_import
+  neo4j_plugins:
+    name: ape_neo4j_plugins
+
+  timescaledb_data:
+    name: ape_timescaledb_data
+
+  redis_data:
+    name: ape_redis_data
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  ape-network:
+    name: ape-network
+    driver: bridge

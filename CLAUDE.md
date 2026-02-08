@@ -1,0 +1,432 @@
+# CLAUDE.md — APE 2026 Root Anchor
+
+**Версия:** 0.1.0 (Pre-MVP)
+**Дата:** 2026-02-07
+**Статус:** Design-Ready → Implementation Pending
+
+---
+
+## 📌 Project Identity
+
+**Name:** APE 2026 (Autonomous Prediction Engine)
+**Type:** Financial Decision Support System (Read-Only, Non-Trading)
+**Mission:** Финансовая аналитика с математической гарантией zero hallucination
+
+**Elevator Pitch:**
+> Система, которая никогда не врет уверенно. LLM генерирует код, а не числа. Все выводы проверяемы математически. Fail-closed при неопределенности.
+
+---
+
+## 🎯 North Star Metrics (Блокирующие)
+
+| Метрика | Целевое значение | Статус |
+|---------|------------------|--------|
+| **Hallucination Rate (Numerical)** | 0.00% | 🔴 Not Started |
+| **Temporal Adherence** | 100% | 🔴 Not Started |
+| **Calibration Error (ECE)** | < 0.05 | 🔴 Not Started |
+| **Evidence Coverage** | ≥ 90% | 🔴 Not Started |
+
+---
+
+## 🏗️ Architecture (High-Level)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    USER INTERFACE LAYER                      │
+│  (FastAPI + WebSocket для streaming, React Frontend)        │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│              ORCHESTRATION LAYER (LangGraph)                 │
+│  State Machine: PLAN → EXECUTE → DEBATE → VALIDATE          │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌──────────────┬──────────────┬──────────────┬───────────────┐
+│  REASONING   │   EXECUTION  │   VALIDATION │    MEMORY     │
+│    LAYER     │    LAYER     │    LAYER     │    LAYER      │
+│              │              │              │               │
+│ DeepSeek-R1  │  VEE         │ Truth Gate   │  Neo4j        │
+│ Claude 3.7   │  (Sandbox)   │ Doubter      │  ClickHouse   │
+│ GPT-4.5      │  Adapters    │ Sensitivity  │  Qdrant       │
+└──────────────┴──────────────┴──────────────┴───────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     DATA LAYER                               │
+│  External APIs (FRED, YF) + Internal DBs                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Core Components
+
+#### 1. **Truth Boundary Gate** (Уникальная особенность)
+- **Принцип:** LLM ЗАПРЕЩЕНО генерировать числа напрямую
+- **Enforcement:** Все числа извлекаются через VEE execution → VerifiedFact
+- **Validation:** Детерминированная проверка: text_numbers ⊆ verified_facts
+
+#### 2. **VEE (Verifiable Execution Environment)**
+- Docker sandbox с изоляцией (network whitelist, filesystem restrictions)
+- Timeout 60 sec, memory limit 2GB
+- Pre-execution safety checks (no eval, no os.system, etc.)
+
+#### 3. **Temporal Integrity Module** (Финансовая специфика)
+- Отслеживает `asof_timestamp` + `publication_lag` для каждого факта
+- Блокирует look-ahead bias (использование будущих данных в прошлом)
+- Критично для backtesting и historical analysis
+
+#### 4. **Multi-Agent Debate** (Adversarial Reasoning)
+- Bull (optimistic), Bear (pessimistic), Quant (neutral)
+- Параллельное исполнение → vote entropy → consensus
+- Doubter agent пытается опровергнуть финальный отчет
+
+#### 5. **Sensitivity Harness**
+- Parameter sweeps (window, method, outliers)
+- Sign flip detection (15.3% → -2.1% = критично)
+- Confidence penalty при нестабильности
+
+---
+
+## 🛠️ Tech Stack
+
+| Компонент | Технология | Версия | Решение |
+|-----------|------------|--------|---------|
+| **Orchestration** | LangGraph | >=0.2.0 | ✅ Принято (ADR-001) |
+| **Language** | Python | 3.11+ | ✅ |
+| **Reasoning Model** | DeepSeek-R1 | Latest | 🟡 Предложено (ADR-002) |
+| **Validation Model** | Claude Sonnet 4.5 | Latest | ✅ |
+| **Debate Models** | DeepSeek-V3 | Latest | ✅ |
+| **Sandbox** | Docker | >=24.0 | ✅ Принято (ADR-003) |
+| **Graph DB** | Neo4j | >=5.14 | ✅ Принято (ADR-004) |
+| **Time-Series** | TBD | - | 🔴 Требует решения (ADR-005) |
+| **Vector DB** | TBD | - | 🔴 Требует решения (ADR-006) |
+
+**Open Decisions (блокируют Week 1):**
+- ADR-005: ClickHouse vs Postgres+TimescaleDB vs DuckDB
+- ADR-006: Qdrant vs ChromaDB vs pgvector
+
+---
+
+## 📂 Project Structure
+
+```
+E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\
+├── CLAUDE.md                     # ← Этот файл (Root Anchor)
+├── ТЕХНИЧЕСКОЕ ЗАДАНИЕ_*.md      # Полное ТЗ v2.1 (1860 строк)
+├── Методология создания проекта.txt
+├── .cursor/
+│   ├── rules/                    # Правила поведения Claude
+│   │   ├── 00-general.mdc        # No yapping, completeness, style
+│   │   ├── 05-security.mdc       # VEE, secrets, CoT prohibition
+│   │   └── 20-testing.mdc        # TDD workflow, coverage
+│   └── memory_bank/              # Persistent context
+│       ├── projectbrief.md       # Суть проекта, цели
+│       ├── activeContext.md      # Текущий фокус, блокеры
+│       ├── systemPatterns.md     # Архитектурные паттерны
+│       ├── progress.md           # Трекер задач
+│       └── decisions.md          # ADR журнал (9 решений)
+└── ape-2026/                     # ← Код (будет создан в Week 1)
+    ├── README.md
+    ├── requirements.txt
+    ├── docker-compose.yml
+    ├── .env.example
+    ├── src/
+    │   ├── orchestration/
+    │   │   ├── langgraph_workflow.py
+    │   │   └── nodes/           # PLAN, EXECUTE, DEBATE, VALIDATE, etc.
+    │   ├── vee/
+    │   │   ├── sandbox_runner.py
+    │   │   ├── adapters/        # YFinance, FRED, Neo4j, ClickHouse
+    │   │   └── safety_checks.py
+    │   ├── validators/
+    │   │   ├── truth_boundary.py
+    │   │   ├── temporal_integrity.py
+    │   │   └── sensitivity_harness.py
+    │   ├── models/
+    │   │   ├── artifacts.py     # Pydantic schemas
+    │   │   └── prompts/
+    │   ├── storage/
+    │   │   ├── neo4j_client.py
+    │   │   └── clickhouse_client.py  # or timescaledb_client.py
+    │   └── api/
+    │       └── main.py          # FastAPI app
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── e2e/
+    ├── eval/
+    │   ├── task_suite.json      # 100 задач для validation
+    │   └── run_eval.py
+    └── deployment/
+        ├── Dockerfile
+        └── docker-compose.yml
+```
+
+---
+
+## 🚀 Commands (для быстрого старта)
+
+### Development
+```bash
+# Setup environment
+cd ape-2026
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Start infrastructure
+docker-compose up -d  # Neo4j, ClickHouse, Qdrant
+
+# Run tests
+pytest tests/unit                  # Fast (<10 sec)
+pytest tests/integration           # Slower (minutes)
+pytest tests/e2e -m e2e            # Full pipeline (10+ min)
+
+# Run linters
+black src/ tests/ --check
+ruff check src/ tests/
+mypy src/
+
+# Run application (после реализации)
+uvicorn src.api.main:app --reload
+```
+
+### Memory Bank Updates
+```bash
+# После каждой сессии
+# 1. Update activeContext.md (что сделали, следующий шаг)
+# 2. Update progress.md (отметить выполненные [x])
+# 3. Update decisions.md (если приняли ADR)
+# 4. Commit
+git add .cursor/memory_bank/
+git commit -m "docs: update memory bank after [component] session"
+```
+
+---
+
+## 📋 Roadmap (16 недель до MVP)
+
+### Milestone 1: "Скелет + Истина" (Week 1-4)
+**Goal:** Доказать Zero Hallucination для простых запросов
+
+- [x] Week 0: Architectural decisions (Opus sessions) **← СЕЙЧАС ТУТ**
+- [ ] Week 1: Scaffolding (Git, Docker, requirements)
+- [ ] Week 2: VEE + YFinance Adapter (TDD)
+- [ ] Week 3-4: Truth Boundary Gate (TDD)
+
+**Acceptance:** 10 простых задач, Hallucination Rate = 0%
+
+### Milestone 2: "Память + Валидация" (Week 5-8)
+**Goal:** Temporal Integrity + Adversarial Validation
+
+- [ ] Week 5-6: Neo4j storage layer
+- [ ] Week 7: Temporal Integrity Module (Opus design)
+- [ ] Week 8: Doubter agent
+
+**Acceptance:** 30 задач, Temporal Adherence = 100%
+
+### Milestone 3: "Reasoning + Debate" (Week 9-12)
+**Goal:** Full LangGraph workflow
+
+- [ ] Week 9-10: LangGraph state machine (Opus design)
+- [ ] Week 11: Multi-agent debate
+- [ ] Week 12: Sensitivity harness
+
+**Acceptance:** 50 задач, Evidence Coverage ≥ 90%
+
+### Milestone 4: "Production Ready" (Week 13-16)
+**Goal:** Shadow Mode Ready
+
+- [ ] Week 13: FastAPI + Authentication
+- [ ] Week 14: Monitoring + Cost tracking
+- [ ] Week 15: Security audit (Opus)
+- [ ] Week 16: Task suite (100 задач)
+
+**Acceptance:** All metrics GREEN, Ready for Shadow Mode
+
+---
+
+## 🔒 Security Constraints
+
+### VEE Sandbox
+- **Network:** Whitelist ONLY (api.stlouisfed.org, query.yahooapis.com)
+- **Filesystem:** Read-only workspace, NO host access
+- **Resources:** 2GB RAM, 60 sec timeout, 2 CPU cores
+- **Pre-execution:** Static analysis (no eval, no os.system, no subprocess)
+
+### Secrets
+- **NO hardcoded secrets**: Environment variables ONLY
+- **NO secrets in logs**: Redact before logging
+- **NO secrets in Git**: .env.example template, .env in .gitignore
+
+### CoT Storage (CRITICAL)
+**ЗАПРЕЩЕНО хранить raw Chain-of-Thought.**
+- ❌ `raw_cot: string`
+- ❌ `thinking_steps: List[str]`
+- ✅ `decision_operators: List[str]` (structured only)
+- ✅ `reasoning_summary: str` (2-3 sentences MAX)
+
+---
+
+## ✅ Testing Strategy
+
+### TDD Workflow (MANDATORY)
+**Red → Green → Refactor → Update Memory**
+
+1. **Day 1-2:** Write FAILING tests (Red)
+2. **Day 3-4:** Implement до прохождения (Green)
+3. **Day 5:** Refactor + Opus review → новые тесты
+
+### Coverage Requirements
+- **Truth Boundary Gate:** 95% (zero hallucination блокирующая)
+- **Temporal Integrity:** 95% (look-ahead bias блокирующая)
+- **VEE Sandbox:** 90%
+- **Everything else:** 80%
+
+### Test Organization
+```
+tests/
+├── unit/          # Fast (<10 sec total)
+├── integration/   # Multi-component (minutes)
+├── e2e/           # Full pipeline (10+ min)
+└── regression/    # Known bugs (永久)
+```
+
+---
+
+## 🎨 Code Style
+
+### Python
+- **Formatter:** Black (line length 100)
+- **Linter:** Ruff
+- **Type checker:** mypy (strict mode)
+- **Docstrings:** Google style
+- **Type hints:** Обязательны для всех функций
+
+### Git Commits
+```bash
+# Conventional Commits
+feat(vee): add Docker network isolation
+fix(truth-gate): handle percentages correctly
+test(temporal): add publication lag edge cases
+docs: update memory bank after VEE session
+```
+
+---
+
+## 🧠 Model Strategy (Opus $50 Промо)
+
+### Default: Sonnet (экономия)
+- Code implementation
+- Refactoring
+- Unit tests
+- Documentation
+
+### Escalate to Opus:
+- Architectural decisions (Week 0, 7, 9, 14)
+- Security audits (Week 2, 15)
+- Complex debugging
+- Research новых технологий
+
+**Budget Allocation:**
+- Week 0 (setup): $8-11
+- Week 1-4 (M1): $2-4
+- Week 5-8 (M2): $5-7
+- Week 9-12 (M3): $5-7
+- Week 13-16 (M4): $6-8
+- Reserve: $5-10
+
+---
+
+## 📖 Documentation Locations
+
+| Документ | Назначение | Частота обновления |
+|----------|------------|-------------------|
+| **CLAUDE.md** (этот файл) | Root Anchor, команды, архитектура | Редко (при major changes) |
+| **projectbrief.md** | Elevator pitch, бизнес-цели | Редко |
+| **activeContext.md** | Текущий фокус, блокеры, next step | Каждая сессия |
+| **decisions.md** | ADR журнал | При архитектурных решениях |
+| **progress.md** | Трекер задач, метрики | После завершения задач |
+| **systemPatterns.md** | Архитектурные паттерны | При появлении новых паттернов |
+
+---
+
+## ⚠️ Критические Правила
+
+1. **NO плейсхолдеров**: Никаких `...`, `rest of implementation`, `TODO` без issue
+2. **TDD всегда**: Тест СНАЧАЛА, код ПОТОМ
+3. **Memory Bank discipline**: Update после КАЖДОЙ сессии
+4. **NO raw CoT storage**: Только structured decisions
+5. **Fail-closed**: Неопределенность → UNCERTAIN, не выдумывать
+6. **Security first**: VEE isolation, secrets management, input validation
+
+---
+
+## 🆘 When Stuck
+
+1. **Check Memory Bank:**
+   ```bash
+   # Прочитай последний контекст
+   Read .cursor/memory_bank/activeContext.md
+   Read .cursor/memory_bank/decisions.md
+   ```
+
+2. **Check open ADRs:**
+   - ADR-005: ClickHouse vs TimescaleDB (блокирует Week 1)
+   - ADR-006: Qdrant vs ChromaDB (блокирует Week 2)
+
+3. **Escalate to Opus:**
+   ```bash
+   /model opus
+   "Изучи [context], спроектируй [component]"
+   ```
+
+4. **Ask user:**
+   - Если architecture decision нужен input
+   - Если requirements unclear
+
+---
+
+## 📞 Quick Reference
+
+### Files to Read at Session Start
+```
+ВСЕГДА:
+- .cursor/memory_bank/activeContext.md  (что было вчера, next step)
+
+ПО НЕОБХОДИМОСТИ:
+- .cursor/memory_bank/projectbrief.md  (если забыл цели)
+- .cursor/memory_bank/decisions.md     (если нужны ADR)
+- .cursor/memory_bank/systemPatterns.md (если нужны паттерны)
+```
+
+### Pre-Commit Checklist
+- [ ] Tests passed (`pytest tests/`)
+- [ ] Coverage ≥80% (`pytest --cov`)
+- [ ] Linters passed (`black`, `ruff`, `mypy`)
+- [ ] No плейсхолдеров (`grep -r "\.\.\."`
+- [ ] activeContext.md updated
+- [ ] progress.md updated (if task done)
+
+---
+
+## 🎯 Current Status
+
+**Phase:** Pre-Implementation (Week 0)
+**Progress:** [░░░░░░░░░░] 0%
+**Blockers:**
+- ADR-005 (ClickHouse vs TimescaleDB)
+- ADR-006 (Qdrant vs ChromaDB)
+
+**Next Action:**
+Week 0 Day 1-2: Infrastructure Design (Opus session)
+→ Решить ADR-005 и ADR-006
+→ Создать docker-compose.yml
+→ Создать data strategy spec
+
+**Ready to Start:** После принятия инфраструктурных решений
+
+---
+
+*Этот файл — единственный источник правды о проекте APE 2026*
+*При рассинхронизации с другими документами — CLAUDE.md побеждает*
+*Last Updated: 2026-02-07*
+*Version: 0.1.0 (Pre-MVP)*
