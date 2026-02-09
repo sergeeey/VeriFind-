@@ -61,6 +61,11 @@ class DebatePerspective:
         if not (0.0 <= self.confidence <= 1.0):
             raise ValueError(f"Confidence must be in [0.0, 1.0], got {self.confidence}")
 
+    @property
+    def key_points(self) -> List[str]:
+        """Alias for supporting_facts (for backward compatibility with real_llm_adapter)."""
+        return self.supporting_facts
+
 
 @dataclass
 class DebateResult:
