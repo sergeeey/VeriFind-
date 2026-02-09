@@ -13,6 +13,7 @@ import {
   Settings,
   FileText,
   Activity,
+  TrendingUp,
 } from 'lucide-react'
 
 const navItems = [
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/dashboard/query/new', label: 'New Query', icon: Plus },
   { href: '/dashboard/history', label: 'History', icon: History },
   { href: '/dashboard/facts', label: 'Facts', icon: Database },
+  { href: '/predictions', label: 'Predictions', icon: TrendingUp },
   { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/docs', label: 'Docs', icon: FileText },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
