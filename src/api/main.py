@@ -22,7 +22,7 @@ from .error_handlers import (
 )
 from .monitoring import prometheus_middleware, initialize_monitoring
 from .middleware import add_security_headers, add_disclaimer_to_json_responses
-from .routes import health_router, analysis_router, data_router
+from .routes import health_router, analysis_router, data_router, predictions_router
 from fastapi.exceptions import RequestValidationError
 from .exceptions import APEException, ValidationError as APEValidationError
 
@@ -73,3 +73,4 @@ app.middleware("http")(add_disclaimer_to_json_responses)
 app.include_router(health_router)
 app.include_router(analysis_router)
 app.include_router(data_router)
+app.include_router(predictions_router)
