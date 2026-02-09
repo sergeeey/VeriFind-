@@ -23,7 +23,7 @@ def upgrade() -> None:
     # Create predictions table
     op.create_table(
         'predictions',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True, server_default=sa.text('gen_random_uuid()')),
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False, server_default=sa.text('gen_random_uuid()')),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
 
         # Ticker & Exchange
@@ -70,6 +70,9 @@ def upgrade() -> None:
             "error_direction IS NULL OR error_direction IN ('OVER', 'UNDER', 'EXACT')",
             name='check_error_direction_values'
         ),
+
+        # Composite primary key (required for TimescaleDB hypertable)
+        sa.PrimaryKeyConstraint('id', 'created_at', name='predictions_pkey')
     )
 
     # Create indexes (before hypertable conversion)
