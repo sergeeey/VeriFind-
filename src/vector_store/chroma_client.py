@@ -245,3 +245,6 @@ def create_document_id(text: str, metadata: DocumentMetadata) -> str:
         f"{metadata.source}_{metadata.doc_type}_{text}"
     )
     return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+# Compatibility alias (Week 11: for imports expecting ChromaDBClient)
+ChromaDBClient = ChromaVectorStore
