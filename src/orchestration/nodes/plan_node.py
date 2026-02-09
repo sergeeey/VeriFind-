@@ -173,6 +173,85 @@ EXAMPLE OUTPUT (COMPLETE AnalysisPlan JSON):
   ]
 }
 
+EXAMPLE INPUT (Correlation Calculation):
+"What is the correlation between SPY and QQQ from 2023-01-01 to 2023-12-31?"
+
+EXAMPLE OUTPUT (Correlation AnalysisPlan):
+{
+  "query_id": "q_corr_spy_qqq_2023",
+  "user_query": "What is the correlation between SPY and QQQ from 2023-01-01 to 2023-12-31?",
+  "plan_reasoning": "To calculate correlation: 1) Download both assets, 2) Align dates, 3) Calculate returns, 4) Compute correlation coefficient",
+  "data_requirements": [
+    {
+      "ticker": "SPY",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "ohlcv",
+      "source": "yfinance"
+    },
+    {
+      "ticker": "QQQ",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "ohlcv",
+      "source": "yfinance"
+    }
+  ],
+  "code_blocks": [
+    {
+      "step_id": "calculate_correlation",
+      "description": "Calculate return correlation between two assets",
+      "code": "import yfinance as yf\\nimport pandas as pd\\n\\n# Download using Ticker API\\ntickerA = yf.Ticker('SPY')\\ntickerB = yf.Ticker('QQQ')\\n\\ndataA = tickerA.history(start='2023-01-01', end='2023-12-31')\\ndataB = tickerB.history(start='2023-01-01', end='2023-12-31')\\n\\n# Extract Close prices\\ncloseA = dataA['Close']\\ncloseB = dataB['Close']\\n\\n# Align dates (CRITICAL)\\ndf = pd.DataFrame({'assetA': closeA, 'assetB': closeB}).dropna()\\n\\n# Calculate returns\\nreturnsA = df['assetA'].pct_change().dropna()\\nreturnsB = df['assetB'].pct_change().dropna()\\n\\n# Calculate correlation\\ncorrelation = returnsA.corr(returnsB)\\n\\n# Create result\\nresult = {'correlation': float(correlation), 'data_points': len(returnsA)}\\nimport json\\nprint(json.dumps(result))",
+      "depends_on": [],
+      "timeout_seconds": 60
+    }
+  ],
+  "expected_output_format": "Dictionary with keys: correlation (float -1 to +1), data_points (int)",
+  "confidence_level": 0.90,
+  "caveats": ["Correlation measures linear relationship", "Based on daily returns"]
+}
+
+EXAMPLE INPUT (Beta Calculation):
+"Calculate the beta of AAPL relative to SPY from 2023-01-01 to 2023-12-31"
+
+EXAMPLE OUTPUT (Beta AnalysisPlan):
+{
+  "query_id": "q_beta_aapl_2023",
+  "user_query": "Calculate the beta of AAPL relative to SPY from 2023-01-01 to 2023-12-31",
+  "plan_reasoning": "To calculate beta, I need: 1) AAPL historical prices, 2) SPY benchmark prices, 3) Align dates and calculate returns, 4) Beta = Cov(AAPL, SPY) / Var(SPY)",
+  "data_requirements": [
+    {
+      "ticker": "AAPL",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "ohlcv",
+      "source": "yfinance"
+    },
+    {
+      "ticker": "SPY",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "ohlcv",
+      "source": "yfinance"
+    }
+  ],
+  "code_blocks": [
+    {
+      "step_id": "calculate_beta",
+      "description": "Calculate beta using covariance and variance",
+      "code": "import yfinance as yf\\nimport pandas as pd\\nimport numpy as np\\n\\n# Download data using Ticker API (more reliable)\\nstock = yf.Ticker('AAPL')\\nbench = yf.Ticker('SPY')\\n\\nstock_data = stock.history(start='2023-01-01', end='2023-12-31')\\nbench_data = bench.history(start='2023-01-01', end='2023-12-31')\\n\\n# Extract Close prices\\nstock_close = stock_data['Close']\\nbench_close = bench_data['Close']\\n\\n# Align dates (CRITICAL for avoiding NaN)\\ndf = pd.DataFrame({'stock': stock_close, 'benchmark': bench_close}).dropna()\\n\\n# Calculate returns\\nstock_returns = df['stock'].pct_change().dropna()\\nbench_returns = df['benchmark'].pct_change().dropna()\\n\\n# Calculate beta = Cov(stock, bench) / Var(bench)\\ncovariance = stock_returns.cov(bench_returns)\\nbench_variance = bench_returns.var()\\nbeta = covariance / bench_variance\\n\\n# Create result dictionary\\nresult = {'beta': float(beta), 'covariance': float(covariance), 'benchmark_variance': float(bench_variance)}\\nimport json\\nprint(json.dumps(result))",
+      "depends_on": [],
+      "timeout_seconds": 60
+    }
+  ],
+  "expected_output_format": "Dictionary with keys: beta (float), covariance (float), benchmark_variance (float)",
+  "confidence_level": 0.90,
+  "caveats": [
+    "Beta measures systematic risk relative to market",
+    "Uses daily returns (not monthly)"
+  ]
+}
+
 CODE OUTPUT RULES (CRITICAL):
 1. The FINAL code block MUST create a 'result' dictionary with all computed values
 2. The FINAL code block MUST print the result as JSON: import json; print(json.dumps(result))
@@ -194,7 +273,8 @@ REMINDER: You MUST include ALL mandatory fields. Do NOT use field names like "se
     def generate_plan(
         self,
         user_query: str,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        max_retries: int = 3
     ) -> AnalysisPlan:
         """
         Generate analysis plan from user query.
@@ -202,40 +282,59 @@ REMINDER: You MUST include ALL mandatory fields. Do NOT use field names like "se
         Args:
             user_query: User's question
             context: Optional context (previous queries, user preferences)
+            max_retries: Maximum retry attempts for JSONDecodeError (default: 3)
 
         Returns:
             Validated AnalysisPlan
 
         Raises:
-            ValidationError: If plan generation fails
+            ValidationError: If plan generation fails after retries
         """
         # Build prompt
         prompt = self._build_prompt(user_query, context)
 
-        # Generate plan using universal client (with provider fallback)
-        try:
-            response = self.client.generate(
-                system_prompt=self.system_prompt,
-                user_prompt=prompt,
-                json_mode=True  # Request structured JSON output
-            )
+        # Retry loop for handling transient LLM JSON errors
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                # Generate plan using universal client (with provider fallback)
+                response = self.client.generate(
+                    system_prompt=self.system_prompt,
+                    user_prompt=prompt,
+                    json_mode=True  # Request structured JSON output
+                )
 
-            # Track which provider was used
-            self.last_provider_used = response.provider
-            logger.info(f"Plan generated by {response.provider} ({response.model}), cost: ${response.cost:.6f}")
+                # Track which provider was used
+                self.last_provider_used = response.provider
+                logger.info(f"Plan generated by {response.provider} ({response.model}), cost: ${response.cost:.6f}")
 
-            # Parse JSON response to AnalysisPlan (Pydantic model)
-            plan_dict = json.loads(response.content)
-            plan = AnalysisPlan.model_validate(plan_dict)
+                # Parse JSON response to AnalysisPlan (Pydantic model)
+                plan_dict = json.loads(response.content)
+                plan = AnalysisPlan.model_validate(plan_dict)
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse plan JSON: {e}")
-            logger.error(f"Raw response: {response.content[:500]}")
-            raise ValueError(f"LLM returned invalid JSON: {e}")
+                # Success! Break retry loop
+                if attempt > 0:
+                    logger.info(f"Plan generation succeeded on attempt {attempt + 1}/{max_retries}")
+                break
 
-        except Exception as e:
-            logger.error(f"Plan generation failed: {e}", exc_info=True)
-            raise ValueError(f"Failed to generate plan: {e}")
+            except json.JSONDecodeError as e:
+                last_error = e
+                logger.warning(f"Attempt {attempt + 1}/{max_retries}: Failed to parse plan JSON: {e}")
+                if hasattr(locals(), 'response'):
+                    logger.warning(f"Raw response (first 500 chars): {response.content[:500]}")
+
+                # Retry unless this was the last attempt
+                if attempt < max_retries - 1:
+                    logger.info(f"Retrying plan generation...")
+                    continue
+                else:
+                    # Final attempt failed
+                    logger.error(f"All {max_retries} attempts failed with JSONDecodeError")
+                    raise ValueError(f"LLM returned invalid JSON after {max_retries} attempts: {e}")
+
+            except Exception as e:
+                logger.error(f"Plan generation failed: {e}", exc_info=True)
+                raise ValueError(f"Failed to generate plan: {e}")
 
         # Add query metadata
         plan.query_id = plan.query_id or self._generate_query_id()
