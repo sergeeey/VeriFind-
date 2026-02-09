@@ -31,6 +31,7 @@ neo4j==5.17.0                 # Graph database driver
 # TimescaleDB / PostgreSQL (Week 1 Day 1 - already running)
 psycopg2-binary==2.9.9        # PostgreSQL adapter
 sqlalchemy==2.0.27            # ORM for TimescaleDB
+alembic==1.13.1               # Database migrations
 
 # Redis (Week 1 Day 1 - already running)
 redis==5.0.1                  # Redis client

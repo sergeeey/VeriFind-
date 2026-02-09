@@ -50,7 +50,7 @@ class SandboxRunner:
 
     def __init__(
         self,
-        image: str = "python:3.11-slim",
+        image: str = "ape-vee-sandbox:latest",  # Week 11 Day 5: Custom image with yfinance, fredapi, pandas, numpy
         memory_limit: str = "256m",
         cpu_limit: float = 0.5,
         timeout: int = 30,

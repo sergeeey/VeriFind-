@@ -15,7 +15,7 @@ from .config import get_settings, load_production_api_keys
 from ..orchestration.langgraph_orchestrator import LangGraphOrchestrator
 from ..storage.timescale_store import TimescaleDBStore
 from ..graph.neo4j_client import Neo4jClient
-from ..vectorstore.chromadb_client import ChromaDBClient
+from ..vector_store.chroma_client import ChromaDBClient
 
 logger = logging.getLogger(__name__)
 

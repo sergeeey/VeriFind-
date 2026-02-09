@@ -345,3 +345,6 @@ class Neo4jGraphClient:
         if self.driver:
             self.driver.close()
             self.logger.info("Neo4j connection closed")
+
+# Compatibility alias (Week 11: for imports expecting Neo4jClient)
+Neo4jClient = Neo4jGraphClient
