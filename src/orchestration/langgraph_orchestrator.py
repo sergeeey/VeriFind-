@@ -33,6 +33,8 @@ from src.debate.debater_agent import DebaterAgent
 from src.debate.synthesizer_agent import SynthesizerAgent
 from src.debate.real_llm_adapter import RealLLMDebateAdapter  # Week 11 Day 2: Real LLM integration
 from src.debate.schemas import Perspective, DebateContext, DebateReport, Synthesis
+from src.predictions.prediction_store import PredictionStore  # Week 9 Day 3: Prediction hook
+# Note: save_prediction_from_result imported lazily in debate_node to avoid circular import
 
 # Logger for orchestrator
 logger = logging.getLogger(__name__)
@@ -188,6 +190,12 @@ class LangGraphOrchestrator:
         else:
             self.debate_adapter = None
             logger.info("Using mock debate agents")
+
+        # Initialize prediction store (Week 9 Day 3)
+        import os
+        db_url = os.getenv('TIMESCALEDB_URL', 'postgresql://ape:ape_timescale_password_CHANGE_ME@localhost:5433/ape_timeseries')
+        self.prediction_store = PredictionStore(db_url=db_url)
+        logger.info("Initialized prediction store for pipeline→predictions integration")
 
     def _broadcast_update(
         self,
@@ -720,6 +728,16 @@ class LangGraphOrchestrator:
             state.verified_fact.confidence_score = synthesis.adjusted_confidence
 
             state.status = StateStatus.COMPLETED
+
+            # Week 9 Day 3: Automatically save prediction from completed pipeline
+            try:
+                # Lazy import to avoid circular dependency
+                from src.orchestration.prediction_hook import save_prediction_from_result
+                prediction_id = save_prediction_from_result(state, self.prediction_store)
+                if prediction_id:
+                    logger.info(f"Query {state.query_id}: Saved as prediction {prediction_id}")
+            except Exception as e:
+                logger.warning(f"Query {state.query_id}: Failed to save prediction: {e}")
 
             # Broadcast: DEBATE completed (final update before COMPLETED)
             self._broadcast_update(

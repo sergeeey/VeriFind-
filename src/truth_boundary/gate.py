@@ -54,10 +54,11 @@ class VerifiedFact:
     # Week 5 Day 3: Added for Debate System integration
     source_code: Optional[str] = None
     confidence_score: float = 1.0  # Default high confidence before debate
-    
+
     # Week 11: Data attribution for regulatory compliance
     data_source: str = "yfinance"  # Source: yfinance, alpha_vantage, polygon, cache
     data_freshness: Optional[datetime] = None  # When data was fetched from external API
+    source_verified: bool = True  # True if values from VEE execution (not LLM hallucination)
 
 
 @dataclass
