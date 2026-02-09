@@ -118,14 +118,14 @@ When calculating metrics that require risk-free rate (Sharpe ratio, etc):
        rf_daily = pd.Series([(rf_annual / 100) / 252] * len(spy_returns), index=spy_returns.index)
        rf_source = 'fallback_2023'
 
-EXAMPLE INPUT:
+EXAMPLE INPUT (Sharpe Ratio - Simple):
 "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31"
 
-EXAMPLE OUTPUT (COMPLETE AnalysisPlan JSON):
+EXAMPLE OUTPUT (Sharpe Ratio AnalysisPlan - SIMPLIFIED SINGLE-STEP):
 {
   "query_id": "q_sharpe_spy_2023",
   "user_query": "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31",
-  "plan_reasoning": "To calculate Sharpe ratio, I need: 1) SPY historical prices for 2023, 2) Risk-free rate data from FRED (3-month Treasury), 3) Calculate daily returns, 4) Annualize and compute (mean - rf) / std",
+  "plan_reasoning": "To calculate Sharpe ratio: 1) Download SPY prices, 2) Calculate daily returns, 3) Use fixed 4.5% annual risk-free rate for 2023, 4) Sharpe = (mean_return - rf) / std * sqrt(252)",
   "data_requirements": [
     {
       "ticker": "SPY",
@@ -133,43 +133,22 @@ EXAMPLE OUTPUT (COMPLETE AnalysisPlan JSON):
       "end_date": "2023-12-31",
       "data_type": "ohlcv",
       "source": "yfinance"
-    },
-    {
-      "ticker": "DGS3MO",
-      "start_date": "2023-01-01",
-      "end_date": "2023-12-31",
-      "data_type": "economic",
-      "source": "fred"
     }
   ],
   "code_blocks": [
     {
-      "step_id": "fetch_spy_prices",
-      "description": "Fetch SPY historical OHLCV data",
-      "code": "import yfinance as yf\\nimport pandas as pd\\nspy = yf.download('SPY', start='2023-01-01', end='2023-12-31')\\nspy_close = spy['Close']\\nspy_returns = spy_close.pct_change().dropna()",
-      "depends_on": [],
-      "timeout_seconds": 60
-    },
-    {
-      "step_id": "fetch_risk_free_rate",
-      "description": "Fetch 3-month Treasury rate from FRED",
-      "code": "from fredapi import Fred\\nfred = Fred()\\nrf_rate = fred.get_series('DGS3MO', start_date='2023-01-01', end_date='2023-12-31')\\nrf_daily = (rf_rate / 100) / 252",
-      "depends_on": [],
-      "timeout_seconds": 60
-    },
-    {
       "step_id": "calculate_sharpe",
-      "description": "Calculate annualized Sharpe ratio",
-      "code": "import numpy as np\\nmean_return = spy_returns.mean() * 252\\nstd_return = spy_returns.std() * np.sqrt(252)\\navg_rf = rf_daily.mean() * 252\\nsharpe_ratio = (mean_return - avg_rf) / std_return\\nresult = {'sharpe_ratio': float(sharpe_ratio), 'mean_return': float(mean_return), 'volatility': float(std_return)}",
-      "depends_on": ["fetch_spy_prices", "fetch_risk_free_rate"],
-      "timeout_seconds": 30
+      "description": "Calculate Sharpe ratio with fixed risk-free rate",
+      "code": "import yfinance as yf\\nimport pandas as pd\\nimport numpy as np\\n\\n# Download using Ticker API\\nticker = yf.Ticker('SPY')\\ndata = ticker.history(start='2023-01-01', end='2023-12-31')\\n\\n# Extract Close prices\\nclose_prices = data['Close']\\n\\n# Calculate daily returns\\nreturns = close_prices.pct_change().dropna()\\n\\n# Sharpe ratio calculation\\nrisk_free_rate = 0.045  # 4.5% annual for 2023\\ndaily_rf = risk_free_rate / 252\\nexcess_returns = returns - daily_rf\\n\\n# Annualized Sharpe ratio\\nmean_excess = excess_returns.mean()\\nstd_returns = excess_returns.std()\\nsharpe = (mean_excess / std_returns) * np.sqrt(252)\\n\\n# Create result\\nresult = {'sharpe_ratio': float(sharpe), 'mean_return': float(returns.mean() * 252), 'volatility': float(returns.std() * np.sqrt(252))}\\nimport json\\nprint(json.dumps(result))",
+      "depends_on": [],
+      "timeout_seconds": 60
     }
   ],
   "expected_output_format": "Dictionary with keys: sharpe_ratio (float), mean_return (float), volatility (float)",
-  "confidence_level": 0.85,
+  "confidence_level": 0.90,
   "caveats": [
-    "Assumes 252 trading days per year",
-    "Uses simple daily returns (not log returns)"
+    "Uses fixed 4.5% annual risk-free rate for 2023",
+    "Assumes 252 trading days per year"
   ]
 }
 
@@ -249,6 +228,40 @@ EXAMPLE OUTPUT (Beta AnalysisPlan):
   "caveats": [
     "Beta measures systematic risk relative to market",
     "Uses daily returns (not monthly)"
+  ]
+}
+
+EXAMPLE INPUT (Volatility Calculation):
+"Calculate the annualized volatility for SPY from 2023-01-01 to 2023-12-31"
+
+EXAMPLE OUTPUT (Volatility AnalysisPlan):
+{
+  "query_id": "q_vol_spy_2023",
+  "user_query": "Calculate the annualized volatility for SPY from 2023-01-01 to 2023-12-31",
+  "plan_reasoning": "To calculate annualized volatility: 1) Download SPY prices, 2) Calculate daily returns, 3) Compute standard deviation, 4) Annualize by multiplying by sqrt(252)",
+  "data_requirements": [
+    {
+      "ticker": "SPY",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "ohlcv",
+      "source": "yfinance"
+    }
+  ],
+  "code_blocks": [
+    {
+      "step_id": "calculate_volatility",
+      "description": "Calculate annualized volatility from daily returns",
+      "code": "import yfinance as yf\\nimport pandas as pd\\nimport numpy as np\\n\\n# Download using Ticker API\\nticker = yf.Ticker('SPY')\\ndata = ticker.history(start='2023-01-01', end='2023-12-31')\\n\\n# Extract Close prices\\nclose_prices = data['Close']\\n\\n# Calculate daily returns\\nreturns = close_prices.pct_change().dropna()\\n\\n# Calculate annualized volatility\\ndaily_vol = returns.std()\\nannualized_vol = daily_vol * np.sqrt(252)\\n\\n# Create result\\nresult = {'volatility': float(annualized_vol), 'daily_volatility': float(daily_vol), 'data_points': len(returns)}\\nimport json\\nprint(json.dumps(result))",
+      "depends_on": [],
+      "timeout_seconds": 60
+    }
+  ],
+  "expected_output_format": "Dictionary with keys: volatility (float, annualized), daily_volatility (float), data_points (int)",
+  "confidence_level": 0.95,
+  "caveats": [
+    "Volatility is annualized using sqrt(252) scaling",
+    "Based on daily returns standard deviation"
   ]
 }
 
