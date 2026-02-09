@@ -94,6 +94,30 @@ DATA REQUIREMENTS RULES:
   * Use "economic" for FRED data (not "risk_free_rate")
 - source: "yfinance", "fred", "sec", or "alpha_vantage"
 
+FRED API FALLBACK STRATEGY (CRITICAL for MVP):
+When calculating metrics that require risk-free rate (Sharpe ratio, etc):
+1. ALWAYS wrap FRED API calls in try/except blocks
+2. If FRED API fails (missing key, network error), use these fallback rates:
+   - 2021: 0.05% annual (near-zero rate environment)
+   - 2022: 1.5% annual (rising rates)
+   - 2023: 4.5% annual (elevated rates)
+   - 2024+: 4.0% annual (normalized rates)
+3. Convert annual rate to daily: daily_rf = (annual_rate / 100) / 252
+4. Add 'risk_free_rate_source' to result: 'fred' or 'fallback_YYYY'
+5. Example fallback code:
+   try:
+       from fredapi import Fred
+       fred = Fred()
+       rf_series = fred.get_series('DGS3MO', start_date='2023-01-01', end_date='2023-12-31')
+       rf_daily = (rf_series / 100) / 252
+       rf_source = 'fred'
+   except Exception as e:
+       # Fallback: use 4.5% annual for 2023
+       import pandas as pd
+       rf_annual = 4.5
+       rf_daily = pd.Series([(rf_annual / 100) / 252] * len(spy_returns), index=spy_returns.index)
+       rf_source = 'fallback_2023'
+
 EXAMPLE INPUT:
 "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31"
 
@@ -148,6 +172,15 @@ EXAMPLE OUTPUT (COMPLETE AnalysisPlan JSON):
     "Uses simple daily returns (not log returns)"
   ]
 }
+
+CODE OUTPUT RULES (CRITICAL):
+1. The FINAL code block MUST create a 'result' dictionary with all computed values
+2. The FINAL code block MUST print the result as JSON: import json; print(json.dumps(result))
+3. This JSON output is how the GATE node extracts verified values
+4. Example final lines:
+   result = {'sharpe_ratio': float(sharpe_ratio), 'mean_return': float(mean_return)}
+   import json
+   print(json.dumps(result))
 
 SAFETY RULES:
 - No file system access (no os, subprocess)

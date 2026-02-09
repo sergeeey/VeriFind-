@@ -36,6 +36,8 @@ class VerifiedFact:
 
     Week 5 Day 3: Made mutable to allow confidence adjustment via Debate.
     Core numerical values remain immutable by design.
+    
+    Week 11: Added data attribution fields for compliance (SEC/FINRA).
     """
 
     fact_id: str
@@ -52,6 +54,10 @@ class VerifiedFact:
     # Week 5 Day 3: Added for Debate System integration
     source_code: Optional[str] = None
     confidence_score: float = 1.0  # Default high confidence before debate
+    
+    # Week 11: Data attribution for regulatory compliance
+    data_source: str = "yfinance"  # Source: yfinance, alpha_vantage, polygon, cache
+    data_freshness: Optional[datetime] = None  # When data was fetched from external API
 
 
 @dataclass
@@ -119,17 +125,46 @@ class TruthBoundaryGate:
         """
         Parse JSON output from stdout.
 
+        Tries to parse:
+        1. The entire stdout as JSON
+        2. The last non-empty line as JSON
+        3. Any line that looks like JSON (starts with { or [)
+
         Args:
             stdout: JSON string from code execution
 
         Returns:
             Dictionary with parsed values
         """
+        if not stdout:
+            return {}
+
+        # Try parsing entire stdout first
         try:
             data = json.loads(stdout)
             return data if isinstance(data, dict) else {}
         except json.JSONDecodeError:
-            return {}
+            pass
+
+        # Try parsing last non-empty line
+        lines = [line.strip() for line in stdout.strip().split('\n') if line.strip()]
+        if lines:
+            try:
+                data = json.loads(lines[-1])
+                return data if isinstance(data, dict) else {}
+            except json.JSONDecodeError:
+                pass
+
+        # Try finding any line that looks like JSON
+        for line in reversed(lines):
+            if line.startswith('{') or line.startswith('['):
+                try:
+                    data = json.loads(line)
+                    return data if isinstance(data, dict) else {}
+                except json.JSONDecodeError:
+                    continue
+
+        return {}
 
     def validate(self, exec_result: ExecutionResult) -> ValidationResult:
         """
@@ -161,9 +196,36 @@ class TruthBoundaryGate:
         # Try to parse as JSON first
         extracted = self.parse_json_output(exec_result.stdout)
 
-        # If not JSON, parse as key-value pairs
+        # CRITICAL: If JSON extraction found an 'error' key, treat as failure
+        if extracted and 'error' in extracted:
+            return ValidationResult(
+                is_valid=False,
+                status='error',
+                extracted_values={},
+                error_message=str(extracted['error'])
+            )
+
+        # If no JSON found, check if stderr has errors before falling back to parsing
+        if not extracted and exec_result.stderr and exec_result.stderr.strip():
+            return ValidationResult(
+                is_valid=False,
+                status='error',
+                extracted_values={},
+                error_message=exec_result.stderr
+            )
+
+        # If still no extracted values, try key-value pairs (fallback)
         if not extracted:
             extracted = self.parse_numerical_output(exec_result.stdout)
+
+        # Final check: if still no values and stderr exists, it's an error
+        if not extracted and exec_result.stderr and exec_result.stderr.strip():
+            return ValidationResult(
+                is_valid=False,
+                status='error',
+                extracted_values={},
+                error_message=exec_result.stderr
+            )
 
         return ValidationResult(
             is_valid=True,

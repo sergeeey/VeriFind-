@@ -7,11 +7,13 @@ FROM python:3.11-slim
 
 # Install financial analysis libraries
 RUN pip install --no-cache-dir \
-    yfinance==0.2.41 \
+    yfinance>=1.1.0 \
     fredapi==0.5.2 \
     pandas==2.2.3 \
     numpy==2.0.1 \
-    requests==2.32.3
+    requests==2.32.3 \
+    pytz \
+    tzdata
 
 # Set working directory
 WORKDIR /workspace
