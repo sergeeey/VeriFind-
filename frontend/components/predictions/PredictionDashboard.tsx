@@ -50,7 +50,7 @@ export function PredictionDashboard() {
     }
 
     fetchTickers()
-  }, [selectedTicker])
+  }, [])
 
   // Fetch track record
   useEffect(() => {
@@ -136,12 +136,12 @@ export function PredictionDashboard() {
             <SelectValue placeholder="Select ticker..." />
           </SelectTrigger>
           <SelectContent>
-            {tickers.length === 0 ? (
+            {tickers?.length === 0 ? (
               <SelectItem value="loading" disabled>
                 Loading tickers...
               </SelectItem>
             ) : (
-              tickers.map((ticker) => (
+              tickers?.map((ticker) => (
                 <SelectItem key={ticker} value={ticker}>
                   {ticker}
                 </SelectItem>
