@@ -1,0 +1,24 @@
+# VEE Sandbox Docker Image
+# Contains financial analysis libraries for code execution
+#
+# Week 11 Day 5: Golden Set Real LLM Validation
+
+FROM python:3.11-slim
+
+# Install financial analysis libraries
+RUN pip install --no-cache-dir \
+    yfinance==0.2.41 \
+    fredapi==0.5.2 \
+    pandas==2.2.3 \
+    numpy==2.0.1 \
+    requests==2.32.3
+
+# Set working directory
+WORKDIR /workspace
+
+# Run as non-root user for security
+RUN useradd -m -u 1000 veeuser
+USER veeuser
+
+# Default command
+CMD ["python3"]
