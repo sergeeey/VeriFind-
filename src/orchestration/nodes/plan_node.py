@@ -2,6 +2,7 @@
 PLAN Node - Generates executable analysis plans from user queries.
 
 Week 1 Day 3: Core implementation with Claude Sonnet 4.5
+Week 11 Day 5: Made provider-agnostic with fallback chain (Anthropic → DeepSeek → OpenAI → Gemini)
 
 Design principles (Truth Boundary):
 1. LLM generates CODE, not numbers
@@ -11,9 +12,13 @@ Design principles (Truth Boundary):
 
 from typing import Optional, Dict, Any
 from datetime import datetime, UTC
+import json
+import logging
 
-from ..claude_client import ClaudeClient
+from ..universal_llm_client import UniversalLLMClient, LLMResponse
 from ..schemas.plan_output import AnalysisPlan, PlanValidationResult
+
+logger = logging.getLogger(__name__)
 
 
 class PlanNode:
@@ -30,19 +35,37 @@ class PlanNode:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: str = "claude-sonnet-4-5-20250929",
-        enable_validation: bool = True
+        model: str = None,
+        enable_validation: bool = True,
+        preferred_provider: Optional[str] = None
     ):
         """
-        Initialize PLAN node.
+        Initialize PLAN node with provider-agnostic LLM client.
 
         Args:
-            api_key: Anthropic API key
-            model: Claude model to use
+            api_key: DEPRECATED - API keys auto-detected from environment
+            model: Model override (uses provider defaults if None)
             enable_validation: Enable plan validation
+            preferred_provider: Preferred LLM provider ("anthropic", "deepseek", "openai", "gemini")
+                               If None, tries all in fallback order
         """
-        self.client = ClaudeClient(api_key=api_key, model=model)
+        # Create universal client with fallback chain
+        try:
+            self.client = UniversalLLMClient(
+                preferred_provider=preferred_provider,
+                model=model,
+                temperature=0.0,  # Deterministic for planning
+                max_tokens=4096
+            )
+            logger.info(f"✅ PLAN node initialized with providers: {list(self.client.available_providers.keys())}")
+        except ValueError as e:
+            raise ValueError(
+                f"PLAN node init failed: {e}\n"
+                f"Set at least one API key (ANTHROPIC_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY)"
+            )
+
         self.enable_validation = enable_validation
+        self.last_provider_used = None
 
         # System prompt for PLAN generation
         self.system_prompt = """You are an expert financial analyst planning system.
@@ -55,44 +78,75 @@ CRITICAL CONSTRAINTS (Truth Boundary):
 3. Plans must be deterministic and reproducible
 4. Use only approved data sources: yfinance, FRED, SEC filings
 
-PLAN STRUCTURE:
-1. Data Requirements: What data is needed?
-2. Code Blocks: Sequential Python code to execute
-3. Dependencies: Execution order (topological)
-4. Validation: Check for edge cases
+MANDATORY JSON FIELDS (must include ALL of these):
+- query_id: string (unique identifier)
+- user_query: string (the original user question)
+- plan_reasoning: string (chain-of-thought explanation)
+- data_requirements: array of objects
+- code_blocks: array of objects
+- expected_output_format: string (describe the final result format)
+- confidence_level: float (0.0 to 1.0)
+
+DATA REQUIREMENTS RULES:
+- ticker: ALWAYS use "ticker" field (even for FRED data like "DGS3MO")
+- data_type: MUST be EXACTLY one of: "ohlcv", "fundamentals", "news", "filings", "economic"
+  * Use "ohlcv" for price/volume data (not "historical_prices")
+  * Use "economic" for FRED data (not "risk_free_rate")
+- source: "yfinance", "fred", "sec", or "alpha_vantage"
 
 EXAMPLE INPUT:
-"What was Apple's revenue growth in 2023?"
+"Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31"
 
-EXAMPLE OUTPUT (AnalysisPlan):
+EXAMPLE OUTPUT (COMPLETE AnalysisPlan JSON):
 {
+  "query_id": "q_sharpe_spy_2023",
+  "user_query": "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31",
+  "plan_reasoning": "To calculate Sharpe ratio, I need: 1) SPY historical prices for 2023, 2) Risk-free rate data from FRED (3-month Treasury), 3) Calculate daily returns, 4) Annualize and compute (mean - rf) / std",
   "data_requirements": [
     {
-      "ticker": "AAPL",
-      "start_date": "2022-01-01",
+      "ticker": "SPY",
+      "start_date": "2023-01-01",
       "end_date": "2023-12-31",
-      "data_type": "fundamentals",
+      "data_type": "ohlcv",
       "source": "yfinance"
+    },
+    {
+      "ticker": "DGS3MO",
+      "start_date": "2023-01-01",
+      "end_date": "2023-12-31",
+      "data_type": "economic",
+      "source": "fred"
     }
   ],
   "code_blocks": [
     {
-      "step_id": "fetch_financials",
-      "description": "Fetch Apple financial data",
-      "code": "import yfinance as yf\\naapl = yf.Ticker('AAPL')\\nfinancials = aapl.financials",
+      "step_id": "fetch_spy_prices",
+      "description": "Fetch SPY historical OHLCV data",
+      "code": "import yfinance as yf\\nimport pandas as pd\\nspy = yf.download('SPY', start='2023-01-01', end='2023-12-31')\\nspy_close = spy['Close']\\nspy_returns = spy_close.pct_change().dropna()",
       "depends_on": [],
       "timeout_seconds": 60
     },
     {
-      "step_id": "calculate_growth",
-      "description": "Calculate YoY revenue growth",
-      "code": "revenue_2023 = financials.loc['Total Revenue']['2023']\\nrevenue_2022 = financials.loc['Total Revenue']['2022']\\ngrowth = (revenue_2023 - revenue_2022) / revenue_2022 * 100",
-      "depends_on": ["fetch_financials"],
+      "step_id": "fetch_risk_free_rate",
+      "description": "Fetch 3-month Treasury rate from FRED",
+      "code": "from fredapi import Fred\\nfred = Fred()\\nrf_rate = fred.get_series('DGS3MO', start_date='2023-01-01', end_date='2023-12-31')\\nrf_daily = (rf_rate / 100) / 252",
+      "depends_on": [],
+      "timeout_seconds": 60
+    },
+    {
+      "step_id": "calculate_sharpe",
+      "description": "Calculate annualized Sharpe ratio",
+      "code": "import numpy as np\\nmean_return = spy_returns.mean() * 252\\nstd_return = spy_returns.std() * np.sqrt(252)\\navg_rf = rf_daily.mean() * 252\\nsharpe_ratio = (mean_return - avg_rf) / std_return\\nresult = {'sharpe_ratio': float(sharpe_ratio), 'mean_return': float(mean_return), 'volatility': float(std_return)}",
+      "depends_on": ["fetch_spy_prices", "fetch_risk_free_rate"],
       "timeout_seconds": 30
     }
   ],
-  "plan_reasoning": "To calculate revenue growth, I need: 1) Financial data for 2022-2023, 2) Extract total revenue for both years, 3) Calculate percentage growth",
-  "confidence_level": 0.9
+  "expected_output_format": "Dictionary with keys: sharpe_ratio (float), mean_return (float), volatility (float)",
+  "confidence_level": 0.85,
+  "caveats": [
+    "Assumes 252 trading days per year",
+    "Uses simple daily returns (not log returns)"
+  ]
 }
 
 SAFETY RULES:
@@ -100,6 +154,8 @@ SAFETY RULES:
 - No network access except approved APIs
 - Timeout all code blocks (max 300 seconds)
 - Validate inputs before execution
+
+REMINDER: You MUST include ALL mandatory fields. Do NOT use field names like "series_id" or enum values like "historical_prices" or "risk_free_rate".
 """
 
     def generate_plan(
@@ -123,15 +179,30 @@ SAFETY RULES:
         # Build prompt
         prompt = self._build_prompt(user_query, context)
 
-        # Generate structured output
-        plan = self.client.generate_structured_output(
-            prompt=prompt,
-            output_schema=AnalysisPlan,
-            system_prompt=self.system_prompt,
-            max_tokens=4096,
-            temperature=1.0,
-            validation_retries=2
-        )
+        # Generate plan using universal client (with provider fallback)
+        try:
+            response = self.client.generate(
+                system_prompt=self.system_prompt,
+                user_prompt=prompt,
+                json_mode=True  # Request structured JSON output
+            )
+
+            # Track which provider was used
+            self.last_provider_used = response.provider
+            logger.info(f"Plan generated by {response.provider} ({response.model}), cost: ${response.cost:.6f}")
+
+            # Parse JSON response to AnalysisPlan (Pydantic model)
+            plan_dict = json.loads(response.content)
+            plan = AnalysisPlan.model_validate(plan_dict)
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse plan JSON: {e}")
+            logger.error(f"Raw response: {response.content[:500]}")
+            raise ValueError(f"LLM returned invalid JSON: {e}")
+
+        except Exception as e:
+            logger.error(f"Plan generation failed: {e}", exc_info=True)
+            raise ValueError(f"Failed to generate plan: {e}")
 
         # Add query metadata
         plan.query_id = plan.query_id or self._generate_query_id()
@@ -245,6 +316,7 @@ Return the plan as valid JSON matching the AnalysisPlan schema."""
     def get_stats(self) -> Dict[str, Any]:
         """Get node statistics."""
         return {
-            "client_stats": self.client.get_stats(),
+            "available_providers": list(self.client.available_providers.keys()),
+            "last_provider_used": self.last_provider_used,
             "validation_enabled": self.enable_validation
         }
