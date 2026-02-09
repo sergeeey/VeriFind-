@@ -6,12 +6,13 @@ Endpoints for retrieving predictions, track record, and corridor data.
 """
 
 from fastapi import APIRouter, HTTPException, status, Query, Depends
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from decimal import Decimal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from ...predictions import PredictionStore, Prediction, TrackRecord, CorridorData
+from ...predictions import PredictionStore, Prediction, TrackRecord, CorridorData, AccuracyTracker
 from ..config import get_settings
 
 router = APIRouter(prefix="/api/predictions", tags=["Predictions"])
@@ -64,6 +65,22 @@ class TickersResponse(BaseModel):
     disclaimer: str = Field(default=DISCLAIMER)
 
 
+class CheckActualsResponse(BaseModel):
+    """Response for check-actuals endpoint."""
+    total_checked: int
+    successful: int
+    failed: int
+    results: List[Dict[str, Any]]
+    disclaimer: str = Field(default=DISCLAIMER)
+
+
+class EvaluatePredictionResponse(BaseModel):
+    """Response for evaluate single prediction endpoint."""
+    success: bool
+    result: Dict[str, Any]
+    disclaimer: str = Field(default=DISCLAIMER)
+
+
 # =============================================================================
 # Dependency: PredictionStore instance
 # =============================================================================
@@ -71,6 +88,13 @@ class TickersResponse(BaseModel):
 def get_prediction_store() -> PredictionStore:
     """Get PredictionStore instance."""
     return PredictionStore(db_url=settings.timescaledb_url)
+
+
+def get_accuracy_tracker(
+    store: PredictionStore = Depends(get_prediction_store)
+) -> AccuracyTracker:
+    """Get AccuracyTracker instance."""
+    return AccuracyTracker(prediction_store=store)
 
 
 # =============================================================================
@@ -260,4 +284,103 @@ async def get_tickers(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve tickers: {str(e)}"
+        )
+
+
+@router.post("/check-actuals", response_model=CheckActualsResponse)
+async def check_actuals(
+    days_until_target: int = Query(default=7, ge=1, le=30, description="Days window for pending predictions"),
+    tracker: AccuracyTracker = Depends(get_accuracy_tracker)
+):
+    """
+    Run daily accuracy check for all pending predictions with expired target dates.
+
+    Fetches actual prices via yfinance and updates predictions with:
+    - Actual price
+    - Accuracy band (HIT/NEAR/MISS)
+    - Error percentage
+    - Error direction (OVER/UNDER/EXACT)
+
+    Args:
+        days_until_target: Days before/after target_date to consider (default: 7)
+
+    Returns:
+        Summary of checked predictions with individual results
+
+    Example:
+        POST /api/predictions/check-actuals?days_until_target=7
+    """
+    try:
+        results = tracker.run_daily_check(days_until_target=days_until_target)
+
+        successful = sum(1 for r in results if r['success'])
+        failed = len(results) - successful
+
+        return CheckActualsResponse(
+            total_checked=len(results),
+            successful=successful,
+            failed=failed,
+            results=results
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to run daily check: {str(e)}"
+        )
+
+
+@router.post("/{prediction_id}/evaluate", response_model=EvaluatePredictionResponse)
+async def evaluate_prediction(
+    prediction_id: UUID,
+    tracker: AccuracyTracker = Depends(get_accuracy_tracker)
+):
+    """
+    Evaluate a single prediction by comparing with actual price.
+
+    Fetches actual price for the prediction's target_date and updates:
+    - Actual price
+    - Accuracy band (HIT/NEAR/MISS)
+    - Error percentage
+    - Error direction
+
+    Args:
+        prediction_id: UUID of prediction to evaluate
+
+    Returns:
+        Evaluation result with accuracy metrics
+
+    Raises:
+        404: Prediction not found
+        500: Evaluation failed
+
+    Example:
+        POST /api/predictions/550e8400-e29b-41d4-a716-446655440000/evaluate
+    """
+    try:
+        result = tracker.evaluate_prediction(prediction_id)
+
+        if not result['success']:
+            if 'not found' in result.get('message', ''):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=result['message']
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=result['message']
+                )
+
+        return EvaluatePredictionResponse(
+            success=result['success'],
+            result=result
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to evaluate prediction: {str(e)}"
         )
