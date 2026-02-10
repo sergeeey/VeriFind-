@@ -69,8 +69,8 @@ class YFinanceAdapter:
         self._last_api_call = 0.0
 
     def _get_cache_key(self, ticker: str, start: str, end: str, interval: str = '1d') -> str:
-        """Generate cache key for request."""
-        return hashlib.md5(
+        """Generate cache key for request using SHA-256 (secure hash)."""
+        return hashlib.sha256(
             f"{ticker}_{start}_{end}_{interval}".encode()
         ).hexdigest()
 
