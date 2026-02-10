@@ -66,8 +66,14 @@ class APISettings(BaseSettings):
     # External APIs (Optional - for AI models and market data)
     openai_api_key: Optional[str] = Field(None, env="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(None, env="ANTHROPIC_API_KEY")
+    deepseek_api_key: Optional[str] = Field(None, env="DEEPSEEK_API_KEY")
     alpha_vantage_api_key: Optional[str] = Field(None, env="ALPHA_VANTAGE_API_KEY")
     polygon_api_key: Optional[str] = Field(None, env="POLYGON_API_KEY")
+    
+    # LLM Provider settings
+    llm_provider: str = Field("deepseek", env="LLM_PROVIDER")
+    llm_fallback: str = Field("mock", env="LLM_FALLBACK")
+    deepseek_base_url: str = Field("https://api.deepseek.com", env="DEEPSEEK_BASE_URL")
 
     # Sandbox Execution (VEE node)
     sandbox_timeout_seconds: int = Field(30, env="SANDBOX_TIMEOUT_SECONDS")

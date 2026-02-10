@@ -48,11 +48,14 @@ async def add_disclaimer_to_json_responses(request: Request, call_next):
             if isinstance(data, dict) and "disclaimer" not in data:
                 data["disclaimer"] = LEGAL_DISCLAIMER
             
-            # Re-encode response
+            # Re-encode response with correct Content-Length
+            new_headers = dict(response.headers)
+            new_headers.pop("content-length", None)  # Remove old Content-Length
+            
             return JSONResponse(
                 content=data,
                 status_code=response.status_code,
-                headers=dict(response.headers),
+                headers=new_headers,
                 media_type="application/json"
             )
         except (json.JSONDecodeError, UnicodeDecodeError):
