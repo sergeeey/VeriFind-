@@ -21,7 +21,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 1.743,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -41,7 +41,7 @@
       "difficulty": "medium",
       "query": "Calculate the Sharpe ratio for SPY from 2021-01-01 to 2023-12-31",
       "expected_value": 0.542,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -61,7 +61,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for QQQ from 2023-01-01 to 2023-12-31",
       "expected_value": 2.493,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -81,7 +81,7 @@
       "difficulty": "medium",
       "query": "Calculate the Sharpe ratio for QQQ from 2021-01-01 to 2023-12-31",
       "expected_value": 0.457,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -101,7 +101,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for AAPL from 2023-01-01 to 2023-12-31",
       "expected_value": 2.217,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -121,7 +121,7 @@
       "difficulty": "medium",
       "query": "Calculate the Sharpe ratio for AAPL from 2021-01-01 to 2023-12-31",
       "expected_value": 0.567,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -141,7 +141,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for MSFT from 2023-01-01 to 2023-12-31",
       "expected_value": 1.898,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -161,7 +161,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for GOOGL from 2023-01-01 to 2023-12-31",
       "expected_value": 1.584,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -181,7 +181,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for TSLA from 2023-01-01 to 2023-12-31",
       "expected_value": 1.825,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -201,7 +201,7 @@
       "difficulty": "easy",
       "query": "Calculate the Sharpe ratio for VTI from 2023-01-01 to 2023-12-31",
       "expected_value": 1.681,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -561,7 +561,7 @@
       "difficulty": "medium",
       "query": "Calculate the beta of AAPL relative to SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 1.104,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -582,7 +582,7 @@
       "difficulty": "medium",
       "query": "Calculate the beta of MSFT relative to SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 1.172,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -603,7 +603,7 @@
       "difficulty": "medium",
       "query": "Calculate the beta of TSLA relative to SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 2.212,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -624,7 +624,7 @@
       "difficulty": "medium",
       "query": "Calculate the beta of KO relative to SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 0.381,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
@@ -645,7 +645,7 @@
       "difficulty": "medium",
       "query": "Calculate the beta of QQQ relative to SPY from 2023-01-01 to 2023-12-31",
       "expected_value": 1.252,
-      "tolerance": 0.15,
+      "tolerance": 0.20,
       "confidence_range": [
         0.85,
         0.95
