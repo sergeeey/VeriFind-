@@ -1,0 +1,146 @@
+# APE 2026 - Staging Environment
+# Отдельное окружение для тестирования (не конфликтует с local)
+
+version: '3.8'
+
+services:
+  # API Backend
+  api-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ape-api-staging
+    ports:
+      - "8001:8000"  # Другой порт!
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=DEBUG
+      # Базы данных staging
+      - NEO4J_URI=bolt://neo4j-staging:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-staging-neo4j-pass}
+      - TIMESCALEDB_URL=postgresql://postgres:${POSTGRES_PASSWORD:-staging-postgres-pass}@timescaledb-staging:5432/ape
+      - REDIS_HOST=redis-staging
+      - REDIS_PORT=6379
+      # API Keys
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+    depends_on:
+      neo4j-staging:
+        condition: service_healthy
+      timescaledb-staging:
+        condition: service_healthy
+      redis-staging:
+        condition: service_started
+    networks:
+      - ape-staging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Neo4j (Graph Database) - Staging
+  neo4j-staging:
+    image: neo4j:5.14.0-community
+    container_name: ape-neo4j-staging
+    ports:
+      - "7475:7474"  # HTTP (другой порт!)
+      - "7689:7687"  # Bolt (другой порт!)
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-staging-neo4j-pass}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_heap_max__size=512M
+      - NEO4J_dbms_memory_pagecache_size=256M
+    volumes:
+      - neo4j_staging_data:/data
+      - neo4j_staging_logs:/logs
+    networks:
+      - ape-staging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # TimescaleDB (Time-series) - Staging
+  timescaledb-staging:
+    image: timescale/timescaledb:latest-pg15
+    container_name: ape-timescaledb-staging
+    ports:
+      - "5434:5432"  # Другой порт!
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-staging-postgres-pass}
+      - POSTGRES_DB=ape
+    volumes:
+      - timescaledb_staging_data:/var/lib/postgresql/data
+    networks:
+      - ape-staging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Cache & WebSocket) - Staging
+  redis-staging:
+    image: redis:7-alpine
+    container_name: ape-redis-staging
+    ports:
+      - "6381:6379"  # Другой порт!
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - ape-staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  # Prometheus - Staging
+  prometheus-staging:
+    image: prom/prometheus:latest
+    container_name: ape-prometheus-staging
+    ports:
+      - "9091:9090"  # Другой порт!
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_staging_data:/prometheus
+    networks:
+      - ape-staging
+    restart: unless-stopped
+
+  # Grafana - Staging
+  grafana-staging:
+    image: grafana/grafana:latest
+    container_name: ape-grafana-staging
+    ports:
+      - "3002:3000"  # Другой порт!
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+    volumes:
+      - grafana_staging_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - ape-staging
+    restart: unless-stopped
+
+volumes:
+  neo4j_staging_data:
+  neo4j_staging_logs:
+  timescaledb_staging_data:
+  redis_staging_data:
+  prometheus_staging_data:
+  grafana_staging_data:
+
+networks:
+  ape-staging:
+    driver: bridge

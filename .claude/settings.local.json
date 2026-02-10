@@ -28,7 +28,10 @@
       "Bash(git branch:*)",
       "Bash(then echo \"✅ .env exists locally\")",
       "Bash(else echo \"❌ .env missing - need to recreate from .env.example\")",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(curl:*)",
+      "Bash(findstr:*)"
     ]
   }
 }
