@@ -50,8 +50,18 @@ curl -X POST http://localhost:8000/api/analyze \
 
 ## Web интерфейс
 
+### Frontend (Рекомендуется!)
+```bash
+cd frontend
+npm install  # только первый раз
+npm run dev
+```
+**Открыть:** http://localhost:3000
+
+### Инструменты
+- **Frontend UI**: http://localhost:3000 ← Главный интерфейс
 - **API Docs**: http://localhost:8000/docs
-- **Neo4j**: http://localhost:7474 (логин: neo4j, пароль: из .env)
+- **Neo4j Browser**: http://localhost:7474 (neo4j / пароль из .env)
 
 ## Важно!
 
