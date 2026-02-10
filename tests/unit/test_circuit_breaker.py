@@ -15,9 +15,10 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_closed_state_allows_calls(self):
         """Closed state allows calls through"""
-        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState
+        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerConfig
         
-        breaker = CircuitBreaker("test", MagicMock(failure_threshold=3))
+        config = CircuitBreakerConfig(failure_threshold=3)
+        breaker = CircuitBreaker("test", config)
         
         # Mock function that succeeds
         mock_func = AsyncMock(return_value="success")
@@ -31,9 +32,10 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_opens_after_failures(self):
         """Circuit opens after threshold failures"""
-        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerOpen
+        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerOpen, CircuitBreakerConfig
         
-        breaker = CircuitBreaker("test", MagicMock(failure_threshold=3))
+        config = CircuitBreakerConfig(failure_threshold=3)
+        breaker = CircuitBreaker("test", config)
         
         # Mock function that fails
         mock_func = AsyncMock(side_effect=Exception("fail"))
@@ -53,9 +55,9 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_half_open_after_timeout(self):
         """Circuit transitions to half-open after timeout"""
-        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState
+        from src.resilience.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerConfig
         
-        config = MagicMock(failure_threshold=3, timeout=0.001)  # Very short timeout
+        config = CircuitBreakerConfig(failure_threshold=3, timeout=0.001)  # Very short timeout
         breaker = CircuitBreaker("test", config)
         
         # Open the circuit
