@@ -44,13 +44,19 @@ async def health_check():
 @router.get("/ready", status_code=status.HTTP_200_OK)
 async def readiness_check():
     """Kubernetes readiness probe."""
-    return {"ready": True, "timestamp": datetime.utcnow().isoformat()}
+    metrics = get_health_metrics()
+    is_ready = all(v == "up" for v in metrics.values())
+    return {
+        "status": "ready" if is_ready else "not_ready",
+        "ready": is_ready,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 
 @router.get("/live", status_code=status.HTTP_200_OK)
 async def liveness_check():
     """Kubernetes liveness probe."""
-    return {"alive": True}
+    return {"status": "alive", "alive": True}
 
 
 @router.get("/disclaimer", status_code=status.HTTP_200_OK)

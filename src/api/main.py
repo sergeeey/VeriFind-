@@ -21,7 +21,7 @@ from .error_handlers import (
     configure_logging,
 )
 from .monitoring import prometheus_middleware, initialize_monitoring
-from .middleware import add_security_headers, add_disclaimer_to_json_responses
+from .middleware import add_security_headers, add_disclaimer_to_json_responses, add_rate_limit_headers
 from .routes import health_router, analysis_router, data_router, predictions_router
 from fastapi.exceptions import RequestValidationError
 from .exceptions import APEException, ValidationError as APEValidationError
@@ -66,6 +66,7 @@ app.add_middleware(
 app.middleware("http")(request_id_middleware)
 app.middleware("http")(error_logging_middleware)
 app.middleware("http")(prometheus_middleware)
+app.middleware("http")(add_rate_limit_headers)
 app.middleware("http")(add_security_headers)
 app.middleware("http")(add_disclaimer_to_json_responses)
 

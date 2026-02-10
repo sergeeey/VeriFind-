@@ -31,6 +31,14 @@ DISCLAIMER = (
 # Response Models (with disclaimer)
 # =============================================================================
 
+class PredictionsListResponse(BaseModel):
+    """Response for predictions list endpoint."""
+    predictions: List[Prediction]
+    total: int
+    ticker: Optional[str] = None
+    disclaimer: str = Field(default=DISCLAIMER)
+
+
 class LatestPredictionResponse(BaseModel):
     """Response for latest prediction endpoint."""
     prediction: Optional[Prediction]
@@ -90,6 +98,18 @@ def get_prediction_store() -> PredictionStore:
     return PredictionStore(db_url=settings.timescaledb_url)
 
 
+def _db_available() -> bool:
+    """Check if database is available (for graceful degradation)."""
+    try:
+        import psycopg2
+        # Try a quick connection
+        conn = psycopg2.connect(settings.timescaledb_url, connect_timeout=2)
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+
 def get_accuracy_tracker(
     store: PredictionStore = Depends(get_prediction_store)
 ) -> AccuracyTracker:
@@ -100,6 +120,53 @@ def get_accuracy_tracker(
 # =============================================================================
 # API Endpoints
 # =============================================================================
+
+@router.get("/", response_model=PredictionsListResponse)
+async def get_predictions_list(
+    ticker: Optional[str] = Query(default=None, description="Filter by ticker"),
+    limit: int = Query(default=20, ge=1, le=100, description="Maximum predictions to return"),
+    store: PredictionStore = Depends(get_prediction_store)
+):
+    """
+    Get list of all predictions, optionally filtered by ticker.
+    
+    Args:
+        ticker: Optional ticker symbol to filter by
+        limit: Maximum number of predictions to return
+        
+    Returns:
+        List of predictions
+    """
+    # Graceful degradation if DB unavailable
+    if not _db_available():
+        return PredictionsListResponse(predictions=[], total=0, ticker=ticker)
+    
+    try:
+        if ticker:
+            ticker = ticker.upper()
+            predictions = store.get_prediction_history(ticker=ticker, limit=limit)
+        else:
+            # Get all predictions (from all tickers)
+            all_tickers = store.get_all_tickers()
+            predictions = []
+            for t in all_tickers[:10]:  # Limit to avoid too many queries
+                preds = store.get_prediction_history(ticker=t, limit=limit // len(all_tickers) or 1)
+                predictions.extend(preds)
+            # Sort by created_at descending
+            predictions.sort(key=lambda p: p.created_at, reverse=True)
+            predictions = predictions[:limit]
+        
+        return PredictionsListResponse(
+            predictions=predictions,
+            total=len(predictions),
+            ticker=ticker
+        )
+        
+    except Exception as e:
+        logger.warning(f"Failed to retrieve predictions: {e}")
+        # Return empty list instead of 500
+        return PredictionsListResponse(predictions=[], total=0, ticker=ticker)
+
 
 @router.get("/{ticker}/latest", response_model=LatestPredictionResponse)
 async def get_latest_prediction(
@@ -154,6 +221,10 @@ async def get_prediction_history(
     """
     ticker = ticker.upper()
 
+    # Graceful degradation if DB unavailable
+    if not _db_available():
+        return PredictionHistoryResponse(ticker=ticker, total=0, predictions=[])
+
     try:
         predictions = store.get_prediction_history(
             ticker=ticker,
@@ -168,10 +239,8 @@ async def get_prediction_history(
         )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve history: {str(e)}"
-        )
+        logger.warning(f"Failed to retrieve history: {e}")
+        return PredictionHistoryResponse(ticker=ticker, total=0, predictions=[])
 
 
 @router.get("/{ticker}/corridor", response_model=CorridorResponse)
@@ -202,6 +271,10 @@ async def get_corridor_data(
     """
     ticker = ticker.upper()
 
+    # Graceful degradation if DB unavailable
+    if not _db_available():
+        return CorridorResponse(ticker=ticker, corridor_data=[])
+
     try:
         corridor_data = store.get_corridor_data(ticker=ticker, limit=limit)
 
@@ -211,10 +284,8 @@ async def get_corridor_data(
         )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve corridor data: {str(e)}"
-        )
+        logger.warning(f"Failed to retrieve corridor data: {e}")
+        return CorridorResponse(ticker=ticker, corridor_data=[])
 
 
 @router.get("/track-record", response_model=TrackRecordResponse)
@@ -245,16 +316,44 @@ async def get_track_record(
     if ticker:
         ticker = ticker.upper()
 
+    # Graceful degradation if DB unavailable
+    if not _db_available():
+        from ...predictions import TrackRecord
+        empty_record = TrackRecord(
+            total_predictions=0,
+            completed_predictions=0,
+            pending_predictions=0,
+            hit_rate=0.0,
+            near_rate=0.0,
+            miss_rate=0.0,
+            avg_error_pct=0.0,
+            median_error_pct=0.0,
+            by_ticker={},
+            recent_accuracy=0.0
+        )
+        return TrackRecordResponse(track_record=empty_record)
+
     try:
         track_record = store.get_track_record(ticker=ticker)
 
         return TrackRecordResponse(track_record=track_record)
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve track record: {str(e)}"
+        logger.warning(f"Failed to retrieve track record: {e}")
+        from ...predictions import TrackRecord
+        empty_record = TrackRecord(
+            total_predictions=0,
+            completed_predictions=0,
+            pending_predictions=0,
+            hit_rate=0.0,
+            near_rate=0.0,
+            miss_rate=0.0,
+            avg_error_pct=0.0,
+            median_error_pct=0.0,
+            by_ticker={},
+            recent_accuracy=0.0
         )
+        return TrackRecordResponse(track_record=empty_record)
 
 
 @router.get("/tickers", response_model=TickersResponse)

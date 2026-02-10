@@ -5,7 +5,7 @@ Week 12: Extracted from main.py God Object
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Header
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 import logging
 
@@ -97,7 +97,7 @@ async def analyze_query(
     query_id = str(uuid4())
     
     # Track metrics
-    queries_submitted_total.inc()
+    queries_submitted_total.labels(priority="normal").inc()
     
     logger.info(f"Query {query_id}: {request.query[:50]}...")
     
@@ -146,7 +146,7 @@ async def submit_query(
     """
     query_id = str(uuid4())
     
-    queries_submitted_total.inc()
+    queries_submitted_total.labels(priority="normal").inc()
     
     # TODO: Queue in Celery for Phase 1
     # For now, synchronous

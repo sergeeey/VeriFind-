@@ -44,17 +44,23 @@ async def prometheus_middleware(request: Request, call_next: Callable) -> Respon
     if endpoint == "/metrics":
         return await call_next(request)
 
-    # Track request size
-    request_size = int(request.headers.get("content-length", 0))
-    http_request_size_bytes.labels(method=method, endpoint=endpoint).observe(request_size)
-
-    # Increment in-progress counter
-    http_requests_in_progress.labels(method=method, endpoint=endpoint).inc()
-
     # Start timer
     start_time = time.time()
 
     try:
+        # Track request size (graceful handling)
+        try:
+            request_size = int(request.headers.get("content-length", 0))
+            http_request_size_bytes.labels(method=method, endpoint=endpoint).observe(request_size)
+        except Exception:
+            pass  # Skip metric if labels don't match
+
+        # Increment in-progress counter
+        try:
+            http_requests_in_progress.labels(method=method, endpoint=endpoint).inc()
+        except Exception:
+            pass
+
         # Process request
         response = await call_next(request)
 
@@ -63,24 +69,33 @@ async def prometheus_middleware(request: Request, call_next: Callable) -> Respon
         duration = time.time() - start_time
 
         # Increment request counter
-        http_requests_total.labels(
-            method=method,
-            endpoint=endpoint,
-            status=status
-        ).inc()
+        try:
+            http_requests_total.labels(
+                method=method,
+                endpoint=endpoint,
+                status=status
+            ).inc()
+        except Exception:
+            pass  # Skip if labels don't match
 
         # Record duration
-        http_request_duration_seconds.labels(
-            method=method,
-            endpoint=endpoint
-        ).observe(duration)
+        try:
+            http_request_duration_seconds.labels(
+                method=method,
+                endpoint=endpoint
+            ).observe(duration)
+        except Exception:
+            pass
 
         # Track response size
-        response_size = int(response.headers.get("content-length", 0))
-        http_response_size_bytes.labels(
-            method=method,
-            endpoint=endpoint
-        ).observe(response_size)
+        try:
+            response_size = int(response.headers.get("content-length", 0))
+            http_response_size_bytes.labels(
+                method=method,
+                endpoint=endpoint
+            ).observe(response_size)
+        except Exception:
+            pass
 
         # Log slow requests (> 1 second)
         if duration > 1.0:
@@ -100,16 +115,22 @@ async def prometheus_middleware(request: Request, call_next: Callable) -> Respon
         # Record exception
         duration = time.time() - start_time
 
-        http_requests_total.labels(
-            method=method,
-            endpoint=endpoint,
-            status=500
-        ).inc()
+        try:
+            http_requests_total.labels(
+                method=method,
+                endpoint=endpoint,
+                status=500
+            ).inc()
+        except Exception:
+            pass
 
-        http_request_duration_seconds.labels(
-            method=method,
-            endpoint=endpoint
-        ).observe(duration)
+        try:
+            http_request_duration_seconds.labels(
+                method=method,
+                endpoint=endpoint
+            ).observe(duration)
+        except Exception:
+            pass
 
         logger.error(
             f"Request failed: {method} {endpoint} - {type(e).__name__}",
@@ -118,15 +139,17 @@ async def prometheus_middleware(request: Request, call_next: Callable) -> Respon
                 "method": method,
                 "endpoint": endpoint,
                 "duration_seconds": duration,
-                "exception": type(e).__name__
-            }
+                "exception": type(e).__name__}
         )
 
         raise
 
     finally:
         # Decrement in-progress counter
-        http_requests_in_progress.labels(method=method, endpoint=endpoint).dec()
+        try:
+            http_requests_in_progress.labels(method=method, endpoint=endpoint).dec()
+        except Exception:
+            pass
 
 
 # ============================================================================

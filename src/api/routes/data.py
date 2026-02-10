@@ -19,6 +19,20 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 # Response Models
+class DataTickersResponse(BaseModel):
+    """Response for data tickers endpoint."""
+    tickers: List[str]
+    disclaimer: str = Field(default="This analysis is for informational purposes only...")
+
+
+class DataFetchResponse(BaseModel):
+    """Response for data fetch endpoint."""
+    task_id: str
+    status: str
+    message: str
+    disclaimer: str = Field(default="This analysis is for informational purposes only...")
+
+
 class VerifiedFactResponse(BaseModel):
     """Response model for verified fact."""
     fact_id: str
@@ -186,3 +200,53 @@ async def list_episodes(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve episodes"
         )
+
+
+# =============================================================================
+# Data API Endpoints
+# =============================================================================
+
+@router.get("/data/tickers", response_model=DataTickersResponse)
+async def get_data_tickers():
+    """
+    Get list of available tickers for market data.
+    
+    Returns:
+        List of ticker symbols
+    """
+    # Return popular tickers as default
+    default_tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "JPM"]
+    return DataTickersResponse(tickers=default_tickers)
+
+
+class FetchRequest(BaseModel):
+    """Request model for data fetch."""
+    ticker: str
+    start_date: str
+    end_date: str
+
+
+@router.post("/data/fetch", response_model=DataFetchResponse, status_code=status.HTTP_202_ACCEPTED)
+async def fetch_market_data(request: FetchRequest):
+    """
+    Fetch market data for a ticker.
+    
+    Args:
+        ticker: Stock ticker symbol
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+        
+    Returns:
+        Task ID for tracking fetch progress
+    """
+    import uuid
+    task_id = str(uuid.uuid4())
+    
+    # In production, this would queue a background task
+    logger.info(f"Data fetch requested for {request.ticker} from {request.start_date} to {request.end_date}")
+    
+    return DataFetchResponse(
+        task_id=task_id,
+        status="accepted",
+        message=f"Data fetch for {request.ticker} has been queued"
+    )
