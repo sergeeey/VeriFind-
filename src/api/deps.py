@@ -66,7 +66,8 @@ def get_orchestrator() -> LangGraphOrchestrator:
     global _orchestrator
     if _orchestrator is None:
         _orchestrator = LangGraphOrchestrator(
-            openai_api_key=settings.openai_api_key,
-            anthropic_api_key=settings.anthropic_api_key,
+            claude_api_key=settings.anthropic_api_key,
+            llm_provider=getattr(settings, 'llm_provider', 'deepseek'),
+            use_real_llm=True,
         )
     return _orchestrator
