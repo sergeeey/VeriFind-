@@ -1,0 +1,21 @@
+ID,Priority,Category,Action,Owner,Effort,Timeline,Status,Notes
+1,P0,Security,Revoke all exposed API keys and generate new ones,DevOps,2h,Immediate,Not Started,"FRED, DeepSeek, Anthropic, OpenAI, Google keys exposed in .env"
+2,P0,Security,Implement secret management (Vault/AWS Secrets Manager),DevOps,1d,Day 1,Not Started,Replace .env file approach with proper secret management
+3,P0,Testing,Increase code coverage from 42% to 80%,Backend,3d,Week 1,Not Started,"Focus on main.py, dependencies.py, config.py (currently 0%)"
+4,P0,Scalability,Fix in-memory WebSocket state (use Redis),Backend,1d,Week 1,Not Started,Global ConnectionManager prevents horizontal scaling
+5,P0,Testing,Fix Golden Set CI to use real API keys,DevOps,4h,Day 1,Not Started,Currently using fake keys in test_golden_set_integration.py
+6,P1,Resilience,Add circuit breaker for external APIs,Backend,1d,Week 2,Not Started,Use pybreaker for Anthropic/OpenAI/AlphaVantage calls
+7,P1,Reliability,Implement graceful shutdown,Backend,4h,Week 2,Not Started,FastAPI lifespan events for connection cleanup
+8,P1,Observability,Add distributed tracing (OpenTelemetry),DevOps,1d,Week 2,Not Started,Jaeger/Zipkin integration for request tracing
+9,P1,Monitoring,Create Prometheus alerting rules,DevOps,4h,Week 2,Not Started,Alertmanager rules for critical metrics
+10,P1,Security,Fix MD5 to SHA-256 (yfinance_adapter.py),Backend,1h,Week 2,Not Started,Cryptographically weak hash algorithm
+11,P2,Documentation,Add API reference documentation,Tech Writer,2d,Week 3,Not Started,Document all 22 endpoints with curl examples
+12,P2,Documentation,Create data model ERD documentation,Backend,1d,Week 3,Not Started,Neo4j graph + TimescaleDB hypertables
+13,P2,Feature,Implement feature flags,Backend,2d,Week 4,Not Started,LaunchDarkly/Flagsmith for gradual rollouts
+14,P2,Performance,Add database connection pooling,Backend,1d,Week 4,Not Started,SQLAlchemy pool_size and max_overflow
+15,P2,Operations,Create incident response runbooks,DevOps,1d,Week 4,Not Started,Playbooks for common failure scenarios
+16,P3,Deployment,Add blue-green deployment support,DevOps,2d,Post-Prod,Not Started,Zero-downtime deployments
+17,P3,Deployment,Implement canary deployments,DevOps,2d,Post-Prod,Not Started,Flagger or Argo Rollouts
+18,P3,API,Add API versioning,Backend,1d,Post-Prod,Not Started,URL or header-based versioning
+19,P3,Code Quality,Refactor God Objects (>500 LOC),Backend,3d,Post-Prod,Not Started,langgraph_orchestrator.py and llm_debate.py
+20,P3,Performance,Implement container pooling for VEE,Backend,3d,Post-Prod,Not Started,Reuse Docker containers to reduce overhead

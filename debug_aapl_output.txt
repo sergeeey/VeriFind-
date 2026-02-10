@@ -1,0 +1,24 @@
+✅ Loaded environment from E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\.env
+
+🔧 Initializing orchestrator...
+
+📊 Testing query: Calculate the Sharpe ratio for AAPL from 2023-01-01 to 2023-12-31
+======================================================================
+
+✅ Result status: StateStatus.COMPLETED
+Traceback (most recent call last):
+  File "E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\scripts\debug_aapl_sharpe.py", line 57, in <module>
+    result = asyncio.run(test_aapl_sharpe())
+  File "C:\Users\serge\miniconda3\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Users\serge\miniconda3\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\serge\miniconda3\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\scripts\debug_aapl_sharpe.py", line 47, in test_aapl_sharpe
+    if result.verified_facts:
+       ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'APEState' object has no attribute 'verified_facts'. Did you mean: 'verified_fact'?

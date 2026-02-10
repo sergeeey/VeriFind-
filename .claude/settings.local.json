@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(find:*)",
+      "Bash(git reset:*)",
+      "Bash(docker ps:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then grep -i \"TIMESCALE\\\\|POSTGRES\" .env)",
+      "Bash(else echo \"No .env file\")",
+      "Bash(fi)",
+      "Bash(docker exec:*)",
+      "Bash(python:*)",
+      "Bash(alembic current:*)",
+      "Bash(git push:*)",
+      "Bash(git merge:*)",
+      "Bash(dir:*)",
+      "Bash(wc:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pytest:*)",
+      "Bash(git pull:*)",
+      "Bash(git branch:*)",
+      "Bash(then echo \"✅ .env exists locally\")",
+      "Bash(else echo \"❌ .env missing - need to recreate from .env.example\")",
+      "Bash(tee:*)"
+    ]
+  }
+}

@@ -1,0 +1,1969 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created_date": "2026-02-08",
+    "total_queries": 100,
+    "categories": {
+      "sharpe_ratio": 25,
+      "correlation": 25,
+      "volatility": 20,
+      "beta": 20,
+      "returns": 10
+    },
+    "date_range": "2018-01-01 to 2024-11-30",
+    "data_source": "yahoo_finance"
+  },
+  "golden_set": [
+    {
+      "id": "sharpe_spy_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for SPY for 2023",
+      "params": {
+        "ticker": "SPY",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "risk_free_rate": 0.0426
+      },
+      "expected_value": 1.5058,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_qqq_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for QQQ for 2023",
+      "params": {
+        "ticker": "QQQ",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "risk_free_rate": 0.0426
+      },
+      "expected_value": 2.2803,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_aapl_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for AAPL for 2023",
+      "params": {
+        "ticker": "AAPL",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "risk_free_rate": 0.0426
+      },
+      "expected_value": 2.0059,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_msft_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for MSFT for 2023",
+      "params": {
+        "ticker": "MSFT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "risk_free_rate": 0.0426
+      },
+      "expected_value": 1.6897,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_googl_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for GOOGL for 2023",
+      "params": {
+        "ticker": "GOOGL",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31",
+        "risk_free_rate": 0.0426
+      },
+      "expected_value": 1.3538,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_amzn_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for AMZN for 2022",
+      "params": {
+        "ticker": "AMZN",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.4218,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_tsla_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for TSLA for 2022",
+      "params": {
+        "ticker": "TSLA",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.8011,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_nvda_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for NVDA for 2022",
+      "params": {
+        "ticker": "NVDA",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.1519,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_meta_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for META for 2022",
+      "params": {
+        "ticker": "META",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.5483,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_jpm_easy_001",
+      "category": "sharpe_ratio",
+      "difficulty": "easy",
+      "query": "Calculate Sharpe ratio for JPM for 2022",
+      "params": {
+        "ticker": "JPM",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -0.5288,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_xlf_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for XLF for 2020-2021",
+      "params": {
+        "ticker": "XLF",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.015
+      },
+      "expected_value": 0.3491,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_xle_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for XLE for 2020-2021",
+      "params": {
+        "ticker": "XLE",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.015
+      },
+      "expected_value": -0.0103,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_xlk_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for XLK for 2020-2021",
+      "params": {
+        "ticker": "XLK",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.015
+      },
+      "expected_value": 0.9754,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_iwm_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for IWM for 2020-2021",
+      "params": {
+        "ticker": "IWM",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.015
+      },
+      "expected_value": 0.4407,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_efa_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for EFA for 2020-2021",
+      "params": {
+        "ticker": "EFA",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.015
+      },
+      "expected_value": 0.2959,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_gld_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for GLD for 2019",
+      "params": {
+        "ticker": "GLD",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31",
+        "risk_free_rate": 0.023
+      },
+      "expected_value": 1.1973,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_slv_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for SLV for 2019",
+      "params": {
+        "ticker": "SLV",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31",
+        "risk_free_rate": 0.023
+      },
+      "expected_value": 0.6102,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_vti_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for VTI for 2019",
+      "params": {
+        "ticker": "VTI",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31",
+        "risk_free_rate": 0.023
+      },
+      "expected_value": 1.9181,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_voo_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for VOO for 2019",
+      "params": {
+        "ticker": "VOO",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31",
+        "risk_free_rate": 0.023
+      },
+      "expected_value": 1.9861,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_bnd_medium_001",
+      "category": "sharpe_ratio",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for BND for 2019",
+      "params": {
+        "ticker": "BND",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31",
+        "risk_free_rate": 0.023
+      },
+      "expected_value": 1.8183,
+      "tolerance": 0.15,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_arkk_hard_001",
+      "category": "sharpe_ratio",
+      "difficulty": "hard",
+      "query": "Calculate Sharpe ratio for ARKK for 2022",
+      "params": {
+        "ticker": "ARKK",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.6894,
+      "tolerance": 0.2,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_btcusd_hard_001",
+      "category": "sharpe_ratio",
+      "difficulty": "hard",
+      "query": "Calculate Sharpe ratio for BTC-USD for 2022",
+      "params": {
+        "ticker": "BTC-USD",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.3712,
+      "tolerance": 0.2,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_ethusd_hard_001",
+      "category": "sharpe_ratio",
+      "difficulty": "hard",
+      "query": "Calculate Sharpe ratio for ETH-USD for 2022",
+      "params": {
+        "ticker": "ETH-USD",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31",
+        "risk_free_rate": 0.0003
+      },
+      "expected_value": -1.0961,
+      "tolerance": 0.2,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_tqqq_hard_001",
+      "category": "sharpe_ratio",
+      "difficulty": "hard",
+      "query": "Calculate Sharpe ratio for TQQQ for 2021",
+      "params": {
+        "ticker": "TQQQ",
+        "start_date": "2021-01-01",
+        "end_date": "2021-12-31",
+        "risk_free_rate": 0.0006
+      },
+      "expected_value": 1.2404,
+      "tolerance": 0.2,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "sharpe_sqqq_hard_001",
+      "category": "sharpe_ratio",
+      "difficulty": "hard",
+      "query": "Calculate Sharpe ratio for SQQQ for 2018",
+      "params": {
+        "ticker": "SQQQ",
+        "start_date": "2018-01-01",
+        "end_date": "2018-12-31",
+        "risk_free_rate": 0.0136
+      },
+      "expected_value": -0.2584,
+      "tolerance": 0.2,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2018-12-31",
+        "data_cutoff": "2018-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_spy_qqq_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between SPY and QQQ daily returns for 2023",
+      "params": {
+        "ticker": "SPY",
+        "ticker_2": "QQQ",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.9166,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_aapl_msft_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between AAPL and MSFT daily returns for 2023",
+      "params": {
+        "ticker": "AAPL",
+        "ticker_2": "MSFT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.5477,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_googl_amzn_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between GOOGL and AMZN daily returns for 2023",
+      "params": {
+        "ticker": "GOOGL",
+        "ticker_2": "AMZN",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.6022,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_jpm_bac_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between JPM and BAC daily returns for 2023",
+      "params": {
+        "ticker": "JPM",
+        "ticker_2": "BAC",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.7175,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_xom_cvx_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between XOM and CVX daily returns for 2023",
+      "params": {
+        "ticker": "XOM",
+        "ticker_2": "CVX",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.8352,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_gld_slv_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between GLD and SLV daily returns for 2022",
+      "params": {
+        "ticker": "GLD",
+        "ticker_2": "SLV",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.8166,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_vti_voo_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between VTI and VOO daily returns for 2022",
+      "params": {
+        "ticker": "VTI",
+        "ticker_2": "VOO",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.9971,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_iwm_spy_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between IWM and SPY daily returns for 2022",
+      "params": {
+        "ticker": "IWM",
+        "ticker_2": "SPY",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.9325,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_tlt_ief_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between TLT and IEF daily returns for 2022",
+      "params": {
+        "ticker": "TLT",
+        "ticker_2": "IEF",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.9073,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_efa_iwm_easy_001",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate Pearson correlation between EFA and IWM daily returns for 2019",
+      "params": {
+        "ticker": "EFA",
+        "ticker_2": "IWM",
+        "start_date": "2019-01-01",
+        "end_date": "2019-12-31"
+      },
+      "expected_value": 0.7512,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2019-12-31",
+        "data_cutoff": "2019-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_spy_tlt_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between SPY and TLT daily returns for 2023",
+      "params": {
+        "ticker": "SPY",
+        "ticker_2": "TLT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.1309,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_qqq_gld_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between QQQ and GLD daily returns for 2023",
+      "params": {
+        "ticker": "QQQ",
+        "ticker_2": "GLD",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.0068,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_aapl_tsla_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between AAPL and TSLA daily returns for 2023",
+      "params": {
+        "ticker": "AAPL",
+        "ticker_2": "TSLA",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.4431,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_btcusd_spy_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between BTC-USD and SPY daily returns for 2023",
+      "params": {
+        "ticker": "BTC-USD",
+        "ticker_2": "SPY",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.1578,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_xle_xlu_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between XLE and XLU daily returns for 2020-2021",
+      "params": {
+        "ticker": "XLE",
+        "ticker_2": "XLU",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.4987,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_vix_spy_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between ^VIX and SPY daily returns for 2022",
+      "params": {
+        "ticker": "^VIX",
+        "ticker_2": "SPY",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": -0.7728,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_arkk_qqq_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between ARKK and QQQ daily returns for 2022",
+      "params": {
+        "ticker": "ARKK",
+        "ticker_2": "QQQ",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.8439,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_eem_spy_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between EEM and SPY daily returns for 2020-2021",
+      "params": {
+        "ticker": "EEM",
+        "ticker_2": "SPY",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.8257,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_xlk_xlf_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between XLK and XLF daily returns for 2024",
+      "params": {
+        "ticker": "XLK",
+        "ticker_2": "XLF",
+        "start_date": "2024-01-01",
+        "end_date": "2024-11-30"
+      },
+      "expected_value": 0.3265,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2024-11-30",
+        "data_cutoff": "2024-11-30T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_iwm_qqq_medium_001",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate Pearson correlation between IWM and QQQ daily returns for 2024",
+      "params": {
+        "ticker": "IWM",
+        "ticker_2": "QQQ",
+        "start_date": "2024-01-01",
+        "end_date": "2024-11-30"
+      },
+      "expected_value": 0.5872,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2024-11-30",
+        "data_cutoff": "2024-11-30T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_btcusd_gld_hard_001",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Calculate Pearson correlation between BTC-USD and GLD daily returns for 2020-2021",
+      "params": {
+        "ticker": "BTC-USD",
+        "ticker_2": "GLD",
+        "start_date": "2020-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.1699,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_tqqq_sqqq_hard_001",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Calculate Pearson correlation between TQQQ and SQQQ daily returns for 2023",
+      "params": {
+        "ticker": "TQQQ",
+        "ticker_2": "SQQQ",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": -0.9987,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_vix_tqqq_hard_001",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Calculate Pearson correlation between ^VIX and TQQQ daily returns for 2022",
+      "params": {
+        "ticker": "^VIX",
+        "ticker_2": "TQQQ",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": -0.7566,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_arkk_spy_hard_001",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Calculate Pearson correlation between ARKK and SPY daily returns for 2024",
+      "params": {
+        "ticker": "ARKK",
+        "ticker_2": "SPY",
+        "start_date": "2024-01-01",
+        "end_date": "2024-11-30"
+      },
+      "expected_value": 0.7405,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2024-11-30",
+        "data_cutoff": "2024-11-30T23:59:59Z"
+      }
+    },
+    {
+      "id": "corr_ethusd_btcusd_hard_001",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Calculate Pearson correlation between ETH-USD and BTC-USD daily returns for 2023",
+      "params": {
+        "ticker": "ETH-USD",
+        "ticker_2": "BTC-USD",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.8321,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_spy_easy_001",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for SPY for 2023",
+      "params": {
+        "ticker": "SPY",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.1308,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_qqq_easy_001",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for QQQ for 2023",
+      "params": {
+        "ticker": "QQQ",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.1784,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_aapl_easy_001",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for AAPL for 2023",
+      "params": {
+        "ticker": "AAPL",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.1992,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_msft_easy_001",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for MSFT for 2023",
+      "params": {
+        "ticker": "MSFT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.2501,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_spy_easy_002",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for SPY for 2022",
+      "params": {
+        "ticker": "SPY",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.243,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_qqq_easy_002",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for QQQ for 2022",
+      "params": {
+        "ticker": "QQQ",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.3222,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_aapl_easy_002",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for AAPL for 2022",
+      "params": {
+        "ticker": "AAPL",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.3561,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_msft_easy_002",
+      "category": "volatility",
+      "difficulty": "easy",
+      "query": "Calculate annualized volatility for MSFT for 2022",
+      "params": {
+        "ticker": "MSFT",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.3539,
+      "tolerance": 0.02,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_tsla_medium_001",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for TSLA for 2023",
+      "params": {
+        "ticker": "TSLA",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.5239,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_nvda_medium_001",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for NVDA for 2023",
+      "params": {
+        "ticker": "NVDA",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.4679,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_meta_medium_001",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for META for 2023",
+      "params": {
+        "ticker": "META",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.3812,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_amd_medium_001",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for AMD for 2023",
+      "params": {
+        "ticker": "AMD",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.4647,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_tsla_medium_002",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for TSLA for 2021",
+      "params": {
+        "ticker": "TSLA",
+        "start_date": "2021-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.5432,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_nvda_medium_002",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for NVDA for 2021",
+      "params": {
+        "ticker": "NVDA",
+        "start_date": "2021-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.4485,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_meta_medium_002",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for META for 2021",
+      "params": {
+        "ticker": "META",
+        "start_date": "2021-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.2951,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_amd_medium_002",
+      "category": "volatility",
+      "difficulty": "medium",
+      "query": "Calculate annualized volatility for AMD for 2021",
+      "params": {
+        "ticker": "AMD",
+        "start_date": "2021-01-01",
+        "end_date": "2021-12-31"
+      },
+      "expected_value": 0.4249,
+      "tolerance": 0.03,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2021-12-31",
+        "data_cutoff": "2021-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_btcusd_hard_001",
+      "category": "volatility",
+      "difficulty": "hard",
+      "query": "Calculate annualized volatility for BTC-USD for 2020",
+      "params": {
+        "ticker": "BTC-USD",
+        "start_date": "2020-01-01",
+        "end_date": "2020-12-31"
+      },
+      "expected_value": 0.6379,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2020-12-31",
+        "data_cutoff": "2020-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_ethusd_hard_001",
+      "category": "volatility",
+      "difficulty": "hard",
+      "query": "Calculate annualized volatility for ETH-USD for 2020",
+      "params": {
+        "ticker": "ETH-USD",
+        "start_date": "2020-01-01",
+        "end_date": "2020-12-31"
+      },
+      "expected_value": 0.8331,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2020-12-31",
+        "data_cutoff": "2020-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_vix_hard_001",
+      "category": "volatility",
+      "difficulty": "hard",
+      "query": "Calculate annualized volatility for ^VIX for 2022",
+      "params": {
+        "ticker": "^VIX",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 1.0637,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "vol_arkk_hard_001",
+      "category": "volatility",
+      "difficulty": "hard",
+      "query": "Calculate annualized volatility for ARKK for 2022",
+      "params": {
+        "ticker": "ARKK",
+        "start_date": "2022-01-01",
+        "end_date": "2022-12-31"
+      },
+      "expected_value": 0.6761,
+      "tolerance": 0.05,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2022-12-31",
+        "data_cutoff": "2022-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_msft_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 1Y beta for MSFT vs SPY (2023)",
+      "params": {
+        "ticker": "MSFT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.1693,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_aapl_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 1Y beta for AAPL vs SPY (2023)",
+      "params": {
+        "ticker": "AAPL",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.1004,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_amzn_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 1Y beta for AMZN vs SPY (2023)",
+      "params": {
+        "ticker": "AMZN",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.5389,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_jpm_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 1Y beta for JPM vs SPY (2023)",
+      "params": {
+        "ticker": "JPM",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.8804,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_jnj_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 3Y beta for JNJ vs SPY (2021-2023)",
+      "params": {
+        "ticker": "JNJ",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.327,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_pg_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 3Y beta for PG vs SPY (2021-2023)",
+      "params": {
+        "ticker": "PG",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.4378,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_unh_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 3Y beta for UNH vs SPY (2021-2023)",
+      "params": {
+        "ticker": "UNH",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.5337,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_xom_easy_001",
+      "category": "beta",
+      "difficulty": "easy",
+      "query": "Calculate 3Y beta for XOM vs SPY (2021-2023)",
+      "params": {
+        "ticker": "XOM",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.6126,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_tsla_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 1Y beta for TSLA vs SPY (2023)",
+      "params": {
+        "ticker": "TSLA",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 2.2059,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_nvda_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 1Y beta for NVDA vs SPY (2023)",
+      "params": {
+        "ticker": "NVDA",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.9996,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_meta_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 1Y beta for META vs SPY (2023)",
+      "params": {
+        "ticker": "META",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.7392,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_amd_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 1Y beta for AMD vs SPY (2023)",
+      "params": {
+        "ticker": "AMD",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.9354,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_nflx_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 3Y beta for NFLX vs SPY (2021-2023)",
+      "params": {
+        "ticker": "NFLX",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.4801,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_crm_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 3Y beta for CRM vs SPY (2021-2023)",
+      "params": {
+        "ticker": "CRM",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.3913,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_baba_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 3Y beta for BABA vs SPY (2021-2023)",
+      "params": {
+        "ticker": "BABA",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.1382,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_uber_medium_001",
+      "category": "beta",
+      "difficulty": "medium",
+      "query": "Calculate 3Y beta for UBER vs SPY (2021-2023)",
+      "params": {
+        "ticker": "UBER",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.5464,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_arkk_hard_001",
+      "category": "beta",
+      "difficulty": "hard",
+      "query": "Calculate 3Y beta for ARKK vs SPY (2022-2023)",
+      "params": {
+        "ticker": "ARKK",
+        "start_date": "2022-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 2.1729,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_tqqq_hard_001",
+      "category": "beta",
+      "difficulty": "hard",
+      "query": "Calculate 3Y beta for TQQQ vs SPY (2022-2023)",
+      "params": {
+        "ticker": "TQQQ",
+        "start_date": "2022-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 3.8194,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_sqqq_hard_001",
+      "category": "beta",
+      "difficulty": "hard",
+      "query": "Calculate 3Y beta for SQQQ vs SPY (2022-2023)",
+      "params": {
+        "ticker": "SQQQ",
+        "start_date": "2022-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": -3.8101,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "beta_btcusd_hard_001",
+      "category": "beta",
+      "difficulty": "hard",
+      "query": "Calculate 3Y beta for BTC-USD vs SPY (2022-2023)",
+      "params": {
+        "ticker": "BTC-USD",
+        "start_date": "2022-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 1.3201,
+      "tolerance": 0.1,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_spy_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 5Y total return for SPY (2019-2023)",
+      "params": {
+        "ticker": "SPY",
+        "start_date": "2019-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 106.16,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_qqq_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 5Y total return for QQQ (2019-2023)",
+      "params": {
+        "ticker": "QQQ",
+        "start_date": "2019-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 173.26,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_aapl_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 5Y total return for AAPL (2019-2023)",
+      "params": {
+        "ticker": "AAPL",
+        "start_date": "2019-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 408.08,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_btcusd_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 5Y total return for BTC-USD (2019-2023)",
+      "params": {
+        "ticker": "BTC-USD",
+        "start_date": "2019-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 996.83,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_tsla_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 3Y total return for TSLA (2021-2023)",
+      "params": {
+        "ticker": "TSLA",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 2.15,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_nvda_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 3Y total return for NVDA (2021-2023)",
+      "params": {
+        "ticker": "NVDA",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 278.49,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_arkk_medium_001",
+      "category": "returns",
+      "difficulty": "medium",
+      "query": "Calculate 3Y total return for ARKK (2021-2023)",
+      "params": {
+        "ticker": "ARKK",
+        "start_date": "2021-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": -57.3,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_gld_easy_001",
+      "category": "returns",
+      "difficulty": "easy",
+      "query": "Calculate 1Y total return for GLD (2023)",
+      "params": {
+        "ticker": "GLD",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 11.76,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_tlt_easy_001",
+      "category": "returns",
+      "difficulty": "easy",
+      "query": "Calculate 1Y total return for TLT (2023)",
+      "params": {
+        "ticker": "TLT",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": 0.84,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    },
+    {
+      "id": "ret_vix_easy_001",
+      "category": "returns",
+      "difficulty": "easy",
+      "query": "Calculate 1Y total return for ^VIX (2023)",
+      "params": {
+        "ticker": "^VIX",
+        "start_date": "2023-01-01",
+        "end_date": "2023-12-31"
+      },
+      "expected_value": -45.63,
+      "tolerance": 2.0,
+      "calculation_method": "standard",
+      "data_source": "yfinance",
+      "temporal_constraints": {
+        "max_date": "2023-12-31",
+        "data_cutoff": "2023-12-31T23:59:59Z"
+      }
+    }
+  ],
+  "_generator_script": "#!/usr/bin/env python3\n\"\"\"\nGolden Set APE 2026 Generator\nGenerates 100 financial queries with verified calculations.\nData source: Yahoo Finance (yfinance)\n\"\"\"\n\nimport json\nimport os\nimport logging\nimport numpy as np\nimport pandas as pd\nimport yfinance as yf\nfrom datetime import datetime, date\n\nlogging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')\nlogger = logging.getLogger(__name__)\n\nCACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), \"data_cache\")\nos.makedirs(CACHE_DIR, exist_ok=True)\n\n# ── Helpers ──────────────────────────────────────────────────────────────────\n\ndef download_ticker(ticker: str, start: str, end: str) -> pd.DataFrame:\n    \"\"\"Download and cache ticker data.\"\"\"\n    safe = ticker.replace(\"^\", \"_\").replace(\"-\", \"_\")\n    cache_file = os.path.join(CACHE_DIR, f\"{safe}_{start}_{end}.csv\")\n    if os.path.exists(cache_file):\n        logger.info(f\"Cache hit: {cache_file}\")\n        df = pd.read_csv(cache_file, index_col=0, parse_dates=True)\n        return df\n    logger.info(f\"Downloading {ticker} [{start} → {end}]\")\n    try:\n        df = yf.download(ticker, start=start, end=end, auto_adjust=True, progress=False)\n        if df.empty:\n            raise ValueError(f\"No data for {ticker}\")\n        # Flatten multi-level columns if present\n        if isinstance(df.columns, pd.MultiIndex):\n            df.columns = df.columns.get_level_values(0)\n        df.to_csv(cache_file)\n        return df\n    except Exception as e:\n        logger.error(f\"Failed to download {ticker}: {e}\")\n        raise\n\n\ndef log_returns(prices: pd.Series) -> pd.Series:\n    \"\"\"Natural log returns.\"\"\"\n    return np.log(prices / prices.shift(1)).dropna()\n\n\ndef get_risk_free_rate(start_date: str) -> float:\n    \"\"\"Fetch 13-week Treasury rate (^IRX) on start_date.\"\"\"\n    sd = pd.Timestamp(start_date)\n    try:\n        df = download_ticker(\"^IRX\", str((sd - pd.Timedelta(days=30)).date()), str((sd + pd.Timedelta(days=10)).date()))\n        df = df.loc[:sd]\n        if df.empty:\n            df = download_ticker(\"^IRX\", str((sd - pd.Timedelta(days=60)).date()), str((sd + pd.Timedelta(days=10)).date()))\n            df = df.loc[:sd]\n        rate = df[\"Close\"].iloc[-1] / 100.0\n        return round(float(rate), 4)\n    except Exception:\n        logger.warning(f\"Could not fetch ^IRX for {start_date}, using fallback\")\n        return 0.05\n\n\n# ── Metric calculators ───────────────────────────────────────────────────────\n\ndef calc_sharpe(ticker: str, start: str, end: str, rfr: float) -> float:\n    df = download_ticker(ticker, start, end)\n    lr = log_returns(df[\"Close\"])\n    ann_ret = lr.mean() * 252\n    ann_vol = lr.std() * np.sqrt(252)\n    return round(float((ann_ret - rfr) / ann_vol), 4)\n\n\ndef calc_correlation(t1: str, t2: str, start: str, end: str) -> float:\n    d1 = download_ticker(t1, start, end)\n    d2 = download_ticker(t2, start, end)\n    idx = d1.index.intersection(d2.index)\n    lr1 = log_returns(d1.loc[idx, \"Close\"])\n    lr2 = log_returns(d2.loc[idx, \"Close\"])\n    common = lr1.index.intersection(lr2.index)\n    lr1, lr2 = lr1.loc[common], lr2.loc[common]\n    return round(float(np.corrcoef(lr1, lr2)[0, 1]), 4)\n\n\ndef calc_volatility(ticker: str, start: str, end: str) -> float:\n    df = download_ticker(ticker, start, end)\n    lr = log_returns(df[\"Close\"])\n    return round(float(lr.std() * np.sqrt(252)), 4)\n\n\ndef calc_beta(ticker: str, start: str, end: str) -> float:\n    ds = download_ticker(ticker, start, end)\n    dm = download_ticker(\"SPY\", start, end)\n    idx = ds.index.intersection(dm.index)\n    lr_s = log_returns(ds.loc[idx, \"Close\"])\n    lr_m = log_returns(dm.loc[idx, \"Close\"])\n    common = lr_s.index.intersection(lr_m.index)\n    lr_s, lr_m = lr_s.loc[common], lr_m.loc[common]\n    cov = np.cov(lr_s, lr_m)[0, 1]\n    var_m = np.var(lr_m, ddof=1)\n    return round(float(cov / var_m), 4)\n\n\ndef calc_return_pct(ticker: str, start: str, end: str) -> float:\n    df = download_ticker(ticker, start, end)\n    p_start = df[\"Close\"].iloc[0]\n    p_end = df[\"Close\"].iloc[-1]\n    return round(float((p_end / p_start - 1) * 100), 2)\n\n\n# ── Golden Set definition ────────────────────────────────────────────────────\n\ndef build_golden_set() -> list:\n    records = []\n    counter = {}\n\n    def next_id(cat, diff, ticker):\n        key = f\"{cat}_{ticker}_{diff}\"\n        counter[key] = counter.get(key, 0) + 1\n        return f\"{cat}_{ticker.lower().replace('-','').replace('^','')}_{diff}_{counter[key]:03d}\"\n\n    # ─── 2.1  Sharpe Ratio (25) ──────────────────────────────────────────────\n\n    sharpe_easy = [\n        (\"SPY\",   \"2023-01-01\", \"2023-12-31\"),\n        (\"QQQ\",   \"2023-01-01\", \"2023-12-31\"),\n        (\"AAPL\",  \"2023-01-01\", \"2023-12-31\"),\n        (\"MSFT\",  \"2023-01-01\", \"2023-12-31\"),\n        (\"GOOGL\", \"2023-01-01\", \"2023-12-31\"),\n        (\"AMZN\",  \"2022-01-01\", \"2022-12-31\"),\n        (\"TSLA\",  \"2022-01-01\", \"2022-12-31\"),\n        (\"NVDA\",  \"2022-01-01\", \"2022-12-31\"),\n        (\"META\",  \"2022-01-01\", \"2022-12-31\"),\n        (\"JPM\",   \"2022-01-01\", \"2022-12-31\"),\n    ]\n    sharpe_medium = [\n        (\"XLF\",  \"2020-01-01\", \"2021-12-31\"),\n        (\"XLE\",  \"2020-01-01\", \"2021-12-31\"),\n        (\"XLK\",  \"2020-01-01\", \"2021-12-31\"),\n        (\"IWM\",  \"2020-01-01\", \"2021-12-31\"),\n        (\"EFA\",  \"2020-01-01\", \"2021-12-31\"),\n        (\"GLD\",  \"2019-01-01\", \"2019-12-31\"),\n        (\"SLV\",  \"2019-01-01\", \"2019-12-31\"),\n        (\"VTI\",  \"2019-01-01\", \"2019-12-31\"),\n        (\"VOO\",  \"2019-01-01\", \"2019-12-31\"),\n        (\"BND\",  \"2019-01-01\", \"2019-12-31\"),\n    ]\n    sharpe_hard = [\n        (\"ARKK\",    \"2022-01-01\", \"2022-12-31\"),\n        (\"BTC-USD\", \"2022-01-01\", \"2022-12-31\"),\n        (\"ETH-USD\", \"2022-01-01\", \"2022-12-31\"),\n        (\"TQQQ\",    \"2021-01-01\", \"2021-12-31\"),\n        (\"SQQQ\",    \"2018-01-01\", \"2018-12-31\"),\n    ]\n\n    for items, diff, tol in [(sharpe_easy, \"easy\", 0.10),\n                              (sharpe_medium, \"medium\", 0.15),\n                              (sharpe_hard, \"hard\", 0.20)]:\n        for ticker, sd, ed in items:\n            rfr = get_risk_free_rate(sd)\n            val = calc_sharpe(ticker, sd, ed, rfr)\n            year_label = sd[:4] if sd[:4] == ed[:4] else f\"{sd[:4]}-{ed[:4]}\"\n            records.append({\n                \"id\": next_id(\"sharpe\", diff, ticker),\n                \"category\": \"sharpe_ratio\",\n                \"difficulty\": diff,\n                \"query\": f\"Calculate Sharpe ratio for {ticker} for {year_label}\",\n                \"params\": {\n                    \"ticker\": ticker,\n                    \"start_date\": sd,\n                    \"end_date\": ed,\n                    \"risk_free_rate\": rfr\n                },\n                \"expected_value\": val,\n                \"tolerance\": tol,\n                \"calculation_method\": \"standard\",\n                \"data_source\": \"yfinance\",\n                \"temporal_constraints\": {\n                    \"max_date\": ed,\n                    \"data_cutoff\": f\"{ed}T23:59:59Z\"\n                }\n            })\n\n    logger.info(f\"Sharpe: {len([r for r in records if r['category']=='sharpe_ratio'])} records\")\n\n    # ─── 2.2  Correlation (25) ───────────────────────────────────────────────\n\n    corr_easy = [\n        (\"SPY\",\"QQQ\",   \"2023-01-01\",\"2023-12-31\"),\n        (\"AAPL\",\"MSFT\", \"2023-01-01\",\"2023-12-31\"),\n        (\"GOOGL\",\"AMZN\",\"2023-01-01\",\"2023-12-31\"),\n        (\"JPM\",\"BAC\",   \"2023-01-01\",\"2023-12-31\"),\n        (\"XOM\",\"CVX\",   \"2023-01-01\",\"2023-12-31\"),\n        (\"GLD\",\"SLV\",   \"2022-01-01\",\"2022-12-31\"),\n        (\"VTI\",\"VOO\",   \"2022-01-01\",\"2022-12-31\"),\n        (\"IWM\",\"SPY\",   \"2022-01-01\",\"2022-12-31\"),\n        (\"TLT\",\"IEF\",   \"2022-01-01\",\"2022-12-31\"),\n        (\"EFA\",\"IWM\",   \"2019-01-01\",\"2019-12-31\"),\n    ]\n    corr_medium = [\n        (\"SPY\",\"TLT\",       \"2023-01-01\",\"2023-12-31\"),\n        (\"QQQ\",\"GLD\",       \"2023-01-01\",\"2023-12-31\"),\n        (\"AAPL\",\"TSLA\",     \"2023-01-01\",\"2023-12-31\"),\n        (\"BTC-USD\",\"SPY\",   \"2023-01-01\",\"2023-12-31\"),\n        (\"XLE\",\"XLU\",       \"2020-01-01\",\"2021-12-31\"),\n        (\"^VIX\",\"SPY\",      \"2022-01-01\",\"2022-12-31\"),\n        (\"ARKK\",\"QQQ\",      \"2022-01-01\",\"2022-12-31\"),\n        (\"EEM\",\"SPY\",       \"2020-01-01\",\"2021-12-31\"),\n        (\"XLK\",\"XLF\",       \"2024-01-01\",\"2024-11-30\"),\n        (\"IWM\",\"QQQ\",       \"2024-01-01\",\"2024-11-30\"),\n    ]\n    corr_hard = [\n        (\"BTC-USD\",\"GLD\",    \"2020-01-01\",\"2021-12-31\"),\n        (\"TQQQ\",\"SQQQ\",     \"2023-01-01\",\"2023-12-31\"),\n        (\"^VIX\",\"TQQQ\",     \"2022-01-01\",\"2022-12-31\"),\n        (\"ARKK\",\"SPY\",      \"2024-01-01\",\"2024-11-30\"),\n        (\"ETH-USD\",\"BTC-USD\",\"2023-01-01\",\"2023-12-31\"),\n    ]\n\n    for items, diff in [(corr_easy, \"easy\"), (corr_medium, \"medium\"), (corr_hard, \"hard\")]:\n        for t1, t2, sd, ed in items:\n            val = calc_correlation(t1, t2, sd, ed)\n            year_label = sd[:4] if sd[:4] == ed[:4] else f\"{sd[:4]}-{ed[:4]}\"\n            records.append({\n                \"id\": next_id(\"corr\", diff, f\"{t1}_{t2}\"),\n                \"category\": \"correlation\",\n                \"difficulty\": diff,\n                \"query\": f\"Calculate Pearson correlation between {t1} and {t2} daily returns for {year_label}\",\n                \"params\": {\n                    \"ticker\": t1,\n                    \"ticker_2\": t2,\n                    \"start_date\": sd,\n                    \"end_date\": ed\n                },\n                \"expected_value\": val,\n                \"tolerance\": 0.05,\n                \"calculation_method\": \"standard\",\n                \"data_source\": \"yfinance\",\n                \"temporal_constraints\": {\n                    \"max_date\": ed,\n                    \"data_cutoff\": f\"{ed}T23:59:59Z\"\n                }\n            })\n\n    logger.info(f\"Correlation: {len([r for r in records if r['category']=='correlation'])} records\")\n\n    # ─── 2.3  Volatility (20) ────────────────────────────────────────────────\n\n    vol_easy = [\n        (\"SPY\",  \"2023-01-01\",\"2023-12-31\"),\n        (\"QQQ\",  \"2023-01-01\",\"2023-12-31\"),\n        (\"AAPL\", \"2023-01-01\",\"2023-12-31\"),\n        (\"MSFT\", \"2023-01-01\",\"2023-12-31\"),\n        (\"SPY\",  \"2022-01-01\",\"2022-12-31\"),\n        (\"QQQ\",  \"2022-01-01\",\"2022-12-31\"),\n        (\"AAPL\", \"2022-01-01\",\"2022-12-31\"),\n        (\"MSFT\", \"2022-01-01\",\"2022-12-31\"),\n    ]\n    vol_medium = [\n        (\"TSLA\", \"2023-01-01\",\"2023-12-31\"),\n        (\"NVDA\", \"2023-01-01\",\"2023-12-31\"),\n        (\"META\", \"2023-01-01\",\"2023-12-31\"),\n        (\"AMD\",  \"2023-01-01\",\"2023-12-31\"),\n        (\"TSLA\", \"2021-01-01\",\"2021-12-31\"),\n        (\"NVDA\", \"2021-01-01\",\"2021-12-31\"),\n        (\"META\", \"2021-01-01\",\"2021-12-31\"),\n        (\"AMD\",  \"2021-01-01\",\"2021-12-31\"),\n    ]\n    vol_hard = [\n        (\"BTC-USD\",\"2020-01-01\",\"2020-12-31\"),\n        (\"ETH-USD\",\"2020-01-01\",\"2020-12-31\"),\n        (\"^VIX\",   \"2022-01-01\",\"2022-12-31\"),\n        (\"ARKK\",   \"2022-01-01\",\"2022-12-31\"),\n    ]\n\n    for items, diff, tol in [(vol_easy,\"easy\",0.02),(vol_medium,\"medium\",0.03),(vol_hard,\"hard\",0.05)]:\n        for ticker, sd, ed in items:\n            val = calc_volatility(ticker, sd, ed)\n            year_label = sd[:4] if sd[:4] == ed[:4] else f\"{sd[:4]}-{ed[:4]}\"\n            records.append({\n                \"id\": next_id(\"vol\", diff, ticker),\n                \"category\": \"volatility\",\n                \"difficulty\": diff,\n                \"query\": f\"Calculate annualized volatility for {ticker} for {year_label}\",\n                \"params\": {\n                    \"ticker\": ticker,\n                    \"start_date\": sd,\n                    \"end_date\": ed\n                },\n                \"expected_value\": val,\n                \"tolerance\": tol,\n                \"calculation_method\": \"standard\",\n                \"data_source\": \"yfinance\",\n                \"temporal_constraints\": {\n                    \"max_date\": ed,\n                    \"data_cutoff\": f\"{ed}T23:59:59Z\"\n                }\n            })\n\n    logger.info(f\"Volatility: {len([r for r in records if r['category']=='volatility'])} records\")\n\n    # ─── 2.4  Beta (20) ─────────────────────────────────────────────────────\n\n    beta_easy_1y = [\n        (\"MSFT\", \"2023-01-01\",\"2023-12-31\"),\n        (\"AAPL\", \"2023-01-01\",\"2023-12-31\"),\n        (\"AMZN\", \"2023-01-01\",\"2023-12-31\"),\n        (\"JPM\",  \"2023-01-01\",\"2023-12-31\"),\n    ]\n    beta_easy_3y = [\n        (\"JNJ\",  \"2021-01-01\",\"2023-12-31\"),\n        (\"PG\",   \"2021-01-01\",\"2023-12-31\"),\n        (\"UNH\",  \"2021-01-01\",\"2023-12-31\"),\n        (\"XOM\",  \"2021-01-01\",\"2023-12-31\"),\n    ]\n    beta_medium_1y = [\n        (\"TSLA\", \"2023-01-01\",\"2023-12-31\"),\n        (\"NVDA\", \"2023-01-01\",\"2023-12-31\"),\n        (\"META\", \"2023-01-01\",\"2023-12-31\"),\n        (\"AMD\",  \"2023-01-01\",\"2023-12-31\"),\n    ]\n    beta_medium_3y = [\n        (\"NFLX\", \"2021-01-01\",\"2023-12-31\"),\n        (\"CRM\",  \"2021-01-01\",\"2023-12-31\"),\n        (\"BABA\", \"2021-01-01\",\"2023-12-31\"),\n        (\"UBER\", \"2021-01-01\",\"2023-12-31\"),\n    ]\n    beta_hard = [\n        (\"ARKK\",    \"2022-01-01\",\"2023-12-31\"),\n        (\"TQQQ\",    \"2022-01-01\",\"2023-12-31\"),\n        (\"SQQQ\",    \"2022-01-01\",\"2023-12-31\"),\n        (\"BTC-USD\", \"2022-01-01\",\"2023-12-31\"),\n    ]\n\n    for items, diff in [(beta_easy_1y,\"easy\"),(beta_easy_3y,\"easy\"),\n                         (beta_medium_1y,\"medium\"),(beta_medium_3y,\"medium\"),\n                         (beta_hard,\"hard\")]:\n        for ticker, sd, ed in items:\n            val = calc_beta(ticker, sd, ed)\n            period = \"1Y\" if (pd.Timestamp(ed)-pd.Timestamp(sd)).days < 400 else \"3Y\"\n            year_label = sd[:4] if sd[:4] == ed[:4] else f\"{sd[:4]}-{ed[:4]}\"\n            records.append({\n                \"id\": next_id(\"beta\", diff, ticker),\n                \"category\": \"beta\",\n                \"difficulty\": diff,\n                \"query\": f\"Calculate {period} beta for {ticker} vs SPY ({year_label})\",\n                \"params\": {\n                    \"ticker\": ticker,\n                    \"start_date\": sd,\n                    \"end_date\": ed\n                },\n                \"expected_value\": val,\n                \"tolerance\": 0.10,\n                \"calculation_method\": \"standard\",\n                \"data_source\": \"yfinance\",\n                \"temporal_constraints\": {\n                    \"max_date\": ed,\n                    \"data_cutoff\": f\"{ed}T23:59:59Z\"\n                }\n            })\n\n    logger.info(f\"Beta: {len([r for r in records if r['category']=='beta'])} records\")\n\n    # ─── 2.5  Returns (10) ──────────────────────────────────────────────────\n\n    ret_5y = [\n        (\"SPY\",     \"2019-01-01\",\"2023-12-31\"),\n        (\"QQQ\",     \"2019-01-01\",\"2023-12-31\"),\n        (\"AAPL\",    \"2019-01-01\",\"2023-12-31\"),\n        (\"BTC-USD\", \"2019-01-01\",\"2023-12-31\"),\n    ]\n    ret_3y = [\n        (\"TSLA\", \"2021-01-01\",\"2023-12-31\"),\n        (\"NVDA\", \"2021-01-01\",\"2023-12-31\"),\n        (\"ARKK\", \"2021-01-01\",\"2023-12-31\"),\n    ]\n    ret_1y = [\n        (\"GLD\",  \"2023-01-01\",\"2023-12-31\"),\n        (\"TLT\",  \"2023-01-01\",\"2023-12-31\"),\n        (\"^VIX\", \"2023-01-01\",\"2023-12-31\"),\n    ]\n\n    for items, period_label in [(ret_5y,\"5Y\"),(ret_3y,\"3Y\"),(ret_1y,\"1Y\")]:\n        for ticker, sd, ed in items:\n            val = calc_return_pct(ticker, sd, ed)\n            year_label = sd[:4] if sd[:4] == ed[:4] else f\"{sd[:4]}-{ed[:4]}\"\n            records.append({\n                \"id\": next_id(\"ret\", \"easy\" if period_label==\"1Y\" else \"medium\", ticker),\n                \"category\": \"returns\",\n                \"difficulty\": \"easy\" if period_label == \"1Y\" else \"medium\",\n                \"query\": f\"Calculate {period_label} total return for {ticker} ({year_label})\",\n                \"params\": {\n                    \"ticker\": ticker,\n                    \"start_date\": sd,\n                    \"end_date\": ed\n                },\n                \"expected_value\": val,\n                \"tolerance\": 2.0,\n                \"calculation_method\": \"standard\",\n                \"data_source\": \"yfinance\",\n                \"temporal_constraints\": {\n                    \"max_date\": ed,\n                    \"data_cutoff\": f\"{ed}T23:59:59Z\"\n                }\n            })\n\n    logger.info(f\"Returns: {len([r for r in records if r['category']=='returns'])} records\")\n\n    return records\n\n\n# ── Summary ──────────────────────────────────────────────────────────────────\n\ndef print_summary(records):\n    print(f\"\\n{'='*60}\")\n    print(f\"GOLDEN SET SUMMARY  —  {len(records)} records total\")\n    print(f\"{'='*60}\")\n    from collections import Counter\n    cats = Counter(r[\"category\"] for r in records)\n    diffs = Counter(r[\"difficulty\"] for r in records)\n    for cat, cnt in sorted(cats.items()):\n        vals = [r[\"expected_value\"] for r in records if r[\"category\"] == cat]\n        print(f\"  {cat:15s}: {cnt:3d}  | min={min(vals):+10.4f}  max={max(vals):+10.4f}  mean={np.mean(vals):+10.4f}\")\n    print(f\"  {'─'*56}\")\n    for d, cnt in sorted(diffs.items()):\n        print(f\"  {d:15s}: {cnt:3d}\")\n    nulls = sum(1 for r in records if r[\"expected_value\"] is None or np.isnan(r[\"expected_value\"]))\n    print(f\"\\n  Null values: {nulls}\")\n    print(f\"{'='*60}\\n\")\n\n\n# ── Main ─────────────────────────────────────────────────────────────────────\n\nif __name__ == \"__main__\":\n    BASE = os.path.dirname(os.path.abspath(__file__))\n\n    records = build_golden_set()\n    print_summary(records)\n\n    # golden_set_v1.json\n    out_path = os.path.join(BASE, \"golden_set_v1.json\")\n    with open(out_path, \"w\") as f:\n        json.dump(records, f, indent=2, ensure_ascii=False)\n    logger.info(f\"Saved {out_path} ({len(records)} records)\")\n\n    # metadata.json\n    meta = {\n        \"version\": \"1.0\",\n        \"created_date\": str(date.today()),\n        \"total_queries\": len(records),\n        \"categories\": {\n            \"sharpe_ratio\": sum(1 for r in records if r[\"category\"]==\"sharpe_ratio\"),\n            \"correlation\": sum(1 for r in records if r[\"category\"]==\"correlation\"),\n            \"volatility\": sum(1 for r in records if r[\"category\"]==\"volatility\"),\n            \"beta\": sum(1 for r in records if r[\"category\"]==\"beta\"),\n            \"returns\": sum(1 for r in records if r[\"category\"]==\"returns\"),\n        },\n        \"date_range\": \"2018-01-01 to 2024-11-30\",\n        \"data_source\": \"yahoo_finance\"\n    }\n    meta_path = os.path.join(BASE, \"metadata.json\")\n    with open(meta_path, \"w\") as f:\n        json.dump(meta, f, indent=2)\n    logger.info(f\"Saved {meta_path}\")\n\n    print(\"Done.\")\n"
+}
