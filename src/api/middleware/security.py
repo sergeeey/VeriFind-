@@ -31,11 +31,11 @@ async def add_security_headers(request: Request, call_next):
     # Enable XSS protection (legacy, but still useful)
     response.headers["X-XSS-Protection"] = "1; mode=block"
     
-    # Content Security Policy (restrictive)
+    # Content Security Policy (restrictive but allow Swagger UI CDN)
     csp_directives = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'",
-        "style-src 'self' 'unsafe-inline'",
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
         "img-src 'self' data: https:",
         "font-src 'self'",
         "connect-src 'self' ws: wss:",
