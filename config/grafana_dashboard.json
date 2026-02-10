@@ -1,0 +1,201 @@
+{
+  "dashboard": {
+    "title": "APE 2026 - Production Overview",
+    "tags": ["ape", "production", "financial"],
+    "timezone": "UTC",
+    "schemaVersion": 36,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Prediction Accuracy (1h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ape_accuracy{window=\"1h\"}",
+            "legendFormat": "Accuracy"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.90},
+                {"color": "green", "value": 0.95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Query Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(ape_queries_total[5m]))",
+            "legendFormat": "Queries/sec"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(ape_queries_total{status=\"error\"}[5m])) / sum(rate(ape_queries_total[5m]))",
+            "legendFormat": "Error %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.05},
+                {"color": "red", "value": 0.10}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Active Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ape_active_websocket_connections",
+            "legendFormat": "WebSockets"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Query Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(ape_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ape_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(ape_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 6,
+        "title": "LLM Provider Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(ape_llm_calls_total[5m])) by (provider)",
+            "legendFormat": "{{ provider }} calls/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "Accuracy Trend (24h)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ape_accuracy{window=\"1h\"}",
+            "legendFormat": "1h window"
+          },
+          {
+            "expr": "ape_accuracy{window=\"24h\"}",
+            "legendFormat": "24h window"
+          }
+        ],
+        "yAxes": [{"max": 1, "min": 0, "unit": "percentunit"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Hit/Miss Ratio",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(ape_hits_total) by (ticker)",
+            "legendFormat": "Hits - {{ ticker }}"
+          },
+          {
+            "expr": "sum(ape_misses_total) by (ticker)",
+            "legendFormat": "Misses - {{ ticker }}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 9,
+        "title": "VEE Sandbox Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ape_vee_execution_time_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P95 execution time"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20}
+      },
+      {
+        "id": 10,
+        "title": "Cache Hit Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(ape_cache_hits_total[5m])) / (sum(rate(ape_cache_hits_total[5m])) + sum(rate(ape_cache_misses_total[5m])))",
+            "legendFormat": "Hit Rate"
+          }
+        ],
+        "yAxes": [{"max": 1, "min": 0, "unit": "percentunit"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20}
+      },
+      {
+        "id": 11,
+        "title": "LLM Cost (USD)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(ape_llm_cost_dollars) by (provider)",
+            "legendFormat": "{{ provider }}"
+          }
+        ],
+        "yAxes": [{"unit": "currencyUSD"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28}
+      },
+      {
+        "id": 12,
+        "title": "Database Query Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ape_db_latency_seconds_bucket[5m])) by (le, operation))",
+            "legendFormat": "{{ operation }} p95"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28}
+      }
+    ]
+  }
+}
