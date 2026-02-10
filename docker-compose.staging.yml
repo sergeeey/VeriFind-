@@ -3,6 +3,8 @@
 
 version: '3.8'
 
+name: ape-staging
+
 services:
   # API Backend
   api-staging:
