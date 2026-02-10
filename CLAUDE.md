@@ -1,8 +1,8 @@
 # CLAUDE.md — APE 2026 Root Anchor
 
-**Версия:** 0.9.2 (Week 9 Day 2 - Production Readiness)
-**Дата:** 2026-02-08
-**Статус:** MVP Complete → Production Hardening
+**Версия:** 0.9.3 (Week 9 Day 3 - Golden Set Validation)
+**Дата:** 2026-02-09
+**Статус:** MVP Complete → Production Baseline Validation
 
 ---
 
@@ -415,32 +415,45 @@ docs: update memory bank after VEE session
 
 ## 🎯 Current Status
 
-**Phase:** Week 9 Day 2 - Production Readiness
-**Progress:** [█████████░] 92%
+**Phase:** Week 9 Day 3 - Golden Set Validation & Critical Fixes
+**Progress:** [█████████░] 95%
 **Blockers:** NONE
 
 **Recent Achievements:**
 - ✅ Week 8 Complete: MVP Frontend with Next.js + shadcn/ui (6,330 LOC)
 - ✅ Week 9 Day 1: Golden Set Validation Framework (30 queries, 16 tests, 100% passing)
 - ✅ Week 9 Day 2: Orchestrator Integration (6 integration tests, all passing)
+- ✅ Week 9 Day 2-3: **Prediction Dashboard** (TimescaleDB, 7 API endpoints, 3 frontend components, 69 tests)
+- ✅ Week 9 Day 3: **Critical Fixes** (source_verified field, retry mechanism, Sharpe/Volatility examples)
+- ✅ Week 9 Day 3: **Merge to master** (claude/week11-router-cicd, +18,820 insertions)
 
 **Current Status:**
-- **Tests:** 306 total (294+ passing, 96.1%)
-- **Code:** ~19,000 LOC backend + 6,330 LOC frontend
-- **Components:** 17 backend modules + 33 frontend components
+- **Tests:** 621 total (585+ passing, 94.2%)
+- **Code:** ~20,013 LOC backend + 6,330 LOC frontend = 26,343 LOC total
+- **Components:** 17 backend modules + 36 frontend components
 - **Coverage:** 99.8% (tested modules)
+- **Golden Set:** 🔄 Run #2 in progress (task baab004, ~15 min remaining)
+
+**Golden Set Validation Progress:**
+- **Run #1:** 73.33% (22/30) - baseline after Fix #1-3
+  - Beta: 5/5 (100%) ✅
+  - Correlation: 10/10 (100%) ✅
+  - Volatility: 4/5 (80%)
+  - Sharpe ratio: 3/10 (30%) ❌
+- **Fix #4-5 Applied:** Simplified Sharpe + Added Volatility examples
+- **Run #2:** In progress (expected 90-100%)
 
 **Next Actions:**
-Week 9 Day 3: Domain Constraints Validation
-→ Detect non-financial queries
-→ Reject out-of-scope requests
-→ Confidence penalty for edge cases
+→ Await Golden Set Run #2 completion (~15 minutes)
+→ Analyze results and update baseline report
+→ If ≥90%: Production baseline achieved! 🎯
+→ If <90%: Debug failures and iterate
 
-**Ready for:** Production hardening and quality assurance
+**Ready for:** Production baseline validation (≥90% accuracy target)
 
 ---
 
 *Этот файл — единственный источник правды о проекте APE 2026*
 *При рассинхронизации с другими документами — CLAUDE.md побеждает*
-*Last Updated: 2026-02-07*
-*Version: 0.1.0 (Pre-MVP)*
+*Last Updated: 2026-02-09*
+*Version: 0.9.3 (Week 9 Day 3 - Golden Set Validation)*
