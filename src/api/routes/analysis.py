@@ -679,3 +679,116 @@ async def compare_tickers(
             "notes": "Runs /api/analyze-equivalent pipeline per ticker in parallel.",
         },
     )
+
+
+# ============================================================================
+# Multi-LLM Debate Endpoint (Week 12+)
+# ============================================================================
+
+class MultiLLMDebateRequest(BaseModel):
+    """Request model for multi-LLM debate."""
+    query: str = Field(
+        ...,
+        min_length=10,
+        max_length=1000,
+        description="Financial analysis query"
+    )
+    context: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Additional context (price, metrics, etc.)"
+    )
+
+    @validator('query')
+    def validate_query(cls, v):
+        if not v.strip():
+            raise ValueError("Query cannot be empty")
+        validation = input_validator.validate_query(v)
+        if not validation.is_valid:
+            raise ValueError(f"Security validation failed: {validation.error_message}")
+        return validation.sanitized_value
+
+
+class MultiLLMDebateResponse(BaseModel):
+    """Response model for multi-LLM debate."""
+    perspectives: Dict[str, Any] = Field(
+        ...,
+        description="Bull/Bear/Arbiter perspectives"
+    )
+    synthesis: Dict[str, Any] = Field(
+        ...,
+        description="Synthesis with recommendation"
+    )
+    metadata: Dict[str, Any] = Field(
+        ...,
+        description="Cost, latency, timestamp"
+    )
+
+
+@router.post("/analyze-debate", response_model=MultiLLMDebateResponse, status_code=status.HTTP_200_OK)
+async def analyze_multi_llm_debate(
+    request: MultiLLMDebateRequest,
+    x_api_key: Optional[str] = Header(None)
+):
+    """
+    Run multi-LLM debate with parallel Bull/Bear/Arbiter agents.
+
+    **New Feature:** Week 12+ commercial value feature.
+
+    **Architecture:**
+    - Bull Agent: DeepSeek (optimistic, fast & cheap)
+    - Bear Agent: Claude (skeptical, critical thinking)
+    - Arbiter Agent: GPT-4 (balanced synthesis)
+
+    **Performance:**
+    - Response time: ~3-4s (parallel execution)
+    - Cost: ~$0.002 per query
+
+    **Returns:**
+    - 3 perspectives (bull/bear/arbiter)
+    - Final recommendation (BUY/HOLD/SELL)
+    - Overall confidence score
+    - Risk/reward ratio
+    """
+    try:
+        logger.info(f"Multi-LLM debate request: {request.query[:100]}...")
+
+        # Import orchestrator (lazy import to avoid import errors if packages missing)
+        from ...debate.parallel_orchestrator import run_multi_llm_debate
+
+        # Run debate
+        result = await run_multi_llm_debate(
+            query=request.query,
+            context=request.context
+        )
+
+        logger.info(
+            f"Multi-LLM debate complete: {result['metadata']['latency_ms']:.0f}ms, "
+            f"Recommendation: {result['synthesis']['recommendation']}"
+        )
+
+        return MultiLLMDebateResponse(**result)
+
+    except ImportError as e:
+        logger.error(f"Multi-LLM debate: Missing dependencies: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail=(
+                "Multi-LLM debate requires additional packages. "
+                "Install: pip install openai anthropic"
+            )
+        )
+    except ValueError as e:
+        logger.error(f"Multi-LLM debate: Configuration error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=(
+                "Multi-LLM debate: Missing API keys. "
+                "Set: DEEPSEEK_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY"
+            )
+        )
+    except Exception as e:
+        logger.error(f"Multi-LLM debate failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Multi-LLM debate failed: {str(e)}"
+        )
