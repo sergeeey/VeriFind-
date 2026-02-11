@@ -10,6 +10,11 @@ module.exports = {
     '^@/components/ui/table$': '<rootDir>/__mocks__/@/components/ui/table.tsx',
     '^@/components/ui/badge$': '<rootDir>/__mocks__/@/components/ui/badge.tsx',
     '^@/components/ui/button$': '<rootDir>/__mocks__/@/components/ui/button.tsx',
+    '^@/components/ui/progress$': '<rootDir>/__mocks__/@/components/ui/progress.tsx',
+    '^@/components/ui/alert$': '<rootDir>/__mocks__/@/components/ui/alert.tsx',
+    '^@/components/ui/textarea$': '<rootDir>/__mocks__/@/components/ui/textarea.tsx',
+    '^@/components/ui/label$': '<rootDir>/__mocks__/@/components/ui/label.tsx',
+    '^@/components/ui/input$': '<rootDir>/__mocks__/@/components/ui/input.tsx',
   },
   transform: {
     '^.+\\.tsx?$': [
