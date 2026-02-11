@@ -1774,3 +1774,25 @@
 
 ### Notes
 - Keeps setup template aligned with shipped feature set and reduces secret-hygiene risk in documentation.
+
+## 2026-02-11 (Codex) - Documentation and Performance Tooling Pack
+
+### Implemented
+- Added/committed documentation and utility scripts:
+  - `README.md`
+  - `CHANGELOG.md`
+  - `PERFORMANCE.md`
+  - `scripts/PERFORMANCE_README.md`
+  - `scripts/performance_test.py`
+  - `scripts/load_test.js`
+  - `scripts/quick_test.py`
+  - `scripts/debug_cache.py`
+  - `commit_wave1.sh`
+- Scope is operational docs and standalone testing helpers; no production runtime logic modifications.
+
+### Verified
+- Secret pattern scan over this doc/script pack: no token/private-key signatures matched.
+- Existing test baselines from previous commit remain green (61 backend targeted + 34 frontend unit).
+
+### Notes
+- This preserves supporting artifacts needed for performance validation and historical implementation traceability.
