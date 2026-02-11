@@ -39,7 +39,7 @@ From the Opus roadmap analysis, all P0 features have been successfully implement
 1. **SECURITY FIX APPLIED** 🔐:
    ```python
    # BEFORE (CRITICAL VULNERABILITY):
-   password: str = 'PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'
+   password: str = '[REDACTED_SECRET]'
 
    # AFTER (SECURE):
    password: Optional[str] = None

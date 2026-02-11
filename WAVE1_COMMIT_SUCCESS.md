@@ -77,7 +77,7 @@ Regression Tests:
 **Security Fix (CRITICAL):**
 ```python
 # BEFORE (VULNERABILITY):
-password: str = 'PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'
+password: str = '[REDACTED_SECRET]'
 
 # AFTER (SECURE):
 password: Optional[str] = None

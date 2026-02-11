@@ -1750,3 +1750,27 @@
 
 ### Notes
 - This reduces repo noise and prevents accidental binary diffs in future feature commits.
+
+## 2026-02-11 (Codex) - Env Template + Documentation Secret Redaction
+
+### Implemented
+- Prepared environment template updates for newly delivered runtime features:
+  - `.env.example`
+  - added:
+    - `SEC_API_USER_AGENT`
+    - `RATE_LIMIT_ENFORCEMENT`
+    - `QUERY_TRACKER_TTL_HOURS`
+    - `QUERY_TRACKER_MAX_ENTRIES`
+    - `ALERT_WEBHOOK_URL`
+    - `ALERT_NOTIFICATION_COOLDOWN_MINUTES`
+    - `SMTP_*` and alert email fields
+- Sanitized historical Wave 1 docs to remove leaked literal and keep redacted placeholder:
+  - `WAVE1_COMMIT_SUCCESS.md`
+  - `docs/WAVE1_IMPLEMENTATION_REVIEW_2026_02_11.md`
+
+### Verified
+- Config/docs-only change; no runtime code path modified.
+- Secret literals replaced with `[REDACTED_SECRET]` placeholders in tracked docs.
+
+### Notes
+- Keeps setup template aligned with shipped feature set and reduces secret-hygiene risk in documentation.
