@@ -47,6 +47,8 @@ from .routes import (
     sentiment_router,
     report_router,
 )
+from .routes.admin_api_keys import router as admin_api_keys_router
+from .routes.admin_usage import router as admin_usage_router
 from fastapi.exceptions import RequestValidationError
 from .exceptions import APEException, ValidationError as APEValidationError
 from ..predictions.scheduler import prediction_scheduler
@@ -102,6 +104,11 @@ app.add_middleware(
 app.middleware("http")(add_security_headers)
 app.middleware("http")(add_rate_limit_headers)
 
+# Usage tracking (logs requests for billing, enforces quota)
+from .usage.middleware import log_request_middleware, enforce_quota_middleware
+app.middleware("http")(enforce_quota_middleware)  # FIRST: Check quota before processing
+app.middleware("http")(log_request_middleware)    # THEN: Log the request
+
 # DISABLED: Route-level caching is faster and more reliable
 # Middleware caching causes issues with response body iteration
 # See: src/api/routes/analysis.py for route-level cache implementation
@@ -144,6 +151,10 @@ app.include_router(educational_router)
 app.include_router(sec_router)
 app.include_router(sentiment_router)
 app.include_router(report_router)
+
+# Admin routers (Week 12 - B2B API)
+app.include_router(admin_api_keys_router)
+app.include_router(admin_usage_router)
 
 
 @app.websocket("/ws")

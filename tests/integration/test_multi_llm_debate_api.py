@@ -421,8 +421,7 @@ class TestCostAndLatencyTracking:
             mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
             MockArbiter.return_value = mock_arbiter
 
-            orchestrator = ParallelDebateOrchestrator()
-            result = await orchestrator.run_debate(
+            result = await run_multi_llm_debate(
                 query="Test query",
                 context={}
             )
@@ -455,11 +454,9 @@ class TestCostAndLatencyTracking:
             mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
             MockArbiter.return_value = mock_arbiter
 
-            orchestrator = ParallelDebateOrchestrator()
-
             import time
             start = time.time()
-            result = await orchestrator.run_debate(
+            result = await run_multi_llm_debate(
                 query="Test query",
                 context={}
             )
@@ -503,8 +500,7 @@ class TestResponseSchemaValidation:
             mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
             MockArbiter.return_value = mock_arbiter
 
-            orchestrator = ParallelDebateOrchestrator()
-            result = await orchestrator.run_debate(
+            result = await run_multi_llm_debate(
                 query="Test query",
                 context={}
             )
@@ -557,8 +553,7 @@ class TestResponseSchemaValidation:
             mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
             MockArbiter.return_value = mock_arbiter
 
-            orchestrator = ParallelDebateOrchestrator()
-            result = await orchestrator.run_debate(
+            result = await run_multi_llm_debate(
                 query="Test query",
                 context={}
             )
@@ -593,8 +588,7 @@ class TestResponseSchemaValidation:
             mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
             MockArbiter.return_value = mock_arbiter
 
-            orchestrator = ParallelDebateOrchestrator()
-            result = await orchestrator.run_debate(
+            result = await run_multi_llm_debate(
                 query="Test query",
                 context={}
             )
@@ -646,8 +640,7 @@ async def test_week11_day2_success_criteria(
         mock_arbiter.analyze = AsyncMock(return_value=mock_arbiter_response)
         MockArbiter.return_value = mock_arbiter
 
-        orchestrator = ParallelDebateOrchestrator()
-        result = await orchestrator.run_debate(
+        result = await run_multi_llm_debate(
             query="Should I buy Tesla stock?",
             context={"ticker": "TSLA", "price": 250.00}
         )
