@@ -153,7 +153,7 @@ E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\
 
 ### WebSocket
 - **Endpoint:** `ws://localhost:8000/ws`
-- **⚠️ Status:** NOT YET IMPLEMENTED (use polling fallback)
+- **✅ Status:** IMPLEMENTED (real-time query updates, 2/2 tests passing)
 
 ---
 
