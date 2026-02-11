@@ -21,6 +21,7 @@ import {
   SlidersHorizontal,
   GitCompareArrows,
   Target,
+  Sparkles,
 } from 'lucide-react'
 
 const navItems = [
@@ -33,6 +34,7 @@ const navItems = [
   { href: '/dashboard/sensitivity', label: 'Sensitivity', icon: SlidersHorizontal },
   { href: '/dashboard/calibration', label: 'Calibration', icon: Target },
   { href: '/dashboard/compare', label: 'Compare', icon: GitCompareArrows },
+  { href: '/dashboard/debate', label: 'Multi-LLM Debate', icon: Sparkles },
   { href: '/dashboard/usage', label: 'Usage', icon: Gauge },
   { href: '/predictions', label: 'Predictions', icon: TrendingUp },
   { href: '/dashboard/activity', label: 'Activity', icon: Activity },
