@@ -9,14 +9,23 @@ from fastapi import APIRouter, HTTPException, status, Query, Depends
 from typing import List, Optional, Dict, Any
 from decimal import Decimal
 from uuid import UUID
+import logging
 
 from pydantic import BaseModel, Field
 
-from ...predictions import PredictionStore, Prediction, TrackRecord, CorridorData, AccuracyTracker
+from ...predictions import (
+    PredictionStore,
+    Prediction,
+    TrackRecord,
+    CorridorData,
+    AccuracyTracker,
+    CalibrationTracker,
+)
 from ..config import get_settings
 
 router = APIRouter(prefix="/api/predictions", tags=["Predictions"])
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 # Disclaimer text
 DISCLAIMER = (
@@ -86,6 +95,20 @@ class EvaluatePredictionResponse(BaseModel):
     """Response for evaluate single prediction endpoint."""
     success: bool
     result: Dict[str, Any]
+    disclaimer: str = Field(default=DISCLAIMER)
+
+
+class CalibrationResponse(BaseModel):
+    """Response for prediction confidence calibration endpoint."""
+    calibration_period: str
+    total_evaluated: int
+    expected_calibration_error: float
+    brier_score: float
+    calibration_curve: List[Dict[str, Any]]
+    recommendations: List[Dict[str, Any]]
+    status: str = "ok"
+    min_required_samples: int = 10
+    ticker: Optional[str] = None
     disclaimer: str = Field(default=DISCLAIMER)
 
 
@@ -354,6 +377,60 @@ async def get_track_record(
             recent_accuracy=0.0
         )
         return TrackRecordResponse(track_record=empty_record)
+
+
+@router.get("/calibration", response_model=CalibrationResponse)
+async def get_calibration_metrics(
+    days: int = Query(default=30, ge=7, le=365, description="Calibration period in days"),
+    ticker: Optional[str] = Query(default=None, description="Optional ticker filter"),
+    min_samples: int = Query(default=10, ge=1, le=1000, description="Minimum samples required"),
+    store: PredictionStore = Depends(get_prediction_store),
+):
+    """
+    Get confidence calibration metrics for evaluated predictions.
+
+    Returns Expected Calibration Error (ECE), Brier score, calibration curve and
+    recommendation hints (over/underconfidence by confidence bins).
+    """
+    safe_ticker = ticker.upper() if ticker else None
+
+    if not _db_available():
+        return CalibrationResponse(
+            calibration_period=f"{days} days",
+            total_evaluated=0,
+            expected_calibration_error=0.0,
+            brier_score=0.0,
+            calibration_curve=[],
+            recommendations=[],
+            status="db_unavailable",
+            min_required_samples=min_samples,
+            ticker=safe_ticker,
+        )
+
+    try:
+        tracker = CalibrationTracker(prediction_store=store)
+        summary = tracker.calculate_summary(
+            days=days,
+            ticker=safe_ticker,
+            min_samples=min_samples,
+        )
+        return CalibrationResponse(
+            ticker=safe_ticker,
+            **summary,
+        )
+    except Exception as e:
+        logger.warning(f"Failed to retrieve calibration metrics: {e}")
+        return CalibrationResponse(
+            calibration_period=f"{days} days",
+            total_evaluated=0,
+            expected_calibration_error=0.0,
+            brier_score=0.0,
+            calibration_curve=[],
+            recommendations=[],
+            status="error",
+            min_required_samples=min_samples,
+            ticker=safe_ticker,
+        )
 
 
 @router.get("/tickers", response_model=TickersResponse)
