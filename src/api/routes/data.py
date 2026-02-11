@@ -7,16 +7,33 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import logging
+import pandas as pd
+import yfinance as yf
 
 from pydantic import BaseModel, Field
 
 from ...storage.timescale_store import TimescaleDBStore
 from ...graph.neo4j_client import Neo4jClient
 from ..config import get_settings
+from ..query_tracker import (
+    get_query_status as get_tracked_query_status,
+    list_query_statuses as list_tracked_query_statuses,
+)
 
 router = APIRouter(prefix="/api", tags=["Data"])
 logger = logging.getLogger(__name__)
 settings = get_settings()
+
+
+def _parse_status_datetime(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value)
+        except Exception:
+            return datetime.utcnow()
+    return datetime.utcnow()
 
 # Response Models
 class DataTickersResponse(BaseModel):
@@ -30,6 +47,29 @@ class DataFetchResponse(BaseModel):
     task_id: str
     status: str
     message: str
+    disclaimer: str = Field(default="This analysis is for informational purposes only...")
+
+
+class ChartPoint(BaseModel):
+    """OHLC point with optional indicators."""
+    timestamp: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: Optional[int] = None
+    ema: Optional[float] = None
+    rsi: Optional[float] = None
+
+
+class ChartDataResponse(BaseModel):
+    """Advanced chart data response."""
+    ticker: str
+    period: str
+    interval: str
+    points: List[ChartPoint]
+    point_count: int
+    indicators: Dict[str, Any] = Field(default_factory=dict)
     disclaimer: str = Field(default="This analysis is for informational purposes only...")
 
 
@@ -53,14 +93,26 @@ class VerifiedFactResponse(BaseModel):
 class StatusResponse(BaseModel):
     """Response model for query status."""
     query_id: str
+    query_text: Optional[str] = None
     status: str
+    state: str
     current_node: Optional[str] = None
+    episode_id: Optional[str] = None
     progress: float = Field(..., ge=0.0, le=1.0, description="Completion progress (0.0-1.0)")
     verified_facts_count: int = Field(0, description="Number of verified facts generated")
     error: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class StatusSummaryResponse(BaseModel):
+    total_tracked: int
+    completed: int
+    failed: int
+    pending: int
+    today_count: int
+    avg_completion_ms: Optional[float] = None
 
 
 class EpisodeResponse(BaseModel):
@@ -106,14 +158,112 @@ def get_graph_client() -> Neo4jClient:
 @router.get("/status/{query_id}", response_model=StatusResponse)
 async def get_query_status(query_id: str):
     """Get query execution status."""
-    # TODO: Implement actual status tracking
+    tracked = get_tracked_query_status(query_id)
+    if not tracked:
+        now = datetime.utcnow()
+        return StatusResponse(
+            query_id=query_id,
+            query_text=None,
+            status="unknown",
+            state="pending",
+            progress=0.0,
+            verified_facts_count=0,
+            episode_id=None,
+            created_at=now,
+            updated_at=now,
+            metadata={
+                "message": "Query ID not found in tracker. Submit via /api/query first.",
+            },
+        )
+
+    def _parse(value: Any) -> datetime:
+        return _parse_status_datetime(value)
+
+    normalized_status = str(tracked.get("status", "unknown"))
     return StatusResponse(
         query_id=query_id,
-        status="completed",
-        progress=1.0,
-        verified_facts_count=1,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        query_text=tracked.get("query_text"),
+        status=normalized_status,
+        state=normalized_status,
+        current_node=tracked.get("current_node"),
+        episode_id=(
+            tracked.get("episode_id")
+            or (tracked.get("metadata", {}) or {}).get("episode_id")
+        ),
+        progress=float(tracked.get("progress", 0.0)),
+        verified_facts_count=int(tracked.get("verified_facts_count", 0)),
+        error=tracked.get("error"),
+        created_at=_parse(tracked.get("created_at")),
+        updated_at=_parse(tracked.get("updated_at")),
+        metadata=tracked.get("metadata", {}) or {},
+    )
+
+
+@router.get("/status", response_model=List[StatusResponse])
+async def list_query_statuses(
+    limit: int = Query(20, ge=1, le=200),
+    state: Optional[str] = Query(default=None),
+    query: Optional[str] = Query(default=None),
+):
+    """List recently tracked query statuses (latest first)."""
+    rows = list_tracked_query_statuses(limit=limit, state=state, query_contains=query)
+    items: List[StatusResponse] = []
+    for row in rows:
+        normalized_status = str(row.get("status", "unknown"))
+        items.append(
+            StatusResponse(
+                query_id=str(row.get("query_id", "")),
+                query_text=row.get("query_text"),
+                status=normalized_status,
+                state=normalized_status,
+                current_node=row.get("current_node"),
+                episode_id=(
+                    row.get("episode_id")
+                    or (row.get("metadata", {}) or {}).get("episode_id")
+                ),
+                progress=float(row.get("progress", 0.0)),
+                verified_facts_count=int(row.get("verified_facts_count", 0)),
+                error=row.get("error"),
+                created_at=_parse_status_datetime(row.get("created_at")),
+                updated_at=_parse_status_datetime(row.get("updated_at")),
+                metadata=row.get("metadata", {}) or {},
+            )
+        )
+    return items
+
+
+@router.get("/status-summary", response_model=StatusSummaryResponse)
+async def get_status_summary():
+    """Aggregate status metrics for dashboard widgets."""
+    rows = list_tracked_query_statuses(limit=200)
+    total = len(rows)
+    completed_rows = [row for row in rows if str(row.get("status", "")).lower() == "completed"]
+    failed_rows = [row for row in rows if str(row.get("status", "")).lower() == "failed"]
+    pending_rows = [row for row in rows if str(row.get("status", "")).lower() in {"pending", "planning", "fetching", "executing", "validating", "debating"}]
+
+    today = datetime.utcnow().date().isoformat()
+    today_count = sum(
+        1 for row in rows if str(row.get("created_at", "")).startswith(today)
+    )
+
+    durations_ms: List[float] = []
+    for row in completed_rows:
+        created_at = _parse_status_datetime(row.get("created_at"))
+        updated_at = _parse_status_datetime(row.get("updated_at"))
+        if updated_at >= created_at:
+            durations_ms.append((updated_at - created_at).total_seconds() * 1000.0)
+
+    avg_completion_ms = None
+    if durations_ms:
+        avg_completion_ms = sum(durations_ms) / len(durations_ms)
+
+    return StatusSummaryResponse(
+        total_tracked=total,
+        completed=len(completed_rows),
+        failed=len(failed_rows),
+        pending=len(pending_rows),
+        today_count=today_count,
+        avg_completion_ms=avg_completion_ms,
     )
 
 
@@ -306,6 +456,18 @@ class FetchRequest(BaseModel):
     end_date: str
 
 
+def _compute_rsi(close_series: pd.Series, period: int = 14) -> pd.Series:
+    """Compute RSI indicator."""
+    delta = close_series.diff()
+    gain = delta.where(delta > 0, 0.0)
+    loss = -delta.where(delta < 0, 0.0)
+    avg_gain = gain.ewm(alpha=1 / period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1 / period, adjust=False).mean()
+    rs = avg_gain / avg_loss.replace(0, pd.NA)
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+
 @router.post("/data/fetch", response_model=DataFetchResponse, status_code=status.HTTP_202_ACCEPTED)
 async def fetch_market_data(request: FetchRequest):
     """
@@ -330,3 +492,69 @@ async def fetch_market_data(request: FetchRequest):
         status="accepted",
         message=f"Data fetch for {request.ticker} has been queued"
     )
+
+
+@router.get("/data/chart/{ticker}", response_model=ChartDataResponse)
+async def get_advanced_chart_data(
+    ticker: str,
+    period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
+    interval: str = Query("1d", pattern="^(1d|1wk|1mo)$"),
+    ema_period: int = Query(20, ge=2, le=200),
+    rsi_period: int = Query(14, ge=2, le=100),
+    include_volume: bool = Query(True),
+):
+    """
+    Get OHLC chart data with technical indicators for frontend charting.
+    """
+    token = ticker.strip().upper()
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Ticker is required",
+        )
+
+    try:
+        frame = yf.Ticker(token).history(period=period, interval=interval, auto_adjust=True)
+        if frame.empty:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No chart data available for {token}",
+            )
+
+        frame = frame.copy()
+        frame["EMA"] = frame["Close"].ewm(span=ema_period, adjust=False).mean()
+        frame["RSI"] = _compute_rsi(frame["Close"], period=rsi_period)
+
+        points: List[ChartPoint] = []
+        for index, row in frame.iterrows():
+            point = ChartPoint(
+                timestamp=index.isoformat(),
+                open=round(float(row["Open"]), 6),
+                high=round(float(row["High"]), 6),
+                low=round(float(row["Low"]), 6),
+                close=round(float(row["Close"]), 6),
+                volume=(int(row["Volume"]) if include_volume and pd.notna(row.get("Volume")) else None),
+                ema=(round(float(row["EMA"]), 6) if pd.notna(row.get("EMA")) else None),
+                rsi=(round(float(row["RSI"]), 6) if pd.notna(row.get("RSI")) else None),
+            )
+            points.append(point)
+
+        return ChartDataResponse(
+            ticker=token,
+            period=period,
+            interval=interval,
+            points=points,
+            point_count=len(points),
+            indicators={
+                "ema_period": ema_period,
+                "rsi_period": rsi_period,
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get chart data for {token}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve chart data",
+        )

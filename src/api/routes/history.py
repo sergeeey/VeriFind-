@@ -2,8 +2,11 @@
 
 from typing import Any, Dict, List, Optional
 import logging
+import csv
+import io
+import json
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from ...storage.query_history_store import QueryHistoryStore
 from ..config import get_settings
@@ -49,6 +52,74 @@ async def get_history(
     except Exception as e:
         logger.warning(f"History fetch failed: {e}")
         return []
+
+
+@router.get("/export")
+async def export_history(
+    format: str = Query("json", pattern="^(json|csv)$"),
+    limit: int = Query(100, ge=1, le=1000),
+    ticker: Optional[str] = Query(None, min_length=1, max_length=10),
+):
+    """Export query history as JSON or CSV."""
+    try:
+        store = get_history_store()
+        rows = store.get_history(limit=limit, ticker=ticker)
+
+        if format == "json":
+            payload = {
+                "export_type": "query_history",
+                "count": len(rows),
+                "ticker_filter": ticker.upper() if ticker else None,
+                "rows": rows,
+            }
+            return Response(
+                content=json.dumps(payload, ensure_ascii=False, default=str, indent=2),
+                media_type="application/json",
+                headers={
+                    "Content-Disposition": "attachment; filename=query_history_export.json"
+                },
+            )
+
+        output = io.StringIO()
+        writer = csv.DictWriter(
+            output,
+            fieldnames=[
+                "id",
+                "created_at",
+                "query_text",
+                "status",
+                "result_summary",
+                "confidence_score",
+                "ticker_mentions",
+            ],
+        )
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(
+                {
+                    "id": row.get("id"),
+                    "created_at": row.get("created_at"),
+                    "query_text": row.get("query_text"),
+                    "status": row.get("status"),
+                    "result_summary": row.get("result_summary"),
+                    "confidence_score": row.get("confidence_score"),
+                    "ticker_mentions": ",".join(row.get("ticker_mentions") or []),
+                }
+            )
+
+        return Response(
+            content=output.getvalue(),
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": "attachment; filename=query_history_export.csv"
+            },
+        )
+    except Exception as e:
+        logger.error(f"History export failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to export history",
+        )
 
 
 @router.get("/{query_id}", response_model=Dict[str, Any])

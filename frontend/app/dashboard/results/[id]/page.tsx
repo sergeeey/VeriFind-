@@ -40,6 +40,15 @@ export default function ResultsPage() {
   const [selectedCode, setSelectedCode] = useState<string | null>(null)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
   const [timeRange, setTimeRange] = useState<TimeRange>('1M')
+  const [verification, setVerification] = useState<{
+    verification_score?: number | null
+    confidence_before?: number | null
+    confidence_after?: number | null
+    confidence_delta?: number | null
+    confidence_rationale?: string | null
+    key_risks?: string[]
+    key_opportunities?: string[]
+  } | null>(null)
 
   useEffect(() => {
     if (!episodeId) return
@@ -57,6 +66,18 @@ export default function ResultsPage() {
         }
 
         setEpisode(episodeData)
+        try {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+          const verificationRes = await fetch(`${apiBase}/api/verification/${episodeId}`)
+          if (verificationRes.ok) {
+            const verificationJson = await verificationRes.json()
+            setVerification(verificationJson)
+          } else {
+            setVerification(null)
+          }
+        } catch {
+          setVerification(null)
+        }
         setError(null)
       } catch (err: any) {
         console.error('Failed to fetch episode:', err)
@@ -91,17 +112,21 @@ export default function ResultsPage() {
     setDetailsDialogOpen(true)
   }
 
-  const handleExport = (format: 'json' | 'csv') => {
+  const handleExport = async (format: 'json' | 'csv' | 'md') => {
     if (!episode) return
 
     try {
-      if (format === 'json') {
-        const dataStr = JSON.stringify(episode, null, 2)
-        const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      if (format === 'json' || format === 'md') {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiBase}/api/report/${episodeId}?format=${format}`)
+        if (!response.ok) {
+          throw new Error('Failed to generate report')
+        }
+        const dataBlob = await response.blob()
         const url = URL.createObjectURL(dataBlob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `episode_${episodeId}.json`
+        link.download = `report_${episodeId}.${format}`
         link.click()
         URL.revokeObjectURL(url)
       } else if (format === 'csv') {
@@ -263,11 +288,15 @@ export default function ResultsPage() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => handleExport('json')}>
             <Download className="mr-2 h-4 w-4" />
-            Export JSON
+            Report JSON
+          </Button>
+          <Button variant="outline" onClick={() => handleExport('md')}>
+            <Download className="mr-2 h-4 w-4" />
+            Report MD
           </Button>
           <Button variant="outline" onClick={() => handleExport('csv')}>
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            Facts CSV
           </Button>
         </div>
       </div>
@@ -292,6 +321,23 @@ export default function ResultsPage() {
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           {episode.synthesis && <SynthesisCard synthesis={episode.synthesis} />}
+          {verification && (
+            <div className="rounded border p-4 text-sm">
+              <div className="font-semibold">Verification Transparency</div>
+              <div className="text-muted-foreground">
+                score: {verification.verification_score ?? 'N/A'} | before: {verification.confidence_before ?? 'N/A'} | after: {verification.confidence_after ?? 'N/A'} | delta: {verification.confidence_delta ?? 'N/A'}
+              </div>
+              {verification.confidence_rationale && (
+                <div className="mt-2">{verification.confidence_rationale}</div>
+              )}
+              {(verification.key_risks || []).length > 0 && (
+                <div className="mt-2">risks: {(verification.key_risks || []).join(', ')}</div>
+              )}
+              {(verification.key_opportunities || []).length > 0 && (
+                <div className="mt-1">opportunities: {(verification.key_opportunities || []).join(', ')}</div>
+              )}
+            </div>
+          )}
 
           {episode.verified_facts.length > 0 && (
             <FactsTable

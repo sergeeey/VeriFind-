@@ -36,9 +36,14 @@ export interface QueryHistoryItem {
 }
 
 export interface WebSocketMessage {
-  type: 'query_update' | 'query_complete' | 'query_error'
-  query_id: string
-  data: Partial<QueryStatus>
+  type: 'query_update' | 'query_complete' | 'query_error' | 'status' | 'complete' | 'error' | 'subscribed' | 'unsubscribed' | 'pong'
+  query_id?: string
+  data?: Partial<QueryStatus>
+  status?: string
+  progress?: number
+  current_step?: string
+  error?: string
+  result_summary?: Record<string, unknown>
 }
 
 export interface PipelineStep {

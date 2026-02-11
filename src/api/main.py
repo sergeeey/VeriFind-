@@ -17,7 +17,9 @@ env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__
 load_dotenv(dotenv_path=env_path, override=True)
 
 from fastapi import FastAPI
+from fastapi import WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+from uuid import uuid4
 
 from .config import get_settings
 from .error_handlers import (
@@ -30,10 +32,26 @@ from .error_handlers import (
 )
 from .monitoring import prometheus_middleware, initialize_monitoring
 from .middleware import add_security_headers, add_disclaimer_to_json_responses, add_rate_limit_headers
-from .routes import health_router, analysis_router, data_router, predictions_router, audit_router, history_router, portfolio_router
+from .routes import (
+    health_router,
+    analysis_router,
+    data_router,
+    predictions_router,
+    audit_router,
+    history_router,
+    portfolio_router,
+    alerts_router,
+    sensitivity_router,
+    educational_router,
+    sec_router,
+    sentiment_router,
+    report_router,
+)
 from fastapi.exceptions import RequestValidationError
 from .exceptions import APEException, ValidationError as APEValidationError
 from ..predictions.scheduler import prediction_scheduler
+from ..alerts.scheduler import price_alert_scheduler
+from .websocket import websocket_handler
 
 settings = get_settings()
 
@@ -120,15 +138,30 @@ app.include_router(predictions_router)
 app.include_router(audit_router)
 app.include_router(history_router)
 app.include_router(portfolio_router)
+app.include_router(alerts_router)
+app.include_router(sensitivity_router)
+app.include_router(educational_router)
+app.include_router(sec_router)
+app.include_router(sentiment_router)
+app.include_router(report_router)
+
+
+@app.websocket("/ws")
+async def ws_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time query status updates."""
+    connection_id = str(uuid4())
+    await websocket_handler(websocket, connection_id)
 
 
 @app.on_event("startup")
 async def start_prediction_scheduler():
     """Start daily prediction evaluation scheduler."""
     prediction_scheduler.start(db_url=settings.timescaledb_url)
+    price_alert_scheduler.start(db_url=settings.timescaledb_url)
 
 
 @app.on_event("shutdown")
 async def stop_prediction_scheduler():
     """Stop scheduler on app shutdown."""
     prediction_scheduler.stop()
+    price_alert_scheduler.stop()

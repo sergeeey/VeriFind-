@@ -12,6 +12,9 @@ import logging
 from ..monitoring import get_health_metrics
 from ..config import get_settings
 from ...predictions.scheduler import prediction_scheduler
+from ...alerts.scheduler import price_alert_scheduler
+from ..middleware.rate_limit import get_usage_summary_snapshot
+from .analysis import get_orchestrator_instance
 
 router = APIRouter(tags=["Health"])
 logger = logging.getLogger(__name__)
@@ -123,4 +126,49 @@ async def scheduler_health():
     return {
         "timestamp": datetime.utcnow().isoformat(),
         "scheduler": prediction_scheduler.health(),
+    }
+
+
+@router.get("/api/health/alerts-scheduler", status_code=status.HTTP_200_OK)
+async def alerts_scheduler_health():
+    """Price alerts scheduler health endpoint."""
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "scheduler": price_alert_scheduler.health(),
+    }
+
+
+@router.get("/api/usage/summary", status_code=status.HTTP_200_OK)
+async def usage_summary():
+    """API usage snapshot for rate limiting and key consumption trends."""
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "usage": get_usage_summary_snapshot(),
+    }
+
+
+@router.get("/api/health/circuit-breakers", status_code=status.HTTP_200_OK)
+async def circuit_breakers_health():
+    """Expose circuit breaker states for operational diagnostics."""
+    instance = get_orchestrator_instance()
+    orchestrator = instance.get("orchestrator")
+    provider = instance.get("provider")
+
+    if orchestrator is None:
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "provider": None,
+            "initialized": False,
+            "message": "Orchestrator not initialized yet. Run /api/analyze or /api/debate first.",
+            "breakers": {},
+        }
+
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "provider": provider,
+        "initialized": True,
+        "breakers": {
+            "market_data_fetch": orchestrator.market_data_breaker.get_stats(),
+            "llm_debate": orchestrator.llm_debate_breaker.get_stats(),
+        },
     }

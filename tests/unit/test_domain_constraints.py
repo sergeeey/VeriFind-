@@ -256,6 +256,34 @@ class TestDomainConstraintsValidator:
                'such as' in result.rejection_reason.lower() or \
                'like' in result.rejection_reason.lower()
 
+    # ========================================================================
+    # Language Detection
+    # ========================================================================
+
+    def test_detect_language_english_query(self):
+        """Detect English query language."""
+        query = "Calculate Sharpe ratio for AAPL in 2024"
+
+        result = self.validator.validate(query)
+
+        assert result.detected_language == "en"
+
+    def test_detect_language_russian_query(self):
+        """Detect Russian query language."""
+        query = "Рассчитай коэффициент Шарпа для AAPL за 2024 год"
+
+        result = self.validator.validate(query)
+
+        assert result.detected_language == "ru"
+
+    def test_detect_language_unknown_when_no_letters(self):
+        """Fallback to unknown when no Latin/Cyrillic letters are present."""
+        query = "12345 !!! ???"
+
+        result = self.validator.validate(query)
+
+        assert result.detected_language == "unknown"
+
 
 # ============================================================================
 # Integration with Other Validators

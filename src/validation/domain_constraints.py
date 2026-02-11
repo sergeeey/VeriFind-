@@ -29,6 +29,7 @@ class DomainValidationResult:
     is_valid: bool
     domain_category: DomainCategory
     confidence_score: float  # 0.0 to 1.0
+    detected_language: str = "unknown"  # ru, en, unknown
     confidence_penalty: float = 0.0  # Penalty for ambiguous cases
     rejection_reason: Optional[str] = None
     detected_entities: List[Dict[str, str]] = field(default_factory=list)
@@ -141,12 +142,15 @@ class DomainConstraintsValidator:
         Returns:
             DomainValidationResult with validation outcome
         """
+        detected_language = self._detect_language(query)
+
         # Check for empty query
         if not query or not query.strip():
             return DomainValidationResult(
                 is_valid=False,
                 domain_category=DomainCategory.NON_FINANCIAL,
                 confidence_score=0.0,
+                detected_language=detected_language,
                 rejection_reason="Query is empty. Please provide a financial analysis query."
             )
 
@@ -167,6 +171,7 @@ class DomainConstraintsValidator:
                 is_valid=False,
                 domain_category=DomainCategory.NON_FINANCIAL,
                 confidence_score=1.0 - non_financial_score,
+                detected_language=detected_language,
                 rejection_reason=self._generate_rejection_message(query_lower),
                 detected_entities=detected_entities
             )
@@ -177,6 +182,7 @@ class DomainConstraintsValidator:
                 is_valid=True,
                 domain_category=DomainCategory.FINANCIAL,
                 confidence_score=financial_score,
+                detected_language=detected_language,
                 confidence_penalty=0.0,
                 detected_entities=detected_entities
             )
@@ -190,6 +196,7 @@ class DomainConstraintsValidator:
                 is_valid=True,
                 domain_category=DomainCategory.AMBIGUOUS,
                 confidence_score=adjusted_score,
+                detected_language=detected_language,
                 confidence_penalty=penalty,
                 detected_entities=detected_entities
             )
@@ -200,6 +207,7 @@ class DomainConstraintsValidator:
                 is_valid=False,
                 domain_category=DomainCategory.NON_FINANCIAL,
                 confidence_score=financial_score,
+                detected_language=detected_language,
                 rejection_reason=self._generate_rejection_message(query_lower),
                 detected_entities=detected_entities
             )
@@ -237,6 +245,22 @@ class DomainConstraintsValidator:
 
         # Each non-financial keyword increases score
         return min(non_financial_count * 0.3, 1.0)
+
+    def _detect_language(self, query: str) -> str:
+        """Detect language using script balance (safe heuristic)."""
+        if not query:
+            return "unknown"
+
+        cyrillic_count = len(re.findall(r"[А-Яа-яЁё]", query))
+        latin_count = len(re.findall(r"[A-Za-z]", query))
+
+        if cyrillic_count == 0 and latin_count == 0:
+            return "unknown"
+        if cyrillic_count > latin_count:
+            return "ru"
+        if latin_count > cyrillic_count:
+            return "en"
+        return "unknown"
 
     def _detect_entities(self, query: str) -> List[Dict[str, str]]:
         """Detect financial entities in query."""

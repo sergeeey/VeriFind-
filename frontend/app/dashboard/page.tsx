@@ -1,13 +1,14 @@
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
-import { Plus, History, Database, Activity } from 'lucide-react'
+import { Plus, History, Database, Activity, Microscope, Bell, Gauge, SlidersHorizontal, GitCompareArrows, Target } from 'lucide-react'
+import { RecentActivityPanel } from '@/components/dashboard/RecentActivityPanel'
+import { SystemStatusPanel } from '@/components/dashboard/SystemStatusPanel'
 
 export default function DashboardPage() {
   return (
@@ -57,76 +58,85 @@ export default function DashboardPage() {
             </CardHeader>
           </Link>
         </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/intelligence">
+            <CardHeader>
+              <Microscope className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Intelligence</CardTitle>
+              <CardDescription>
+                Unified view for SEC, sentiment, sensitivity and chart signals
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/alerts">
+            <CardHeader>
+              <Bell className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Alerts</CardTitle>
+              <CardDescription>
+                Create and monitor price threshold alerts
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/usage">
+            <CardHeader>
+              <Gauge className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Usage</CardTitle>
+              <CardDescription>
+                Inspect API key usage and rate-limit pressure
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/sensitivity">
+            <CardHeader>
+              <SlidersHorizontal className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Sensitivity</CardTitle>
+              <CardDescription>
+                Sweep price shocks and inspect PnL sign-flip behavior
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/calibration">
+            <CardHeader>
+              <Target className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Calibration</CardTitle>
+              <CardDescription>
+                Inspect confidence reliability curve, ECE and Brier score
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+          <Link href="/dashboard/compare">
+            <CardHeader>
+              <GitCompareArrows className="h-10 w-10 text-primary mb-2" />
+              <CardTitle>Compare</CardTitle>
+              <CardDescription>
+                Compare the same analysis across multiple tickers
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
       </div>
 
       {/* System Status */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>System Status</CardTitle>
-            <Activity className="h-5 w-5 text-green-500" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-3xl font-bold text-green-500 mb-1">✓</div>
-              <div className="text-sm text-muted-foreground">API Healthy</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-1">256</div>
-              <div className="text-sm text-muted-foreground">Total Queries</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-green-500 mb-1">0.00%</div>
-              <div className="text-sm text-muted-foreground">Hallucination Rate</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-blue-500 mb-1">&lt;5s</div>
-              <div className="text-sm text-muted-foreground">Avg Response Time</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <SystemStatusPanel />
 
       {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Your latest analysis queries</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg border">
-              <div>
-                <p className="font-medium">50-day MA for AAPL</p>
-                <p className="text-sm text-muted-foreground">2 hours ago • Completed</p>
-              </div>
-              <Button variant="outline" size="sm">
-                View Results
-              </Button>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg border">
-              <div>
-                <p className="font-medium">SPY vs QQQ correlation</p>
-                <p className="text-sm text-muted-foreground">5 hours ago • Completed</p>
-              </div>
-              <Button variant="outline" size="sm">
-                View Results
-              </Button>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg border">
-              <div>
-                <p className="font-medium">TSLA volatility analysis</p>
-                <p className="text-sm text-muted-foreground">1 day ago • Completed</p>
-              </div>
-              <Button variant="outline" size="sm">
-                View Results
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <RecentActivityPanel />
     </div>
   )
 }

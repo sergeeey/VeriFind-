@@ -25,6 +25,7 @@ from datetime import datetime, UTC
 import time
 import asyncio
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from src.vee.sandbox_runner import SandboxRunner, ExecutionResult
 from src.truth_boundary.gate import TruthBoundaryGate, VerifiedFact
@@ -34,6 +35,7 @@ from src.debate.synthesizer_agent import SynthesizerAgent
 from src.debate.real_llm_adapter import RealLLMDebateAdapter  # Week 11 Day 2: Real LLM integration
 from src.debate.schemas import Perspective, DebateContext, DebateReport, Synthesis
 from src.predictions.prediction_store import PredictionStore  # Week 9 Day 3: Prediction hook
+from src.resilience.circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitBreakerOpen
 # Note: save_prediction_from_result imported lazily in debate_node to avoid circular import
 
 # Logger for orchestrator
@@ -218,6 +220,55 @@ class LangGraphOrchestrator:
             logger.info("Query history store enabled in orchestrator")
         except Exception as e:
             logger.warning(f"Query history store disabled: {e}")
+
+        # Circuit breakers for external dependency calls
+        self.market_data_breaker = CircuitBreaker(
+            "market_data_fetch",
+            CircuitBreakerConfig(failure_threshold=5, timeout=60.0),
+        )
+        self.llm_debate_breaker = CircuitBreaker(
+            "llm_debate",
+            CircuitBreakerConfig(failure_threshold=3, timeout=45.0),
+        )
+
+    @staticmethod
+    def _run_coro_sync(coro):
+        """Run coroutine safely from sync context (with or without active loop)."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(coro)
+
+        # Active loop in this thread: execute coroutine in dedicated thread loop.
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(lambda: asyncio.run(coro)).result()
+
+    def _call_with_breaker_sync(self, breaker: CircuitBreaker, func: Callable, *args, **kwargs):
+        """Execute sync callable through async circuit breaker."""
+
+        async def _wrapped():
+            return await asyncio.to_thread(func, *args, **kwargs)
+
+        return self._run_coro_sync(breaker.call(_wrapped))
+
+    def _run_mock_debate(self, state: APEState, debate_context: DebateContext):
+        """Run local bull/bear/neutral debate and synthesize result."""
+        bull_agent = DebaterAgent(perspective=Perspective.BULL)
+        bear_agent = DebaterAgent(perspective=Perspective.BEAR)
+        neutral_agent = DebaterAgent(perspective=Perspective.NEUTRAL)
+
+        bull_report = bull_agent.debate(debate_context)
+        bear_report = bear_agent.debate(debate_context)
+        neutral_report = neutral_agent.debate(debate_context)
+
+        debate_reports = [bull_report, bear_report, neutral_report]
+        synthesizer = SynthesizerAgent(enable_synthesis=True)
+        synthesis = synthesizer.synthesize(
+            debate_reports=debate_reports,
+            original_confidence=state.verified_fact.confidence_score,
+            fact_id=state.verified_fact.fact_id
+        )
+        return debate_reports, synthesis
 
     def _persist_gate_artifacts(self, state: APEState):
         """
@@ -523,7 +574,11 @@ class LangGraphOrchestrator:
 
                 if data_type.lower() == 'fundamentals':
                     # Fetch fundamentals
-                    fundamentals = self.yfinance_adapter.fetch_fundamentals(ticker)
+                    fundamentals = self._call_with_breaker_sync(
+                        self.market_data_breaker,
+                        self.yfinance_adapter.fetch_fundamentals,
+                        ticker
+                    )
                     fetched_data[ticker] = fundamentals
                 elif data_type.lower() == 'ohlcv':
                     # Fetch OHLCV
@@ -532,7 +587,9 @@ class LangGraphOrchestrator:
                         state.status = StateStatus.FAILED
                         return state
 
-                    df = self.yfinance_adapter.fetch_ohlcv(
+                    df = self._call_with_breaker_sync(
+                        self.market_data_breaker,
+                        self.yfinance_adapter.fetch_ohlcv,
                         ticker=ticker,
                         start_date=start_date,
                         end_date=end_date,
@@ -542,6 +599,19 @@ class LangGraphOrchestrator:
 
             state.fetched_data = fetched_data
 
+        except CircuitBreakerOpen as cb_err:
+            state.error_message = str(cb_err)
+            state.status = StateStatus.FAILED
+
+            # Broadcast: FETCH failed due to open circuit
+            self._broadcast_update(
+                query_id=state.query_id,
+                status="failed",
+                current_node="FETCH",
+                progress=0.4,
+                verified_facts_count=0,
+                error=state.error_message
+            )
         except Exception as e:
             state.error_message = f'Fetch error: {str(e)}'
             state.status = StateStatus.FAILED
@@ -785,10 +855,18 @@ class LangGraphOrchestrator:
             if self.use_real_llm and self.debate_adapter:
                 # Real LLM API (production mode)
                 logger.info(f"Using real LLM ({self.llm_provider}) for debate")
-                debate_reports, synthesis = self.debate_adapter.generate_debate(
-                    context=debate_context,
-                    original_confidence=state.verified_fact.confidence_score
-                )
+                try:
+                    debate_reports, synthesis = self._call_with_breaker_sync(
+                        self.llm_debate_breaker,
+                        self.debate_adapter.generate_debate,
+                        context=debate_context,
+                        original_confidence=state.verified_fact.confidence_score
+                    )
+                except CircuitBreakerOpen as cb_err:
+                    logger.warning(
+                        f"LLM debate circuit is open for query {state.query_id}, using mock fallback: {cb_err}"
+                    )
+                    debate_reports, synthesis = self._run_mock_debate(state, debate_context)
 
                 # Log cost stats
                 stats = self.debate_adapter.get_stats()
@@ -801,23 +879,7 @@ class LangGraphOrchestrator:
             else:
                 # Mock agents (test mode)
                 logger.info("Using mock debate agents (test mode)")
-                bull_agent = DebaterAgent(perspective=Perspective.BULL)
-                bear_agent = DebaterAgent(perspective=Perspective.BEAR)
-                neutral_agent = DebaterAgent(perspective=Perspective.NEUTRAL)
-
-                bull_report = bull_agent.debate(debate_context)
-                bear_report = bear_agent.debate(debate_context)
-                neutral_report = neutral_agent.debate(debate_context)
-
-                debate_reports = [bull_report, bear_report, neutral_report]
-
-                # Synthesize
-                synthesizer = SynthesizerAgent(enable_synthesis=True)
-                synthesis = synthesizer.synthesize(
-                    debate_reports=debate_reports,
-                    original_confidence=state.verified_fact.confidence_score,
-                    fact_id=state.verified_fact.fact_id
-                )
+                debate_reports, synthesis = self._run_mock_debate(state, debate_context)
 
             # Update state
             state.debate_reports = debate_reports
@@ -1049,6 +1111,7 @@ class LangGraphOrchestrator:
         # Convert state to API response format
         result = {
             "query_id": final_state.query_id,
+            "episode_id": final_state.query_id,
             "query_text": final_state.query_text,
             "status": final_state.status.value,
             "answer": None,

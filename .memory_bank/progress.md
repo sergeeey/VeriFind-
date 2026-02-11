@@ -1693,3 +1693,26 @@
 
 ### Notes
 - Confirms no obvious tracked secret signatures and no regression in async status contract.
+
+## 2026-02-11 (Codex) - Wave 2 Functional Pack Commit Preparation (Backend + Frontend + Tests)
+
+### Implemented
+- Staged cohesive functional pack covering:
+  - async query status tracking + websocket flow + status summary API
+  - alerts stack (store/checker/notifier/scheduler + API)
+  - dashboard workbenches (activity/alerts/intelligence/sensitivity/usage/compare/calibration)
+  - verification transparency integration in results
+  - route integrity closures for missing sidebar pages
+  - API support routes (report/sec/sentiment/educational) and middleware/cache/profiling additions
+- Included source and tests only (`src/`, `frontend/`, `tests/`), excluding non-source artifacts and local reports.
+
+### Verified
+- Backend regression sweep:
+  - `pytest tests/unit/test_alerts_api.py tests/unit/test_alert_checker.py tests/unit/test_alert_notifier.py tests/unit/test_alert_scheduler.py tests/unit/test_async_query_status_api.py tests/unit/test_query_tracker.py tests/unit/test_websocket_endpoint.py tests/unit/test_compare_api.py tests/unit/test_sensitivity_api.py tests/unit/test_sec_api.py tests/unit/test_sentiment_api.py tests/unit/test_report_api.py tests/unit/test_educational_api.py tests/unit/test_usage_dashboard_api.py tests/integration/test_api_critical.py -q`
+  - result: **61 passed**.
+- Frontend regression:
+  - `npm --prefix frontend test -- --runInBand` -> **15 suites / 34 tests passed**.
+  - `npm --prefix frontend run lint` -> **pass**.
+
+### Notes
+- This checkpoint validates the major Wave 2/ops UX package end-to-end before commit.

@@ -41,8 +41,8 @@ export function PredictionDashboard() {
         const json: TickersResponse = await response.json()
         setTickers(json.tickers)
 
-        if (json.tickers.length > 0 && !selectedTicker) {
-          setSelectedTicker(json.tickers[0])
+        if (json.tickers.length > 0) {
+          setSelectedTicker((prev) => prev || json.tickers[0])
         }
       } catch (err) {
         console.error('Error fetching tickers:', err)

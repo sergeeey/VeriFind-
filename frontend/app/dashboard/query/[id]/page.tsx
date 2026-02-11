@@ -12,6 +12,7 @@ import { useWebSocket } from '@/components/providers/WebSocketProvider'
 import { api } from '@/lib/api'
 import { QUERY_STATES } from '@/lib/constants'
 import type { QueryStatus as QueryStatusType } from '@/types/query'
+import { normalizeQueryStatusPayload } from '@/lib/query-status'
 import { CheckCircle2, ExternalLink } from 'lucide-react'
 
 export default function QueryStatusPage() {
@@ -33,7 +34,7 @@ export default function QueryStatusPage() {
     const fetchStatus = async () => {
       try {
         const response = await api.getStatus(queryId)
-        setStatus(response.data)
+        setStatus(normalizeQueryStatusPayload(response.data, queryId))
         setError(null)
       } catch (err: any) {
         console.error('Failed to fetch status:', err)
@@ -59,7 +60,10 @@ export default function QueryStatusPage() {
 
     const unsubscribe = subscribe(queryId, (data) => {
       console.log(`[QueryStatusPage] Received update:`, data)
-      setStatus((prev) => (prev ? { ...prev, ...data } : null))
+      setStatus((prev) => ({
+        ...normalizeQueryStatusPayload(prev || {}, queryId),
+        ...normalizeQueryStatusPayload(data || {}, queryId),
+      }))
     })
 
     return unsubscribe
@@ -74,7 +78,7 @@ export default function QueryStatusPage() {
     const interval = setInterval(async () => {
       try {
         const response = await api.getStatus(queryId)
-        setStatus(response.data)
+        setStatus(normalizeQueryStatusPayload(response.data, queryId))
       } catch (err) {
         console.error('Polling failed:', err)
       }

@@ -18,6 +18,8 @@ from ...orchestration.langgraph_orchestrator import LangGraphOrchestrator, State
 from ..config import get_settings
 from ..security import input_validator
 from ..metrics import queries_submitted_total
+from ..query_tracker import create_query_status, update_query_status
+from ..websocket import broadcast_completion, broadcast_error, broadcast_status_update
 
 router = APIRouter(prefix="/api", tags=["Analysis"])
 logger = logging.getLogger(__name__)
@@ -179,15 +181,80 @@ class CompareResponse(BaseModel):
 _orchestrator: Optional[LangGraphOrchestrator] = None
 _orchestrator_provider: Optional[str] = None
 
+
+def get_orchestrator_instance() -> Dict[str, Any]:
+    """Return current orchestrator singleton metadata without lazy creation."""
+    return {
+        "orchestrator": _orchestrator,
+        "provider": _orchestrator_provider,
+    }
+
+
 def get_orchestrator(provider: Optional[str] = None) -> LangGraphOrchestrator:
     """Get or create LangGraph orchestrator."""
     global _orchestrator, _orchestrator_provider
     requested_provider = provider or settings.llm_provider
+
+    async def _tracker_broadcast(
+        query_id: str,
+        status: str,
+        current_node: Optional[str] = None,
+        progress: float = 0.0,
+        verified_facts_count: int = 0,
+        error: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        state_from_node = {
+            "PLAN": "planning",
+            "FETCH": "fetching",
+            "VEE": "executing",
+            "GATE": "validating",
+            "DEBATE": "debating",
+            "ERROR": "failed",
+        }
+        normalized_status = status
+        if status == "processing":
+            normalized_status = state_from_node.get(str(current_node or "").upper(), "pending")
+        elif status == "accepted":
+            normalized_status = "pending"
+        elif status not in {"completed", "failed"}:
+            normalized_status = "pending"
+
+        update_query_status(
+            query_id=query_id,
+            status=normalized_status,
+            current_node=current_node,
+            progress=progress,
+            verified_facts_count=verified_facts_count,
+            error=error,
+            metadata=metadata,
+        )
+        try:
+            await broadcast_status_update(
+                query_id=query_id,
+                status=normalized_status,
+                progress=progress,
+                current_step=str(current_node or ""),
+            )
+            if normalized_status == "completed":
+                await broadcast_completion(
+                    query_id=query_id,
+                    result_summary={
+                        "verified_facts_count": verified_facts_count,
+                        "metadata": metadata or {},
+                    },
+                )
+            elif normalized_status == "failed" and error:
+                await broadcast_error(query_id=query_id, error=str(error))
+        except Exception as ws_err:
+            logger.warning(f"WebSocket broadcast skipped for {query_id}: {ws_err}")
+
     if _orchestrator is None or _orchestrator_provider != requested_provider:
         _orchestrator = LangGraphOrchestrator(
             claude_api_key=settings.anthropic_api_key,
             llm_provider=requested_provider,
             use_real_llm=True,
+            broadcast_callback=_tracker_broadcast,
         )
         _orchestrator_provider = requested_provider
     return _orchestrator
@@ -333,11 +400,68 @@ async def submit_query(
     Returns immediately with query_id. Check status via /api/status/{query_id}
     """
     query_id = str(uuid4())
+    detected_language = _detect_language(request.query)
     
     queries_submitted_total.labels(priority="normal").inc()
-    
-    # TODO: Queue in Celery for Phase 1
-    # For now, synchronous
+
+    create_query_status(
+        query_id=query_id,
+        query_text=request.query,
+        status="accepted",
+        progress=0.0,
+        metadata={
+            "priority": request.priority,
+            "provider": request.provider,
+            "detected_language": detected_language,
+            "pipeline_path": "langgraph",
+            "queued_via": "fastapi_background_task",
+        },
+    )
+
+    async def _run_query_in_background():
+        try:
+            update_query_status(
+                query_id=query_id,
+                status="processing",
+                current_node="PLAN",
+                progress=0.05,
+            )
+
+            orchestrator = get_orchestrator(request.provider)
+            result = await orchestrator.process_query_async(
+                query_id=query_id,
+                query_text=request.query,
+                provider=request.provider,
+                context={"priority": request.priority, "mode": "async_query"},
+            )
+            is_completed = result.get("status") == "completed"
+            update_query_status(
+                query_id=query_id,
+                status="completed" if is_completed else "failed",
+                current_node=None,
+                progress=1.0 if is_completed else 0.0,
+                verified_facts_count=1 if result.get("verified_fact") else 0,
+                error=result.get("error"),
+                metadata={
+                    "answer": result.get("answer"),
+                    "episode_id": result.get("episode_id"),
+                    "detected_language": detected_language,
+                    "verification_score": result.get("verification_score"),
+                    "nodes_visited": result.get("nodes_visited", []),
+                },
+            )
+        except Exception as e:
+            logger.error(f"Async query {query_id} failed: {e}")
+            update_query_status(
+                query_id=query_id,
+                status="failed",
+                current_node="ERROR",
+                progress=0.0,
+                error=str(e),
+            )
+
+    # Fire-and-forget worker: keep /api/query low-latency.
+    asyncio.create_task(_run_query_in_background())
     
     return QueryResponse(
         query_id=query_id,

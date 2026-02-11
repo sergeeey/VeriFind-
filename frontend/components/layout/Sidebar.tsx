@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useStore } from '@/lib/store'
@@ -14,6 +15,12 @@ import {
   FileText,
   Activity,
   TrendingUp,
+  Microscope,
+  Bell,
+  Gauge,
+  SlidersHorizontal,
+  GitCompareArrows,
+  Target,
 } from 'lucide-react'
 
 const navItems = [
@@ -21,6 +28,12 @@ const navItems = [
   { href: '/dashboard/query/new', label: 'New Query', icon: Plus },
   { href: '/dashboard/history', label: 'History', icon: History },
   { href: '/dashboard/facts', label: 'Facts', icon: Database },
+  { href: '/dashboard/alerts', label: 'Alerts', icon: Bell },
+  { href: '/dashboard/intelligence', label: 'Intelligence', icon: Microscope },
+  { href: '/dashboard/sensitivity', label: 'Sensitivity', icon: SlidersHorizontal },
+  { href: '/dashboard/calibration', label: 'Calibration', icon: Target },
+  { href: '/dashboard/compare', label: 'Compare', icon: GitCompareArrows },
+  { href: '/dashboard/usage', label: 'Usage', icon: Gauge },
   { href: '/predictions', label: 'Predictions', icon: TrendingUp },
   { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/docs', label: 'Docs', icon: FileText },
@@ -30,6 +43,36 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const sidebarOpen = useStore((state) => state.sidebarOpen)
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const [apiStatus, setApiStatus] = useState<'Healthy' | 'Degraded'>('Healthy')
+  const [todayCount, setTodayCount] = useState<number>(0)
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        const [healthRes, statusRes] = await Promise.all([
+          fetch(`${apiBase}/health`),
+          fetch(`${apiBase}/api/status-summary`),
+        ])
+        if (healthRes.ok) {
+          const healthJson = await healthRes.json()
+          setApiStatus(healthJson.status === 'healthy' ? 'Healthy' : 'Degraded')
+        }
+        if (statusRes.ok) {
+          const summary = await statusRes.json()
+          setTodayCount(Number(summary.today_count || 0))
+        }
+      } catch {
+        // Keep defaults on best-effort status panel failures.
+      }
+    }
+    loadStatus()
+  }, [apiBase])
+
+  const statusColorClass = useMemo(
+    () => (apiStatus === 'Healthy' ? 'text-green-500' : 'text-yellow-500'),
+    [apiStatus]
+  )
 
   return (
     <>
@@ -74,11 +117,11 @@ export function Sidebar() {
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Status</span>
-              <span className="text-green-500 font-medium">Healthy</span>
+              <span className={`${statusColorClass} font-medium`}>{apiStatus}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Queries Today</span>
-              <span className="font-medium">12</span>
+              <span className="font-medium">{todayCount}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Hallucinations</span>

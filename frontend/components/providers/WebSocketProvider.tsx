@@ -42,6 +42,11 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
         console.log('[WebSocket] Connected')
         setConnected(true)
         reconnectAttempts.current = 0
+
+        // Re-subscribe active query listeners after reconnect.
+        for (const queryId of listenersRef.current.keys()) {
+          ws.send(JSON.stringify({ action: 'subscribe', query_id: queryId }))
+        }
       }
 
       ws.onmessage = (event) => {
@@ -49,10 +54,13 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
           const message: WebSocketMessage = JSON.parse(event.data)
           console.log('[WebSocket] Message received:', message)
 
+          const queryId = message.query_id
+          if (!queryId) return
+
           // Notify all listeners for this query_id
-          const listeners = listenersRef.current.get(message.query_id)
+          const listeners = listenersRef.current.get(queryId)
           if (listeners) {
-            listeners.forEach((callback) => callback(message.data))
+            listeners.forEach((callback) => callback(message))
           }
         } catch (error) {
           console.error('[WebSocket] Failed to parse message:', error)
@@ -105,9 +113,15 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
       listeners = new Set()
       listenersRef.current.set(queryId, listeners)
     }
+    const beforeSize = listeners.size
 
     // Add callback to listeners
     listeners.add(callback)
+
+    // Subscribe on server when first local listener is registered.
+    if (beforeSize === 0 && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ action: 'subscribe', query_id: queryId }))
+    }
 
     console.log(`[WebSocket] Subscribed to query ${queryId}`)
 
@@ -116,6 +130,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
       listeners?.delete(callback)
       if (listeners?.size === 0) {
         listenersRef.current.delete(queryId)
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ action: 'unsubscribe', query_id: queryId }))
+        }
       }
       console.log(`[WebSocket] Unsubscribed from query ${queryId}`)
     }

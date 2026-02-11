@@ -10,6 +10,7 @@ from typing import Optional, Dict, Any
 from src.api.metrics import prediction_check_last_run_timestamp
 from src.predictions.prediction_store import PredictionStore
 from src.predictions.accuracy_tracker import AccuracyTracker
+from src.predictions.calibration import CalibrationTracker
 
 try:
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -36,15 +37,29 @@ class PredictionScheduler:
         def _sync_check():
             store = PredictionStore(db_url=db_url)
             tracker = AccuracyTracker(prediction_store=store)
-            return tracker.run_daily_check(days_until_target=days_until_target)
+            check_results = tracker.run_daily_check(days_until_target=days_until_target)
+            calibration_summary = None
+            try:
+                calibration = CalibrationTracker(prediction_store=store)
+                calibration_summary = calibration.calculate_summary(days=30, min_samples=10)
+            except Exception as calibration_error:
+                logger.warning(f"Calibration summary update failed: {calibration_error}")
+            return check_results, calibration_summary
 
-        results = await loop.run_in_executor(None, _sync_check)
+        results, calibration_summary = await loop.run_in_executor(None, _sync_check)
         successful = sum(1 for item in results if item.get("success"))
         summary = {
             "checked": len(results),
             "successful": successful,
             "failed": len(results) - successful,
         }
+        if calibration_summary is not None:
+            summary["calibration"] = {
+                "status": calibration_summary.get("status", "unknown"),
+                "total_evaluated": calibration_summary.get("total_evaluated", 0),
+                "expected_calibration_error": calibration_summary.get("expected_calibration_error", 0.0),
+                "brier_score": calibration_summary.get("brier_score", 0.0),
+            }
 
         self.last_run_at = datetime.now(UTC)
         self.last_run_result = summary
