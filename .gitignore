@@ -122,3 +122,4 @@ alembic.ini
 # Test databases
 *.sqlite3
 chroma.sqlite3
+AUDIT_REPORT_2026_02_10.md
