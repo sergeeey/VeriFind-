@@ -11,6 +11,7 @@ import logging
 
 from ..monitoring import get_health_metrics
 from ..config import get_settings
+from ...predictions.scheduler import prediction_scheduler
 
 router = APIRouter(tags=["Health"])
 logger = logging.getLogger(__name__)
@@ -79,4 +80,47 @@ async def get_disclaimer():
             "and agree to be bound by this disclaimer."
         ),
         "summary": "Not financial advice - consult a qualified advisor"
+    }
+
+
+@router.get("/metrics/performance", status_code=status.HTTP_200_OK)
+async def performance_metrics():
+    """Get API performance metrics."""
+    from ..middleware.profiling import ProfilingMiddleware
+    from ..middleware.cache import CacheStats
+    import redis.asyncio as redis
+    
+    metrics = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "cache": {},
+        "profiling": {},
+        "settings": {
+            "cache_enabled": settings.cache_enabled,
+            "profiling_enabled": settings.profiling_enabled,
+            "cache_ttl_seconds": settings.cache_ttl_seconds,
+            "profiling_slow_threshold": settings.profiling_slow_threshold
+        }
+    }
+    
+    # Get cache stats
+    try:
+        redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+        cache_stats = CacheStats(redis_client)
+        metrics["cache"] = await cache_stats.get_stats()
+        await redis_client.close()
+    except Exception as e:
+        metrics["cache"] = {"error": str(e)}
+    
+    # Note: Profiling stats would need to be accessed from the middleware instance
+    # This is a simplified version
+    
+    return metrics
+
+
+@router.get("/api/health/scheduler", status_code=status.HTTP_200_OK)
+async def scheduler_health():
+    """Prediction scheduler health endpoint."""
+    return {
+        "timestamp": datetime.utcnow().isoformat(),
+        "scheduler": prediction_scheduler.health(),
     }

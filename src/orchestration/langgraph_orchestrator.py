@@ -197,6 +197,104 @@ class LangGraphOrchestrator:
         self.prediction_store = PredictionStore(db_url=db_url)
         logger.info("Initialized prediction store for pipeline→predictions integration")
 
+        # Initialize Neo4j graph integration (non-blocking)
+        self.neo4j_client = None
+        try:
+            from src.graph.neo4j_client import Neo4jClient
+            self.neo4j_client = Neo4jClient(
+                uri=os.getenv("NEO4J_URI", "neo4j://localhost:7688"),
+                user=os.getenv("NEO4J_USER", "neo4j"),
+                password=os.getenv("NEO4J_PASSWORD")
+            )
+            logger.info("Neo4j integration enabled in orchestrator")
+        except Exception as e:
+            logger.warning(f"Neo4j integration disabled: {e}")
+
+        # Initialize query history store (non-blocking)
+        self.query_history_store = None
+        try:
+            from src.storage.query_history_store import QueryHistoryStore
+            self.query_history_store = QueryHistoryStore(db_url=db_url)
+            logger.info("Query history store enabled in orchestrator")
+        except Exception as e:
+            logger.warning(f"Query history store disabled: {e}")
+
+    def _persist_gate_artifacts(self, state: APEState):
+        """
+        Persist Episode + VerifiedFact to Neo4j.
+
+        Never raises to keep pipeline resilient.
+        """
+        if not self.neo4j_client or not state.verified_fact:
+            return
+
+        try:
+            self.neo4j_client.create_episode(
+                episode_id=state.query_id,
+                query_text=state.query_text,
+                created_at=datetime.now(UTC)
+            )
+            self.neo4j_client.create_verified_fact_node(state.verified_fact)
+            self.neo4j_client.link_episode_to_fact(
+                episode_id=state.query_id,
+                fact_id=state.verified_fact.fact_id
+            )
+        except Exception as e:
+            logger.warning(f"Neo4j gate persistence skipped: {e}")
+
+    def _persist_debate_artifacts(self, state: APEState):
+        """
+        Persist Synthesis node and relationship to Neo4j.
+
+        Never raises to keep pipeline resilient.
+        """
+        if not self.neo4j_client or not state.verified_fact or not state.synthesis:
+            return
+
+        try:
+            if hasattr(state.synthesis, "model_dump"):
+                synthesis_payload = state.synthesis.model_dump()
+            elif hasattr(state.synthesis, "dict"):
+                synthesis_payload = state.synthesis.dict()
+            else:
+                synthesis_payload = {"raw": str(state.synthesis)}
+
+            synthesis_id = self.neo4j_client.create_synthesis_node(
+                fact_id=state.verified_fact.fact_id,
+                synthesis_data=synthesis_payload
+            )
+            self.neo4j_client.link_fact_to_synthesis(
+                fact_id=state.verified_fact.fact_id,
+                synthesis_id=synthesis_id
+            )
+        except Exception as e:
+            logger.warning(f"Neo4j debate persistence skipped: {e}")
+
+    def _persist_query_history(
+        self,
+        query_id: str,
+        query_text: str,
+        status: str,
+        result_summary: Optional[str],
+        confidence_score: Optional[float]
+    ):
+        """Persist query result metadata for history/session UX."""
+        if not self.query_history_store:
+            return
+
+        try:
+            ticker_mentions = self.query_history_store.extract_ticker_mentions(query_text)
+            self.query_history_store.save_entry(
+                query_id=query_id,
+                query_text=query_text,
+                status=status,
+                result_summary=result_summary,
+                confidence_score=confidence_score,
+                ticker_mentions=ticker_mentions,
+            )
+        except Exception as e:
+            logger.warning(f"Query history persistence skipped: {e}")
+
     def _broadcast_update(
         self,
         query_id: str,
@@ -609,6 +707,7 @@ class LangGraphOrchestrator:
             )
 
             state.verified_fact = verified_fact
+            self._persist_gate_artifacts(state)
             # Note: Don't set to COMPLETED yet - DEBATE node comes next
 
         except Exception as e:
@@ -723,6 +822,7 @@ class LangGraphOrchestrator:
             # Update state
             state.debate_reports = debate_reports
             state.synthesis = synthesis
+            self._persist_debate_artifacts(state)
 
             # Update verified_fact confidence with adjusted value
             state.verified_fact.confidence_score = synthesis.adjusted_confidence
@@ -911,3 +1011,77 @@ class LangGraphOrchestrator:
             )
 
         return state
+
+    async def process_query_async(
+        self,
+        query_id: str,
+        query_text: str,
+        provider: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Async wrapper for processing query through the pipeline.
+        
+        API-compatible method that calls run() in executor.
+        
+        Args:
+            query_id: Unique query identifier
+            query_text: User query text
+            provider: LLM provider (deepseek, openai, gemini) - for API compatibility
+            context: Optional context data
+            
+        Returns:
+            Dict with analysis results
+        """
+        import asyncio
+        
+        # Run synchronous run() in thread pool
+        loop = asyncio.get_event_loop()
+        final_state = await loop.run_in_executor(
+            None,  # Default executor
+            self.run,
+            query_id,
+            query_text,
+            None,  # direct_code
+            True   # use_plan
+        )
+        
+        # Convert state to API response format
+        result = {
+            "query_id": final_state.query_id,
+            "query_text": final_state.query_text,
+            "status": final_state.status.value,
+            "answer": None,
+            "verified_fact": None,
+            "data_source": "yfinance",
+            "data_freshness": None,
+            "verification_score": 0.0,
+            "cost_usd": 0.0,
+            "tokens_used": 0,
+            "nodes_visited": final_state.nodes_visited,
+            "error": final_state.error_message
+        }
+        
+        # Extract verified fact data if available
+        if final_state.verified_fact:
+            fact = final_state.verified_fact
+            result["verified_fact"] = {
+                "fact_id": fact.fact_id,
+                "statement": fact.statement or str(fact.extracted_values),
+                "confidence_score": fact.confidence_score,
+                "source": fact.data_source
+            }
+            # Use statement or build from extracted_values
+            result["answer"] = fact.statement or f"Analysis complete: {fact.extracted_values}"
+            result["verification_score"] = fact.confidence_score
+            result["data_source"] = fact.data_source
+
+        self._persist_query_history(
+            query_id=query_id,
+            query_text=query_text,
+            status=result["status"],
+            result_summary=result.get("answer"),
+            confidence_score=result.get("verification_score"),
+        )
+
+        return result

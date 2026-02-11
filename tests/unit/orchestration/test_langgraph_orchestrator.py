@@ -118,7 +118,8 @@ def test_gate_node_validates_output(lg_orchestrator):
 
     updated_state = lg_orchestrator.gate_node(state)
 
-    assert updated_state.status == StateStatus.COMPLETED  # GATE completes validation
+    # Gate validates and prepares state for DEBATE (does not complete pipeline).
+    assert updated_state.status == StateStatus.VALIDATING
     assert updated_state.current_node == 'GATE'
     assert updated_state.verified_fact is not None
     assert updated_state.verified_fact.status == 'success'

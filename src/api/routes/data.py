@@ -167,7 +167,7 @@ async def get_episode(episode_id: str):
     """Get episode details with all verified facts."""
     try:
         graph = get_graph_client()
-        episode = await graph.get_episode(episode_id)
+        episode = graph.get_episode(episode_id)
         if not episode:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -192,13 +192,93 @@ async def list_episodes(
     """List episodes with pagination."""
     try:
         graph = get_graph_client()
-        episodes = await graph.list_episodes(limit=limit, offset=offset)
+        episodes = graph.list_episodes(limit=limit, offset=offset)
         return episodes
     except Exception as e:
         logger.error(f"Failed to list episodes: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve episodes"
+        )
+
+
+@router.get("/graph/facts", response_model=List[Dict[str, Any]])
+async def get_graph_facts(
+    ticker: str = Query(..., min_length=1, description="Ticker symbol, e.g. AAPL"),
+    limit: int = Query(20, ge=1, le=200)
+):
+    """Search graph facts related to ticker."""
+    try:
+        graph = get_graph_client()
+        return graph.search_facts_by_ticker(ticker=ticker, limit=limit)
+    except Exception as e:
+        logger.error(f"Failed to search graph facts for ticker {ticker}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to search graph facts"
+        )
+
+
+@router.get("/graph/lineage/{fact_id}", response_model=Dict[str, Any])
+async def get_graph_lineage(fact_id: str):
+    """Get lineage for a fact."""
+    try:
+        graph = get_graph_client()
+        fact = graph.get_fact_node(fact_id)
+        if not fact:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Fact {fact_id} not found"
+            )
+        lineage = graph.get_fact_lineage(fact_id)
+        return {
+            "fact_id": fact_id,
+            "fact": fact,
+            "ancestors": lineage,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get lineage for fact {fact_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve fact lineage"
+        )
+
+
+@router.get("/graph/related/{fact_id}", response_model=Dict[str, Any])
+async def get_graph_related(fact_id: str):
+    """Get related facts and synthesis artifacts for a fact."""
+    try:
+        graph = get_graph_client()
+        related = graph.get_related_facts(fact_id)
+        if not related.get("fact"):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Fact {fact_id} not found"
+            )
+        return related
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get related artifacts for fact {fact_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve related facts"
+        )
+
+
+@router.get("/graph/stats", response_model=Dict[str, int])
+async def get_graph_stats():
+    """Get Neo4j graph statistics."""
+    try:
+        graph = get_graph_client()
+        return graph.get_graph_stats()
+    except Exception as e:
+        logger.error(f"Failed to get graph stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve graph stats"
         )
 
 

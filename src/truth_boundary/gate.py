@@ -59,6 +59,9 @@ class VerifiedFact:
     data_source: str = "yfinance"  # Source: yfinance, alpha_vantage, polygon, cache
     data_freshness: Optional[datetime] = None  # When data was fetched from external API
     source_verified: bool = True  # True if values from VEE execution (not LLM hallucination)
+    
+    # API response: Human-readable statement summarizing the fact
+    statement: Optional[str] = None  # Generated summary for API response
 
 
 @dataclass
@@ -259,7 +262,8 @@ class TruthBoundaryGate:
         code_hash: Optional[str] = None,
         execution_time_ms: Optional[int] = None,
         memory_used_mb: Optional[float] = None,
-        source_code: Optional[str] = None
+        source_code: Optional[str] = None,
+        statement: Optional[str] = None
     ) -> VerifiedFact:
         """
         Create VerifiedFact from validation result.
@@ -272,11 +276,17 @@ class TruthBoundaryGate:
             execution_time_ms: Execution time (optional, from ExecutionResult)
             memory_used_mb: Memory used (optional, from ExecutionResult)
             source_code: Executed source code (optional, for Debate System)
+            statement: Human-readable statement summarizing the fact (optional)
 
         Returns:
             VerifiedFact
         """
         fact_id = str(uuid.uuid4())
+
+        # Auto-generate statement from extracted_values if not provided
+        if statement is None and validation.extracted_values:
+            parts = [f"{k}: {v}" for k, v in validation.extracted_values.items()]
+            statement = ", ".join(parts)
 
         return VerifiedFact(
             fact_id=fact_id,
@@ -290,5 +300,6 @@ class TruthBoundaryGate:
             created_at=datetime.now(UTC),
             error_message=validation.error_message,
             source_code=source_code,
-            confidence_score=1.0  # Default high confidence before debate
+            confidence_score=1.0,  # Default high confidence before debate
+            statement=statement
         )

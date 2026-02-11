@@ -202,6 +202,12 @@ cache_hit_ratio = Gauge(
     'Cache hit ratio (0-1)'
 )
 
+# Prediction scheduler metrics
+prediction_check_last_run_timestamp = Gauge(
+    'prediction_check_last_run_timestamp',
+    'Unix timestamp of last prediction accuracy scheduler run'
+)
+
 
 # ============================================================================
 # System Metrics

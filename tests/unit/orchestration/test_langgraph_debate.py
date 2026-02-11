@@ -31,7 +31,8 @@ def orchestrator():
     """Create orchestrator for debate testing."""
     return LangGraphOrchestrator(
         claude_api_key='test_api_key',
-        enable_retry=False
+        enable_retry=False,
+        use_real_llm=False
     )
 
 

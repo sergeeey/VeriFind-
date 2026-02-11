@@ -84,6 +84,7 @@ pre-commit==3.6.2             # Git hooks
 # ==============================================================================
 prometheus-client==0.20.0     # Metrics exporter
 structlog==24.1.0             # Structured logging
+apscheduler==3.10.4           # Daily prediction scheduler
 
 # ==============================================================================
 # Security (Week 15)

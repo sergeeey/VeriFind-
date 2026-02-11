@@ -15,6 +15,7 @@ Success criteria:
 """
 
 import pytest
+import os
 from datetime import datetime, UTC
 
 from src.orchestration.langgraph_orchestrator import LangGraphOrchestrator, StateStatus
@@ -45,10 +46,14 @@ def timescale_storage():
 @pytest.fixture
 def neo4j_graph():
     """Neo4j graph connection."""
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+    if not neo4j_password:
+        pytest.skip("NEO4J_PASSWORD is not set for integration tests")
+
     graph = Neo4jGraphClient(
         uri='neo4j://localhost:7688',
         user='neo4j',
-        password='PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'
+        password=neo4j_password
     )
     graph.clear_all()  # Clean before tests
     yield graph

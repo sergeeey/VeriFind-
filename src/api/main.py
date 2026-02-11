@@ -8,6 +8,14 @@ Endpoints:
 - Data: /api/facts, /api/episodes, /api/status
 """
 
+# CRITICAL: Load .env file BEFORE importing settings
+from dotenv import load_dotenv
+import os
+
+# Load .env from project root (2 levels up from this file)
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+load_dotenv(dotenv_path=env_path, override=True)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,9 +30,10 @@ from .error_handlers import (
 )
 from .monitoring import prometheus_middleware, initialize_monitoring
 from .middleware import add_security_headers, add_disclaimer_to_json_responses, add_rate_limit_headers
-from .routes import health_router, analysis_router, data_router, predictions_router
+from .routes import health_router, analysis_router, data_router, predictions_router, audit_router, history_router, portfolio_router
 from fastapi.exceptions import RequestValidationError
 from .exceptions import APEException, ValidationError as APEValidationError
+from ..predictions.scheduler import prediction_scheduler
 
 settings = get_settings()
 
@@ -55,7 +64,14 @@ app.add_exception_handler(APEValidationError, validation_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
 
-# Middleware (order matters!)
+# CRITICAL: Middleware order matters!
+# 1. CORS first (must process OPTIONS requests)
+# 2. Security headers early
+# 3. Cache (can skip other middleware on HIT)
+# 4. Request tracking (profiling, request_id)
+# 5. Processing (rate limit, logging)
+# 6. Disclaimer LAST (modifies response)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -63,11 +79,37 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
-app.middleware("http")(request_id_middleware)
-app.middleware("http")(error_logging_middleware)
-app.middleware("http")(prometheus_middleware)
-app.middleware("http")(add_rate_limit_headers)
+
+# Security headers (early)
 app.middleware("http")(add_security_headers)
+app.middleware("http")(add_rate_limit_headers)
+
+# DISABLED: Route-level caching is faster and more reliable
+# Middleware caching causes issues with response body iteration
+# See: src/api/routes/analysis.py for route-level cache implementation
+# if settings.cache_enabled:
+#     from .middleware.cache import ResponseCacheMiddleware
+#     app.add_middleware(
+#         ResponseCacheMiddleware,
+#         redis_url=settings.redis_url
+#     )
+
+# Profiling (tracks timing)
+if settings.profiling_enabled:
+    from .middleware.profiling import ProfilingMiddleware
+    app.add_middleware(
+        ProfilingMiddleware,
+        slow_threshold=settings.profiling_slow_threshold
+    )
+
+# Request tracking
+app.middleware("http")(request_id_middleware)
+app.middleware("http")(prometheus_middleware)
+
+# Logging (after processing)
+app.middleware("http")(error_logging_middleware)
+
+# Disclaimer LAST (modifies JSON response)
 app.middleware("http")(add_disclaimer_to_json_responses)
 
 # Include routers
@@ -75,3 +117,18 @@ app.include_router(health_router)
 app.include_router(analysis_router)
 app.include_router(data_router)
 app.include_router(predictions_router)
+app.include_router(audit_router)
+app.include_router(history_router)
+app.include_router(portfolio_router)
+
+
+@app.on_event("startup")
+async def start_prediction_scheduler():
+    """Start daily prediction evaluation scheduler."""
+    prediction_scheduler.start(db_url=settings.timescaledb_url)
+
+
+@app.on_event("shutdown")
+async def stop_prediction_scheduler():
+    """Stop scheduler on app shutdown."""
+    prediction_scheduler.stop()

@@ -139,6 +139,31 @@ class APISettings(BaseSettings):
         """Parse CORS origins from comma-separated string."""
         return [origin.strip() for origin in self.cors_origins_str.split(",") if origin.strip()]
 
+    # Performance Optimization - Connection Pooling (Week 10)
+    # Database connection pool sizes
+    db_pool_size: int = Field(20, env="DB_POOL_SIZE")
+    db_max_overflow: int = Field(10, env="DB_MAX_OVERFLOW")
+    db_pool_recycle: int = Field(3600, env="DB_POOL_RECYCLE")  # 1 hour
+    
+    # Redis connection pool
+    redis_max_connections: int = Field(50, env="REDIS_MAX_CONNECTIONS")
+    
+    # Neo4j connection pool
+    neo4j_max_pool_size: int = Field(50, env="NEO4J_MAX_POOL_SIZE")
+    neo4j_connection_timeout: int = Field(30, env="NEO4J_CONNECTION_TIMEOUT")
+    
+    # Cache settings
+    cache_ttl_seconds: int = Field(300, env="CACHE_TTL_SECONDS")  # 5 minutes
+    cache_enabled: bool = Field(True, env="CACHE_ENABLED")
+    
+    # Profiling settings
+    profiling_enabled: bool = Field(True, env="PROFILING_ENABLED")
+    profiling_slow_threshold: float = Field(2.0, env="PROFILING_SLOW_THRESHOLD")
+    
+    # LLM timeout settings
+    llm_timeout_seconds: int = Field(30, env="LLM_TIMEOUT_SECONDS")
+    llm_retry_attempts: int = Field(3, env="LLM_RETRY_ATTEMPTS")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

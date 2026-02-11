@@ -18,6 +18,7 @@ Success criteria:
 """
 
 import pytest
+import os
 from datetime import datetime, UTC
 from typing import Dict, Any
 
@@ -32,11 +33,14 @@ from src.truth_boundary.gate import VerifiedFact
 @pytest.fixture
 def neo4j_client():
     """Create Neo4j client connection."""
-    # Note: Using persisted auto-generated password from Neo4j container
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+    if not neo4j_password:
+        pytest.skip("NEO4J_PASSWORD is not set for integration tests")
+
     client = Neo4jGraphClient(
         uri='neo4j://localhost:7688',
         user='neo4j',
-        password='PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'
+        password=neo4j_password
     )
 
     # Clean up before tests
@@ -303,6 +307,118 @@ def test_graph_stats(neo4j_client):
     assert stats['episode_count'] >= 1
     assert stats['fact_count'] >= 1
     assert stats['relationship_count'] >= 1
+
+
+def test_create_and_link_synthesis(neo4j_client):
+    """Test creating Synthesis node and linking to fact."""
+    fact = VerifiedFact(
+        fact_id='synthesis_fact',
+        query_id='synthesis_query',
+        plan_id='synthesis_plan',
+        code_hash='hash_synth',
+        status='success',
+        extracted_values={'ticker': 'AAPL', 'price': 123.45},
+        execution_time_ms=1000,
+        memory_used_mb=30.0,
+        created_at=datetime.now(UTC),
+        statement='AAPL price is 123.45'
+    )
+    neo4j_client.create_verified_fact_node(fact)
+
+    synthesis_id = neo4j_client.create_synthesis_node(
+        fact_id=fact.fact_id,
+        synthesis_data={
+            'balanced_view': 'Balanced summary',
+            'recommendation': 'Hold',
+            'original_confidence': 0.80,
+            'adjusted_confidence': 0.82,
+            'key_risks': ['Valuation risk'],
+            'key_opportunities': ['Growth momentum']
+        }
+    )
+    neo4j_client.link_fact_to_synthesis(fact.fact_id, synthesis_id)
+
+    related = neo4j_client.get_related_facts(fact.fact_id)
+    assert related['fact'] is not None
+    assert len(related['syntheses']) == 1
+    assert related['syntheses'][0]['synthesis_id'] == synthesis_id
+
+
+def test_search_facts_by_ticker(neo4j_client):
+    """Test ticker-based fact search."""
+    episode_id = 'search_episode'
+    neo4j_client.create_episode(
+        episode_id=episode_id,
+        query_text='Find AAPL valuation',
+        created_at=datetime.now(UTC)
+    )
+
+    fact = VerifiedFact(
+        fact_id='search_fact_aapl',
+        query_id=episode_id,
+        plan_id='plan_search',
+        code_hash='hash_search',
+        status='success',
+        extracted_values={'ticker': 'AAPL', 'pe_ratio': 25.1},
+        execution_time_ms=1200,
+        memory_used_mb=30.0,
+        created_at=datetime.now(UTC),
+        statement='AAPL PE ratio is 25.1'
+    )
+    neo4j_client.create_verified_fact_node(fact)
+    neo4j_client.link_episode_to_fact(episode_id, fact.fact_id)
+
+    results = neo4j_client.search_facts_by_ticker('AAPL', limit=10)
+    assert len(results) >= 1
+    assert any(item['fact_id'] == 'search_fact_aapl' for item in results)
+
+
+def test_list_episodes_pagination(neo4j_client):
+    """Test listing episodes with limit/offset."""
+    for i in range(3):
+        neo4j_client.create_episode(
+            episode_id=f'episode_list_{i}',
+            query_text=f'List test {i}',
+            created_at=datetime.now(UTC)
+        )
+
+    episodes = neo4j_client.list_episodes(limit=2, offset=0)
+    assert len(episodes) == 2
+    assert all('episode_id' in item for item in episodes)
+
+
+def test_get_related_facts_with_lineage(neo4j_client):
+    """Test related facts returns lineage neighbors."""
+    fact_a = VerifiedFact(
+        fact_id='related_fact_a',
+        query_id='related_query',
+        plan_id='plan_a',
+        code_hash='hash_a',
+        status='success',
+        extracted_values={'value': 100},
+        execution_time_ms=1000,
+        memory_used_mb=30.0,
+        created_at=datetime.now(UTC)
+    )
+    fact_b = VerifiedFact(
+        fact_id='related_fact_b',
+        query_id='related_query',
+        plan_id='plan_b',
+        code_hash='hash_b',
+        status='success',
+        extracted_values={'value': 200},
+        execution_time_ms=1100,
+        memory_used_mb=31.0,
+        created_at=datetime.now(UTC)
+    )
+    neo4j_client.create_verified_fact_node(fact_a)
+    neo4j_client.create_verified_fact_node(fact_b)
+    neo4j_client.create_lineage(from_fact_id='related_fact_b', to_fact_id='related_fact_a')
+
+    related = neo4j_client.get_related_facts('related_fact_b')
+    assert related['fact']['fact_id'] == 'related_fact_b'
+    assert len(related['ancestors']) == 1
+    assert related['ancestors'][0]['fact_id'] == 'related_fact_a'
 
 
 # ==============================================================================
