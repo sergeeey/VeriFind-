@@ -3,7 +3,8 @@
 Week 12: Extracted from main.py God Object
 """
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Header, Request
+from starlette.responses import Response
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -88,33 +89,59 @@ def get_orchestrator() -> LangGraphOrchestrator:
 async def analyze_query(
     request: QueryRequest,
     background_tasks: BackgroundTasks,
-    x_api_key: Optional[str] = Header(None)
+    raw_request: Request,
+    x_api_key: Optional[str] = Header(None),
+    http_response: Response = None  # FastAPI Response for setting headers
 ):
     """
     Analyze financial query with full verification pipeline.
     
     Flow: Query → Router → LLM/Debate → Truth Boundary → Response
+    
+    Week 10: Added route-level caching for performance
     """
+    from ..cache_simple import analyze_cache, generate_cache_key, get_cached_response, set_cached_response
+    
+    # Generate cache key
+    cache_key = generate_cache_key(raw_request, request.dict())
+    
+    # Check cache first (FAST PATH)
+    if settings.cache_enabled:
+        try:
+            cached = await get_cached_response(cache_key)
+            if cached:
+                logger.info(f"Cache HIT for query: {request.query[:50]}...")
+                # Set cache headers
+                if http_response:
+                    http_response.headers["X-Cache"] = "HIT"
+                    http_response.headers["X-Cache-Key"] = cache_key[:16]
+                # Return cached response with metadata
+                return AnalysisResponse(**cached)
+        except Exception as e:
+            logger.warning(f"Cache read error: {e}")
+    
+    # SLOW PATH: Process query
     query_id = str(uuid4())
     
     # Track metrics
     queries_submitted_total.labels(priority="normal").inc()
     
-    logger.info(f"Query {query_id}: {request.query[:50]}...")
+    logger.info(f"Query {query_id}: {request.query[:50]}... (Cache MISS)")
     
     try:
         # Get orchestrator
         orchestrator = get_orchestrator()
         
         # Process query (async)
-        # TODO: Celery for heavy tasks in Phase 1
         result = await orchestrator.process_query_async(
             query_id=query_id,
             query_text=request.query,
-            provider=request.provider
+            provider=request.provider,
+            context={"priority": request.priority}
         )
         
-        return AnalysisResponse(
+        # Build response model
+        result_response = AnalysisResponse(
             query_id=query_id,
             status="completed",
             answer=result.get("answer"),
@@ -125,6 +152,25 @@ async def analyze_query(
             cost_usd=result.get("cost_usd", 0.0),
             tokens_used=result.get("tokens_used", 0)
         )
+        
+        # Cache the response
+        if settings.cache_enabled:
+            try:
+                await set_cached_response(
+                    cache_key,
+                    result_response.dict(),
+                    ttl_seconds=settings.cache_ttl_seconds
+                )
+                logger.info(f"Cached response for: {request.query[:50]}...")
+            except Exception as e:
+                logger.warning(f"Cache write error: {e}")
+
+        # Set cache miss headers
+        if http_response:
+            http_response.headers["X-Cache"] = "MISS"
+            http_response.headers["X-Cache-Key"] = cache_key[:16]
+
+        return result_response
         
     except Exception as e:
         logger.error(f"Query {query_id} failed: {e}")
