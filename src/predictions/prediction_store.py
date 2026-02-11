@@ -42,6 +42,13 @@ class PredictionCreate(BaseModel):
     was_calibrated: bool = Field(default=False)
     calibration_adj: Optional[float] = Field(None, ge=-1.0, le=1.0)
 
+    # Conformal Prediction intervals (Week 13)
+    lower_bound: Optional[Decimal] = Field(None, description="Conformal lower bound")
+    upper_bound: Optional[Decimal] = Field(None, description="Conformal upper bound")
+    interval_width: Optional[Decimal] = Field(None, ge=0, description="Interval width")
+    coverage_level: Optional[float] = Field(None, ge=0.0, le=1.0, description="Target coverage (e.g., 0.95)")
+    conformal_method: Optional[str] = Field(None, max_length=50, description="Conformal method used")
+
     @field_validator('reasoning')
     @classmethod
     def validate_reasoning(cls, v):
@@ -84,6 +91,13 @@ class Prediction(BaseModel):
     # Calibration
     was_calibrated: bool
     calibration_adj: Optional[float] = None
+
+    # Conformal Prediction intervals (Week 13)
+    lower_bound: Optional[Decimal] = None
+    upper_bound: Optional[Decimal] = None
+    interval_width: Optional[Decimal] = None
+    coverage_level: Optional[float] = None
+    conformal_method: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -174,19 +188,22 @@ class PredictionStore:
                         ticker, exchange, horizon_days, target_date,
                         price_at_creation, price_low, price_base, price_high,
                         reasoning, verification_score, model_used, pipeline_cost,
-                        was_calibrated, calibration_adj
+                        was_calibrated, calibration_adj,
+                        lower_bound, upper_bound, interval_width, coverage_level, conformal_method
                     ) VALUES (
                         %s, %s, %s, %s,
                         %s, %s, %s, %s,
                         %s, %s, %s, %s,
-                        %s, %s
+                        %s, %s,
+                        %s, %s, %s, %s, %s
                     )
                     RETURNING *
                 """, (
                     pred.ticker, pred.exchange, pred.horizon_days, pred.target_date,
                     pred.price_at_creation, pred.price_low, pred.price_base, pred.price_high,
                     Json(pred.reasoning), pred.verification_score, pred.model_used, pred.pipeline_cost,
-                    pred.was_calibrated, pred.calibration_adj
+                    pred.was_calibrated, pred.calibration_adj,
+                    pred.lower_bound, pred.upper_bound, pred.interval_width, pred.coverage_level, pred.conformal_method
                 ))
 
                 row = cur.fetchone()

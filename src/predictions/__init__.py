@@ -13,6 +13,11 @@ from .conformal import (
     ConformalInterval,
     ConformalMethod
 )
+from .conformal_integration import (
+    add_conformal_interval,
+    get_calibration_residuals,
+    evaluate_conformal_coverage
+)
 
 __all__ = [
     "PredictionStore",
@@ -27,4 +32,7 @@ __all__ = [
     "FinancialConformalPredictor",
     "ConformalInterval",
     "ConformalMethod",
+    "add_conformal_interval",
+    "get_calibration_residuals",
+    "evaluate_conformal_coverage",
 ]
