@@ -19,7 +19,7 @@ Navigate to: **Settings → Secrets and variables → Actions → New repository
 |-------------|-------------|---------|
 | `STAGING_HOST` | Staging server hostname/IP | `staging.ape2026.com` |
 | `STAGING_USER` | SSH username for staging | `ubuntu` |
-| `STAGING_SSH_KEY` | Private SSH key for staging | `-----BEGIN RSA PRIVATE KEY-----...` |
+| `STAGING_SSH_KEY` | Private SSH key for staging | `<SSH_PRIVATE_KEY_PEM_CONTENT>` |
 
 #### Production Environment
 
@@ -27,7 +27,7 @@ Navigate to: **Settings → Secrets and variables → Actions → New repository
 |-------------|-------------|---------|
 | `PRODUCTION_HOST` | Production server hostname/IP | `api.ape2026.com` |
 | `PRODUCTION_USER` | SSH username for production | `ubuntu` |
-| `PRODUCTION_SSH_KEY` | Private SSH key for production | `-----BEGIN RSA PRIVATE KEY-----...` |
+| `PRODUCTION_SSH_KEY` | Private SSH key for production | `<SSH_PRIVATE_KEY_PEM_CONTENT>` |
 
 #### Notifications
 
@@ -272,11 +272,7 @@ gh secret list | grep STAGING_SSH_KEY
 ### SSH Key Template
 
 ```text
------BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA1234567890...
-(multiple lines)
-...xyz123
------END RSA PRIVATE KEY-----
+<SSH_PRIVATE_KEY_PEM_CONTENT>
 ```
 
 ### Slack Webhook Template

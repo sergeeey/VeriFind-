@@ -154,12 +154,12 @@ Redis Connection        Healthy     Port 6380   ✅ Connected!
 - Verdict: Best practice implementation, NOT an issue
 
 **Finding #3: Default Passwords** ✅ **CONFIRMED & FIXED**
-- Before: `NEO4J_PASSWORD=ape_neo4j_password_CHANGE_ME`
-- After: `NEO4J_PASSWORD=QSRXcPCeMpTWMkIw9HEXWceelF9G4N` (crypto-random)
-- Before: `POSTGRES_PASSWORD=ape_timescale_password_CHANGE_ME`
-- After: `POSTGRES_PASSWORD=6MTBYX#2Z8&XBgcAfsbIcDuzoZncVH^5` (crypto-random)
-- Before: `SECRET_KEY=your_secret_key_for_jwt_CHANGE_ME`
-- After: `SECRET_KEY=7587f1d3f1cef0263cffed1a58ca79a54dd30d4749e4ca68...` (128 chars)
+- Before: `NEO4J_PASSWORD=<default_placeholder>`
+- After: `NEO4J_PASSWORD=<rotated_secure_value>` (crypto-random)
+- Before: `POSTGRES_PASSWORD=<default_placeholder>`
+- After: `POSTGRES_PASSWORD=<rotated_secure_value>` (crypto-random)
+- Before: `SECRET_KEY=<default_placeholder>`
+- After: `SECRET_KEY=<rotated_secure_value>` (128 chars)
 - Impact: Fixed 78 failing tests (password authentication errors resolved)
 
 **Finding #4: WebSocket In-Memory** ✅ **CONFIRMED**

@@ -9,7 +9,7 @@ process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000'
 
 // Mock Recharts components
 jest.mock('recharts', () => ({
-  AreaChart: ({ children }: { children: React.ReactNode }) => <div data-testid="area-chart">{children}</div>,
+  AreaChart: ({ children }: { children: React.ReactNode }) => <svg data-testid="area-chart">{children}</svg>,
   Area: () => <div data-testid="area" />,
   XAxis: () => <div data-testid="x-axis" />,
   YAxis: () => <div data-testid="y-axis" />,
@@ -19,7 +19,7 @@ jest.mock('recharts', () => ({
   ),
   Legend: () => <div data-testid="legend" />,
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="responsive-container">{children}</div>
+    <svg data-testid="responsive-container">{children}</svg>
   ),
   ReferenceLine: () => <div data-testid="reference-line" />,
 }))

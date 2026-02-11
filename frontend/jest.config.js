@@ -25,4 +25,7 @@ module.exports = {
     'node_modules/(?!(lucide-react|@radix-ui)/)',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testPathIgnorePatterns: [
+    '<rootDir>/e2e/',
+  ],
 }

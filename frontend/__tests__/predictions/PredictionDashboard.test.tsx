@@ -154,6 +154,12 @@ describe('PredictionDashboard', () => {
 
     render(<PredictionDashboard />)
 
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/api/predictions/tickers'
+      )
+    })
+
     // Check disclaimer is rendered
     expect(screen.getByText(/Disclaimer:/i)).toBeInTheDocument()
     expect(
@@ -163,15 +169,23 @@ describe('PredictionDashboard', () => {
   })
 
   it('handles API errors gracefully', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     ;(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
 
     render(<PredictionDashboard />)
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/api/predictions/tickers'
+      )
+    })
 
     // Component should still render without crashing
     expect(screen.getByText('Prediction Dashboard')).toBeInTheDocument()
     
     // Disclaimer should still be visible
     expect(screen.getByText(/Disclaimer:/i)).toBeInTheDocument()
+    consoleErrorSpy.mockRestore()
   })
 
   it('fetches tickers from correct API endpoint', async () => {
@@ -238,6 +252,12 @@ describe('PredictionDashboard', () => {
 
     // Resolve to complete the test
     resolveTickers!({ ok: true, json: async () => mockTickersResponse })
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:8000/api/predictions/tickers'
+      )
+    })
   })
 
   it('renders CorridorChart when ticker is selected', async () => {
