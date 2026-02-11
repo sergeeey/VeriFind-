@@ -1243,7 +1243,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "33 \n34     def __init__(\n35         self,\n36         uri: str = 'neo4j://localhost:7688',\n37         user: str = 'neo4j',\n38         password: str = 'PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'  # Persisted auto-generated password\n39     ):\n40         \"\"\"\n41         Initialize Neo4j connection.\n42 \n43         Args:\n44             uri: Neo4j connection URI\n45             user: Database user\n46             password: Database password\n47         \"\"\"\n48         self.uri = uri\n49         self.user = user\n50 \n51         self.logger = logging.getLogger(__name__)\n52 \n53         try:\n54             self.driver = GraphDatabase.driver(uri, auth=(user, password))\n55             # Test connection\n56             with self.driver.session() as session:\n57                 session.run(\"RETURN 1\")\n58             self.logger.info(f\"Connected to Neo4j at {uri}\")\n59         except Exception as e:\n60             self.logger.error(f\"Failed to connect to Neo4j: {e}\")\n61             raise\n62 \n",
+      "code": "33 \n34     def __init__(\n35         self,\n36         uri: str = 'neo4j://localhost:7688',\n37         user: str = 'neo4j',\n38         password: str = '[REDACTED_SECRET]'  # Persisted auto-generated password\n39     ):\n40         \"\"\"\n41         Initialize Neo4j connection.\n42 \n43         Args:\n44             uri: Neo4j connection URI\n45             user: Database user\n46             password: Database password\n47         \"\"\"\n48         self.uri = uri\n49         self.user = user\n50 \n51         self.logger = logging.getLogger(__name__)\n52 \n53         try:\n54             self.driver = GraphDatabase.driver(uri, auth=(user, password))\n55             # Test connection\n56             with self.driver.session() as session:\n57                 session.run(\"RETURN 1\")\n58             self.logger.info(f\"Connected to Neo4j at {uri}\")\n59         except Exception as e:\n60             self.logger.error(f\"Failed to connect to Neo4j: {e}\")\n61             raise\n62 \n",
       "col_offset": 4,
       "end_col_offset": 17,
       "filename": "src/graph\\neo4j_client.py",
@@ -1253,7 +1253,7 @@
         "link": "https://cwe.mitre.org/data/definitions/259.html"
       },
       "issue_severity": "LOW",
-      "issue_text": "Possible hardcoded password: 'PDHGuBQs62EBXLknJC-Hd4XxPW3uwaC0q9FKNoeFDKY'",
+      "issue_text": "Possible hardcoded password: '[REDACTED_SECRET]'",
       "line_number": 34,
       "line_range": [
         34,
