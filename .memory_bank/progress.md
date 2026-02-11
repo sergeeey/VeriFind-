@@ -1811,3 +1811,14 @@
 
 ### Notes
 - Keeps security and golden-set artifacts synchronized with the current branch state.
+
+## 2026-02-11 (Codex) - Workspace Noise Guard
+
+### Implemented
+- Added `nul` to `.gitignore` to suppress Windows-reserved filename artifact from appearing as untracked.
+
+### Verified
+- `git status --short` no longer shows `nul`.
+
+### Notes
+- This is a repository hygiene change only; no runtime effect.
