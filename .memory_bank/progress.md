@@ -367,3 +367,9 @@
 - Regression checks after portfolio integration:
   - `python -m pytest tests/unit/test_prediction_scheduler.py tests/unit/test_history_api.py tests/unit/test_audit_api.py tests/unit/orchestration/test_query_history_persistence.py tests/unit/orchestration/test_langgraph_orchestrator.py tests/unit/orchestration/test_langgraph_debate.py tests/unit/orchestration/test_langgraph_neo4j_resilience.py -q`
   - Result: **38 passed**
+## 2026-02-11 Wave 2 Planning (Codex)
+- Phase 1 complete for first Wave 2 feature: Standalone Debate endpoint.
+- Dependency map collected for `src/api/routes/analysis.py` and related modules:
+  `src/api/main.py`, `src/api/routes/__init__.py`, `src/orchestration/langgraph_orchestrator.py`, `src/debate/real_llm_adapter.py`, `src/debate/llm_debate.py`, `src/api/security.py`, `src/api/metrics.py`, `src/api/cache_simple.py`.
+- Key risks identified: API contract compatibility, provider-selection mismatch (request provider currently effectively ignored by singleton orchestrator), side-effects (prediction/history persistence), fail-closed behavior when provider keys are missing, and unified production path consistency.
+- Next step prepared: Phase 2 execution plan with rollback + verification, then approval gate.
