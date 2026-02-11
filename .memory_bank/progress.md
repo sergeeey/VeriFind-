@@ -1735,3 +1735,18 @@
 
 ### Notes
 - Remote branch now contains the latest Wave 2 operations stack commits.
+
+## 2026-02-11 (Codex) - Repository Hygiene Cleanup (Tracked Bytecode Removal)
+
+### Implemented
+- Removed tracked Python bytecode artifacts from git index:
+  - `*.pyc` files under `src/**/__pycache__` and `tests/**/__pycache__`
+- Operation used `git rm --cached` so cleanup is VCS-level (source history), not runtime behavior.
+- Existing `.gitignore` rules already cover `__pycache__/` and `*.py[cod]`, preventing re-add on future commits.
+
+### Verified
+- `git status --short` shows staged deletions for bytecode files across source/test trees.
+- No source code logic changes introduced in this cleanup step.
+
+### Notes
+- This reduces repo noise and prevents accidental binary diffs in future feature commits.
