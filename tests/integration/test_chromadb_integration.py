@@ -10,6 +10,7 @@ Success criteria:
 """
 
 import time
+import shutil
 from datetime import datetime, timedelta
 import pytest
 
@@ -24,6 +25,7 @@ from src.vector_store.chroma_client import create_document_id
 @pytest.fixture
 def chroma_store():
     """Create a fresh ChromaDB instance for testing."""
+    shutil.rmtree("./test_chroma_data", ignore_errors=True)
     store = ChromaVectorStore(
         persist_directory="./test_chroma_data",
         collection_name="test_financial_docs"

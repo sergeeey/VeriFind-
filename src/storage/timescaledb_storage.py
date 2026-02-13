@@ -15,6 +15,7 @@ from psycopg2.extras import RealDictCursor, Json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
+import os
 
 from src.truth_boundary.gate import VerifiedFact
 
@@ -35,7 +36,7 @@ class TimescaleDBStorage:
         port: int = 5433,
         database: str = 'ape_timeseries',
         user: str = 'ape',
-        password: str = 'ape_timescale_password'
+        password: Optional[str] = None
     ):
         """
         Initialize TimescaleDB connection.
@@ -51,6 +52,9 @@ class TimescaleDBStorage:
         self.port = port
         self.database = database
         self.user = user
+
+        if password is None:
+            password = os.getenv("TIMESCALE_PASSWORD") or os.getenv("TIMESCALEDB_PASSWORD")
 
         self.logger = logging.getLogger(__name__)
 

@@ -118,7 +118,7 @@ class ParallelDebateOrchestrator:
         )
 
         # Calculate overall metrics
-        latency_ms = (time.time() - start_time) * 1000
+        latency_ms = max(1.0, (time.time() - start_time) * 1000)
         overall_confidence = (
             bull_response.confidence * 0.3 +
             bear_response.confidence * 0.3 +

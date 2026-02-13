@@ -83,7 +83,7 @@ class APIKeyManager:
             db_url: Database URL (defaults to TIMESCALEDB_URL from env)
         """
         self.db_url = db_url or os.getenv(
-            "TIMESCALEDB_URL",
+            "TIMESCALEDB_ASYNC_URL",
             "postgresql+asyncpg://ape_test:test_password_123@localhost:5433/ape_timeseries"
         )
         self.engine: Optional[AsyncEngine] = None

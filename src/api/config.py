@@ -51,12 +51,12 @@ class APISettings(BaseSettings):
 
     # Database URLs (optional, fallback to env vars)
     timescaledb_url: str = Field(
-        "postgresql://ape_user:ape_pass@localhost:5433/ape_db",
+        "",
         env="TIMESCALEDB_URL"
     )
     neo4j_uri: str = Field("bolt://localhost:7688", env="NEO4J_URI")
     neo4j_user: str = Field("neo4j", env="NEO4J_USER")
-    neo4j_password: str = Field("ape_neo4j_pass", env="NEO4J_PASSWORD")
+    neo4j_password: str = Field("", env="NEO4J_PASSWORD")
     redis_url: str = Field("redis://localhost:6380/0", env="REDIS_URL")
 
     # Query Execution
@@ -111,14 +111,14 @@ class APISettings(BaseSettings):
                 raise ValueError("SECRET_KEY must be at least 32 characters in production")
 
             # Check database credentials
-            if self.timescaledb_url == "postgresql://ape_user:ape_pass@localhost:5433/ape_db":
+            if not self.timescaledb_url:
                 raise ValueError(
-                    "timescaledb_url uses default credentials. "
+                    "timescaledb_url is not set. "
                     "Set environment variable TIMESCALEDB_URL with production credentials."
                 )
-            if self.neo4j_password == "ape_neo4j_pass":
+            if not self.neo4j_password:
                 raise ValueError(
-                    "neo4j_password uses default credentials. "
+                    "neo4j_password is not set. "
                     "Set environment variable NEO4J_PASSWORD with production credentials."
                 )
 

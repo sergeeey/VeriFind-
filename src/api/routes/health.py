@@ -29,7 +29,9 @@ LEGAL_DISCLAIMER = {
     ),
     "version": "1.0",
     "effective_date": "2026-02-08",
+    "full_text_url": "/disclaimer"
 }
+
 
 
 @router.get("/health", status_code=status.HTTP_200_OK)
@@ -80,9 +82,24 @@ async def get_disclaimer():
         "full_text": full_text,
         "notice": (
             "By using this API, you acknowledge that you have read, understood, "
-            "and agree to be bound by this disclaimer."
+            "and agree to be bound by this disclaimer. This content is for informational purposes only "
+            "and does not constitute financial advice."
         ),
-        "summary": "Not financial advice - consult a qualified advisor"
+        "summary": "Not financial advice - consult a qualified advisor",
+        "key_points": [
+            "Not financial advice; informational purposes only",
+            "Past performance does not guarantee future results",
+            "AI-generated analysis may contain errors or biases",
+            "All investments carry risk, including loss of principal",
+            "Data sources may be incomplete or delayed",
+            "Must be 18+ to use this software",
+            "Software provided as-is with no warranty"
+        ],
+        "contact": {
+            "documentation": "/docs",
+            "github": "https://github.com/yourusername/ape-2026",
+            "issues": "File a GitHub issue for technical questions"
+        }
     }
 
 

@@ -15,6 +15,7 @@ Success criteria:
 """
 
 import pytest
+import docker
 import os
 from datetime import datetime, UTC
 
@@ -63,6 +64,12 @@ def neo4j_graph():
 @pytest.fixture
 def orchestrator():
     """LangGraph orchestrator."""
+    try:
+        client = docker.from_env()
+        client.version()
+    except Exception as e:
+        pytest.skip(f"Docker not available: {e}")
+
     return LangGraphOrchestrator(
         claude_api_key='mock_key',
         enable_retry=True,
