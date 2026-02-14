@@ -31,7 +31,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_endpoint ON audit_log (endpoint, timestamp 
 SELECT add_retention_policy('audit_log', INTERVAL '2 years', if_not_exists => TRUE);
 
 -- Grant permissions
-GRANT SELECT, INSERT ON audit_log TO postgres;
+GRANT SELECT, INSERT ON audit_log TO ape;
 
 -- Comment on table
 COMMENT ON TABLE audit_log IS 'Immutable audit trail for financial analysis. Required for SEC/EU AI Act compliance. Retention: 2 years.';

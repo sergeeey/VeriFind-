@@ -766,6 +766,30 @@ async def analyze_multi_llm_debate(
             f"Recommendation: {result['synthesis']['recommendation']}"
         )
 
+        # Week 13 Day 1: Audit logging (sync fallback - no async pool yet)
+        try:
+            import uuid
+            query_id = str(uuid.uuid4())
+
+            # Structured log for compliance audit
+            logger.info(
+                "compliance_audit",
+                extra={
+                    "event_type": "analysis_request",
+                    "query_id": query_id,
+                    "endpoint": "/api/analyze-debate",
+                    "recommendation": result['synthesis'].get('recommendation'),
+                    "confidence": result['synthesis'].get('overall_confidence'),
+                    "cost_usd": result['metadata'].get('cost_usd'),
+                    "processing_time_ms": result['metadata'].get('latency_ms'),
+                    "llm_providers": result.get('data_attribution', {}).get('llm_providers', []),
+                    "disclaimer_version": "2.0",
+                }
+            )
+        except Exception as audit_error:
+            # Never fail request due to audit logging
+            logger.warning(f"Audit logging failed: {audit_error}")
+
         return MultiLLMDebateResponse(**result)
 
     except ImportError as e:
