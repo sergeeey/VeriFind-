@@ -204,17 +204,40 @@ class AnswerValidator:
         return True, f"Analytical text with indicators: {found_analytical[:3]}"
 
     @classmethod
-    def validate_answer(cls, answer: str, expected: Dict[str, Any]) -> tuple[bool, str]:
+    def validate_answer(
+        cls,
+        answer: str,
+        expected: Dict[str, Any],
+        source_verified: bool = True,  # Week 14: Add source_verified check
+        error_detected: bool = False,
+        ambiguity_detected: bool = False
+    ) -> tuple[bool, str]:
         """
         Main validation router.
+
+        Week 14: Added source_verified, error_detected, ambiguity_detected checks
+        to prevent hallucinations from passing validation.
 
         Args:
             answer: LLM generated answer text
             expected: Expected answer metadata from Golden Set
+            source_verified: True if value came from VEE execution (not LLM hallucination)
+            error_detected: True if VEE execution had errors
+            ambiguity_detected: True if VEE execution had pandas Series ambiguity, etc.
 
         Returns:
             (is_correct, reason)
         """
+        # Week 14 CRITICAL: Block hallucinations at validation level
+        if not source_verified:
+            return False, "HALLUCINATION: Value not from verified VEE execution (source_verified=False)"
+
+        if error_detected:
+            return False, "VEE_ERROR: Execution had errors (error_detected=True)"
+
+        if ambiguity_detected:
+            return False, "VEE_AMBIGUITY: Execution had pandas Series ambiguity or similar issues (ambiguity_detected=True)"
+
         value_type = expected.get("value_type", "").lower()
 
         if value_type == "percentage":

@@ -237,8 +237,17 @@ async def run_golden_set_with_data(file_path: str, limit: Optional[int] = None):
             answer_text = extract_answer_from_debate(result)
             expected = q.get('expected_answer', {})
 
+            # Week 14: Extract source_verified, error_detected, ambiguity_detected from result
+            source_verified = getattr(result, 'source_verified', True)  # Conservative: assume True if not present
+            error_detected = getattr(result, 'error_detected', False)
+            ambiguity_detected = getattr(result, 'ambiguity_detected', False)
+
             is_correct, validation_reason = AnswerValidator.validate_answer(
-                answer_text, expected
+                answer_text,
+                expected,
+                source_verified=source_verified,
+                error_detected=error_detected,
+                ambiguity_detected=ambiguity_detected
             )
 
             # Step 6: Report
