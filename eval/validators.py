@@ -2,9 +2,11 @@
 Golden Set Answer Validators.
 
 Week 13 Day 2: Real validation logic (not just field existence check).
+Week 13 Day 3: Added fuzzy matching for robust must_contain validation.
 """
 
 import re
+from difflib import SequenceMatcher
 from typing import Any, Dict, List, Optional
 
 
@@ -103,6 +105,8 @@ class AnswerValidator:
         """
         Validate string answer with must_contain requirements.
 
+        Week 13 Day 3: Added fuzzy matching for robustness (case, punctuation, typos).
+
         Args:
             answer: LLM generated answer text
             expected: Expected answer metadata with must_contain list
@@ -112,6 +116,7 @@ class AnswerValidator:
         """
         must_contain = expected.get("must_contain", [])
         answer_lower = answer.lower()
+        similarity_threshold = 0.85  # 85% similarity for fuzzy match
 
         if not must_contain:
             # No specific requirements, just check non-empty
@@ -119,13 +124,46 @@ class AnswerValidator:
 
         missing = []
         for phrase in must_contain:
-            if phrase.lower() not in answer_lower:
+            # Fast path: exact case-insensitive match
+            if phrase.lower() in answer_lower:
+                continue
+
+            # Fuzzy path: use SequenceMatcher with sliding window
+            if not AnswerValidator._fuzzy_contains(phrase, answer, similarity_threshold):
                 missing.append(phrase)
 
         if missing:
-            return False, f"Missing required phrases: {missing}"
+            return False, f"Missing required phrases (fuzzy checked): {missing}"
         else:
             return True, f"Contains all required phrases: {must_contain}"
+
+    @staticmethod
+    def _fuzzy_contains(phrase: str, text: str, threshold: float) -> bool:
+        """
+        Check if phrase exists in text with fuzzy matching.
+
+        Uses sliding window + SequenceMatcher for typo/punctuation tolerance.
+
+        Args:
+            phrase: Phrase to find
+            text: Text to search in
+            threshold: Similarity threshold (0.0-1.0)
+
+        Returns:
+            True if fuzzy match found, False otherwise
+        """
+        phrase_lower = phrase.lower()
+        text_lower = text.lower()
+        phrase_len = len(phrase)
+
+        # Sliding window over text
+        for i in range(len(text) - phrase_len + 1):
+            window = text_lower[i:i + phrase_len]
+            similarity = SequenceMatcher(None, phrase_lower, window).ratio()
+            if similarity >= threshold:
+                return True
+
+        return False
 
     @staticmethod
     def validate_analytical_text(answer: str, expected: Dict[str, Any]) -> tuple[bool, str]:

@@ -444,7 +444,9 @@ class ArbiterAgent(BaseAgent):
         bear_view: str
     ) -> str:
         """Build ARBITER perspective prompt with bull/bear views."""
-        return f"""You are an IMPARTIAL ARBITER. Synthesize these perspectives into a balanced view.
+        return f"""You are an IMPARTIAL ARBITER. Your PRIMARY task: answer the user's question directly using data from analyses below.
+
+CRITICAL: Answer the specific question FIRST with concrete numbers/facts, THEN provide synthesis.
 
 Query: {query}
 
@@ -458,15 +460,16 @@ BEAR VIEW (Pessimistic):
 {bear_view}
 
 Your task:
-1. Provide a balanced synthesis of both perspectives
-2. Calculate risk/reward ratio (e.g., "60/40" means 60% upside, 40% downside)
-3. Give final recommendation: BUY, HOLD, or SELL
-4. Provide overall confidence (0.0-1.0)
-5. List 3-5 key takeaways
+1. Extract the DIRECT ANSWER to the user's question from the analyses (e.g., "TSLA volatility: 45.2%")
+2. If both analyses agree on data, state it immediately
+3. If they disagree on numbers, present both values and explain the difference
+4. THEN provide balanced synthesis of perspectives
+5. Calculate risk/reward ratio (e.g., "60/40")
+6. Give final recommendation: BUY, HOLD, or SELL
 
 Return JSON:
 {{
-    "analysis": "Your balanced synthesis (2-3 paragraphs)",
+    "analysis": "DIRECT ANSWER: [specific answer to question]\\n\\nSYNTHESIS: [balanced analysis of perspectives]",
     "confidence": 0.70,
     "key_points": [
         "Key takeaway 1",
@@ -477,7 +480,7 @@ Return JSON:
     "risk_reward_ratio": "60/40"
 }}
 
-Be objective. Consider both bull and bear arguments fairly."""
+Be objective. Answer directly first, then synthesize."""
 
     async def analyze(
         self,
