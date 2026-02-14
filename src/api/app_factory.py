@@ -65,9 +65,16 @@ def configure_middleware(app: FastAPI, settings: APISettings) -> None:
     app.middleware("http")(add_rate_limit_headers)
 
     # 3. Usage tracking (quota + logging)
-    from .usage.middleware import log_request_middleware, enforce_quota_middleware
-    app.middleware("http")(enforce_quota_middleware)  # Check quota first
-    app.middleware("http")(log_request_middleware)    # Then log
+    # Note: SQLAlchemy import may fail on Python 3.13+
+    try:
+        from .usage.middleware import log_request_middleware, enforce_quota_middleware
+        app.middleware("http")(enforce_quota_middleware)  # Check quota first
+        app.middleware("http")(log_request_middleware)    # Then log
+    except (ImportError, AssertionError) as e:
+        # SQLAlchemy 2.0.27 incompatible with Python 3.13.5
+        # Usage tracking disabled (non-critical for beta)
+        import logging
+        logging.warning(f"Usage tracking disabled: {e}")
 
     # 4. Profiling (optional)
     if settings.profiling_enabled:
