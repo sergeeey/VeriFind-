@@ -91,6 +91,10 @@ class SynthesizerAgent:
         # Calculate debate quality
         quality_score = self._calculate_debate_quality(debate_reports)
 
+        # Compliance: calculate model agreement (Week 13 Day 1)
+        num_perspectives = len(perspectives)
+        model_agreement = f"{num_perspectives}/{num_perspectives} perspectives reviewed"
+
         return Synthesis(
             fact_id=fact_id,
             perspectives_reviewed=perspectives,
@@ -103,7 +107,11 @@ class SynthesizerAgent:
             original_confidence=original_confidence,
             adjusted_confidence=adjusted_conf,
             confidence_rationale=rationale,
-            debate_quality_score=quality_score
+            debate_quality_score=quality_score,
+            # Compliance fields
+            ai_generated=True,
+            model_agreement=model_agreement,
+            compliance_disclaimer="This is NOT investment advice. See full disclaimer."
         )
 
     def _find_agreement(self, reports: List[DebateReport]) -> List[str]:

@@ -289,7 +289,11 @@ class RealLLMDebateAdapter:
             adjusted_confidence=adjusted_confidence,
             confidence_rationale=rationale,  # Week 11 Day 2: Use correct field name
             recommendation=debate_result.synthesis[:300],  # First 300 chars
-            debate_quality_score=0.85  # High quality from real LLM
+            debate_quality_score=0.85,  # High quality from real LLM
+            # Compliance fields (Week 13 Day 1)
+            ai_generated=True,
+            model_agreement="3/3 perspectives reviewed (Bull/Bear/Neutral)",
+            compliance_disclaimer="This is NOT investment advice. See full disclaimer."
         )
 
         return synthesis
@@ -353,7 +357,11 @@ class RealLLMDebateAdapter:
             adjusted_confidence=original_confidence,
             confidence_rationale="Test mode",  # Correct field name
             recommendation="Test mode",
-            debate_quality_score=0.0
+            debate_quality_score=0.0,
+            # Compliance fields (Week 13 Day 1)
+            ai_generated=True,
+            model_agreement="Test mode",
+            compliance_disclaimer="This is NOT investment advice. See full disclaimer."
         )
 
         return reports, synthesis

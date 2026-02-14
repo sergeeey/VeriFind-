@@ -126,6 +126,20 @@ class Synthesis(BaseModel):
         description="Final recommendation or conclusion (2-3 sentences)"
     )
 
+    # Compliance fields (Week 13 Day 1: SEC/EU AI Act)
+    ai_generated: bool = Field(
+        default=True,
+        description="Flag indicating this is AI-generated content"
+    )
+    model_agreement: Optional[str] = Field(
+        default=None,
+        description="How many models agreed (e.g., '2/3 models agree')"
+    )
+    compliance_disclaimer: str = Field(
+        default="This is NOT investment advice. See full disclaimer.",
+        description="Short compliance notice for users"
+    )
+
     # Confidence adjustment
     original_confidence: float = Field(
         ...,

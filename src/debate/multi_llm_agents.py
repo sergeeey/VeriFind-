@@ -35,6 +35,41 @@ logger = logging.getLogger(__name__)
 
 
 # ============================================================================
+# Cost Constants (Week 13 Day 1: Compliance)
+# ============================================================================
+
+# Token costs as of Feb 2026 (USD per 1K tokens)
+COST_PER_1K_TOKENS = {
+    "deepseek-chat": {"input": 0.00014, "output": 0.00028},
+    "claude-sonnet-4-5-20250929": {"input": 0.003, "output": 0.015},
+    "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
+    "gpt-4-turbo-preview": {"input": 0.01, "output": 0.03},
+}
+
+
+def calculate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
+    """
+    Calculate cost for LLM API call.
+
+    Args:
+        model: Model name
+        input_tokens: Number of input tokens
+        output_tokens: Number of output tokens
+
+    Returns:
+        Cost in USD
+    """
+    if model not in COST_PER_1K_TOKENS:
+        logger.warning(f"Unknown model '{model}' for cost calculation, using zero cost")
+        return 0.0
+
+    pricing = COST_PER_1K_TOKENS[model]
+    input_cost = (input_tokens / 1000) * pricing["input"]
+    output_cost = (output_tokens / 1000) * pricing["output"]
+    return input_cost + output_cost
+
+
+# ============================================================================
 # Data Models
 # ============================================================================
 
@@ -53,6 +88,9 @@ class AgentResponse:
     confidence: float  # 0.0-1.0
     key_points: list[str]
     recommendation: Optional[str] = None  # BUY|HOLD|SELL (arbiter only)
+    # Week 13 Day 1: Cost tracking
+    input_tokens: int = 0
+    output_tokens: int = 0
 
 
 @dataclass

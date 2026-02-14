@@ -32,6 +32,7 @@ from .error_handlers import (
 )
 from .monitoring import prometheus_middleware, initialize_monitoring
 from .middleware import add_security_headers, add_disclaimer_to_json_responses, add_rate_limit_headers
+from .middleware.compliance import ComplianceMiddleware
 from .routes import (
     health_router,
     analysis_router,
@@ -133,6 +134,9 @@ app.middleware("http")(prometheus_middleware)
 
 # Logging (after processing)
 app.middleware("http")(error_logging_middleware)
+
+# Compliance middleware (audit logging for financial analysis)
+app.add_middleware(ComplianceMiddleware)
 
 # Disclaimer LAST (modifies JSON response)
 app.middleware("http")(add_disclaimer_to_json_responses)

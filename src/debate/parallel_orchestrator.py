@@ -17,6 +17,7 @@ Cost estimation:
 import asyncio
 import time
 import logging
+from datetime import datetime
 from typing import Dict, Any, Optional
 from dataclasses import asdict
 
@@ -54,6 +55,11 @@ class ParallelDebateOrchestrator:
             bear_model: Claude model for bear agent
             arbiter_model: GPT-4 model for arbiter
         """
+        # Store model names for data attribution (Week 13 Day 1)
+        self.bull_model = bull_model
+        self.bear_model = bear_model
+        self.arbiter_model = arbiter_model
+
         self.bull_agent = BullAgent(model=bull_model)
         self.bear_agent = BearAgent(model=bear_model)
         self.arbiter_agent = ArbiterAgent(model=arbiter_model)
@@ -213,6 +219,19 @@ class ParallelDebateOrchestrator:
                 "cost_usd": result.cost_usd,
                 "latency_ms": result.latency_ms,
                 "timestamp": time.time()
+            },
+            "data_attribution": {
+                "sources": [
+                    {"name": "yfinance", "type": "market_data", "delay": "15min"},
+                    {"name": "FRED", "type": "economic_data", "delay": "1day"}
+                ],
+                "llm_providers": [
+                    {"role": "bull", "provider": "deepseek", "model": self.bull_model},
+                    {"role": "bear", "provider": "anthropic", "model": self.bear_model},
+                    {"role": "arbiter", "provider": "openai", "model": self.arbiter_model}
+                ],
+                "generated_at": datetime.now().isoformat(),
+                "data_freshness": "Data may be delayed up to 15 minutes"
             }
         }
 
