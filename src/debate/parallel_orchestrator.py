@@ -45,8 +45,8 @@ class ParallelDebateOrchestrator:
     def __init__(
         self,
         bull_model: str = "deepseek-chat",
-        bear_model: str = "claude-sonnet-4-5-20250929",
-        arbiter_model: str = "claude-sonnet-4-5-20250929"  # Week 14: Switch from GPT-4 (quota exceeded)
+        bear_model: str = "claude-sonnet-4-5",  # Week 14: Claude 4.5 Sonnet
+        arbiter_model: str = "gpt-4o"  # Week 14: GPT-4o (max diversity: DeepSeek + Claude + OpenAI)
     ):
         """
         Initialize orchestrator with agents.
