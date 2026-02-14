@@ -436,23 +436,40 @@ class ArbiterAgent(BaseAgent):
     """
     Impartial synthesizer - provides balanced view and recommendation.
 
-    Provider: OpenAI GPT-4 (reasoning - $2.50/1M input, $10/1M output)
-    Reasoning: GPT-4 excels at synthesis and balanced reasoning.
+    Provider: OpenAI GPT-4 OR Anthropic Claude (Week 14: fallback to Claude)
+    Reasoning: GPT-4 excels at synthesis, but Claude is more reliable when GPT quota exhausted.
     """
 
     def __init__(self, model: str = "gpt-4-turbo-preview"):
-        """Initialize Arbiter agent with GPT-4."""
-        super().__init__(AgentRole.ARBITER, "openai", model)
+        """Initialize Arbiter agent with GPT-4 or Claude."""
+        # Week 14 Day 1: Auto-detect provider from model name
+        if "claude" in model.lower():
+            provider = "anthropic"
+        else:
+            provider = "openai"
 
-        # Initialize OpenAI client
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY not found in environment")
+        super().__init__(AgentRole.ARBITER, provider, model)
 
-        if AsyncOpenAI is None:
-            raise ImportError("openai package required. Run: pip install openai")
+        if provider == "anthropic":
+            # Initialize Anthropic client (Claude)
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise ValueError("ANTHROPIC_API_KEY not found in environment")
 
-        self.client = AsyncOpenAI(api_key=api_key)
+            if AsyncAnthropic is None:
+                raise ImportError("anthropic package required. Run: pip install anthropic")
+
+            self.client = AsyncAnthropic(api_key=api_key)
+        else:
+            # Initialize OpenAI client (GPT-4)
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY not found in environment")
+
+            if AsyncOpenAI is None:
+                raise ImportError("openai package required. Run: pip install openai")
+
+            self.client = AsyncOpenAI(api_key=api_key)
 
     def build_prompt(
         self,
@@ -509,40 +526,82 @@ Be objective. Answer directly first, then synthesize."""
         bull_view: str = "",
         bear_view: str = ""
     ) -> AgentResponse:
-        """Run arbiter synthesis."""
+        """Run arbiter synthesis (supports both OpenAI and Anthropic)."""
         try:
             prompt = self.build_prompt(query, context, bull_view, bear_view)
 
-            response = await self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are an impartial financial arbiter."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.5,
-                max_tokens=1000,
-                response_format={"type": "json_object"}
-            )
+            # Week 14 Day 1: Support both OpenAI and Anthropic providers
+            if self.provider == "anthropic":
+                # Claude API call
+                response = await self.client.messages.create(
+                    model=self.model,
+                    max_tokens=1500,
+                    temperature=0.5,
+                    system="You are an impartial financial arbiter. Return JSON only.",
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ]
+                )
 
-            # Week 13 Day 2: Extract token usage BEFORE parsing (survives JSON errors)
-            usage = response.usage
-            in_tok = usage.prompt_tokens if usage else 0
-            out_tok = usage.completion_tokens if usage else 0
+                # Extract usage
+                in_tok = response.usage.input_tokens if response.usage else 0
+                out_tok = response.usage.output_tokens if response.usage else 0
 
-            # Parse JSON response
-            content = response.choices[0].message.content
+                # Parse content
+                raw_content = response.content[0].text
 
-            try:
-                data = json.loads(content)
-            except json.JSONDecodeError as json_err:
-                self.logger.warning(f"{self.__class__.__name__} JSON parse error: {json_err}")
-                self.logger.warning(f"Raw content (first 200 chars): {content[:200]}")
-                # Fallback: use raw content as analysis, but preserve usage
-                data = {
-                    "analysis": content,
-                    "confidence": 0.5,
-                    "key_points": ["Raw response (JSON parse failed)"]
-                }
+                # Week 14: Unwrap markdown JSON if present (Claude sometimes adds ```json```)
+                content = raw_content.strip()
+                if content.startswith("```json"):
+                    content = content[7:]  # Remove ```json
+                if content.startswith("```"):
+                    content = content[3:]  # Remove ```
+                if content.endswith("```"):
+                    content = content[:-3]  # Remove ```
+                content = content.strip()
+
+                try:
+                    data = json.loads(content)
+                except json.JSONDecodeError as json_err:
+                    self.logger.warning(f"{self.__class__.__name__} JSON parse error: {json_err}")
+                    self.logger.warning(f"Raw content (first 500 chars): {raw_content[:500]}")
+                    data = {
+                        "analysis": raw_content,
+                        "confidence": 0.5,
+                        "key_points": ["Raw response (JSON parse failed)"]
+                    }
+
+            else:
+                # OpenAI API call (original code)
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": "You are an impartial financial arbiter."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.5,
+                    max_tokens=1000,
+                    response_format={"type": "json_object"}
+                )
+
+                # Extract token usage
+                usage = response.usage
+                in_tok = usage.prompt_tokens if usage else 0
+                out_tok = usage.completion_tokens if usage else 0
+
+                # Parse JSON response
+                content = response.choices[0].message.content
+
+                try:
+                    data = json.loads(content)
+                except json.JSONDecodeError as json_err:
+                    self.logger.warning(f"{self.__class__.__name__} JSON parse error: {json_err}")
+                    self.logger.warning(f"Raw content (first 200 chars): {content[:200]}")
+                    data = {
+                        "analysis": content,
+                        "confidence": 0.5,
+                        "key_points": ["Raw response (JSON parse failed)"]
+                    }
 
             return AgentResponse(
                 role=AgentRole.ARBITER,
