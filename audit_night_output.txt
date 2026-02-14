@@ -1,0 +1,4 @@
+  File "E:\ПРЕДСКАЗАТЕЛЬНАЯ АНАЛИТИКА\night_audit.py", line 55
+    subprocess.run("git status --porcelain | findstr /R \"^??\" > audit_results\untracked.txt", shell=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 59-60: truncated \uXXXX escape
