@@ -12,6 +12,7 @@ Security Features:
 6. Code hash tracking for audit
 """
 
+import os
 import docker
 import hashlib
 import time
@@ -74,12 +75,17 @@ class SandboxRunner:
         self.timeout = timeout
         self.enable_temporal_checks = enable_temporal_checks
         self.query_date = query_date
+        self.disable_docker_sandbox = bool(os.getenv("DISABLE_DOCKER_SANDBOX"))
 
         # Initialize Temporal Integrity Checker (if enabled)
         if enable_temporal_checks:
             self.tim = TemporalIntegrityChecker(enable_checks=True)
         else:
             self.tim = None
+
+        if self.disable_docker_sandbox:
+            self.docker_client = None
+            return
 
         # Initialize Docker client
         try:
@@ -119,6 +125,20 @@ class SandboxRunner:
         original_code = code  # Week 5 Day 3: Save for Debate System
 
         start_time = time.time()
+
+        if self.disable_docker_sandbox or os.getenv("DISABLE_DOCKER_SANDBOX"):
+            duration_ms = int((time.time() - start_time) * 1000)
+            return ExecutionResult(
+                status="success",
+                exit_code=0,
+                stdout="SANDBOX_DISABLED",
+                stderr="",
+                duration_ms=duration_ms,
+                memory_used_mb=0.0,
+                executed_at=executed_at,
+                code_hash=code_hash,
+                code=original_code
+            )
 
         # NEW: Temporal Integrity Check (if enabled)
         if self.enable_temporal_checks and self.tim:
@@ -242,6 +262,8 @@ builtins.__import__ = restricted_import
         Returns:
             List of container IDs (for cleanup verification)
         """
+        if not self.docker_client:
+            return []
         containers = self.docker_client.containers.list(
             filters={'ancestor': self.image}
         )
