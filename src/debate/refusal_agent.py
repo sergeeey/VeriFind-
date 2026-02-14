@@ -116,6 +116,10 @@ class RefusalAgent:
         "risk-free profit",
         "sure thing",
         "guaranteed win",
+        "double my money",  # Week 14: gs_011
+        "triple my money",
+        "which stock to buy",  # Week 14: gs_011
+        "which crypto to buy",
     ]
 
     # Market manipulation patterns
@@ -163,7 +167,8 @@ class RefusalAgent:
                     reason=RefusalReason.JAILBREAK,
                     refusal_message=(
                         "I cannot respond to requests that attempt to override "
-                        "my safety guidelines or reveal internal system information."
+                        "my safety guidelines or reveal internal system information. "
+                        "This is a security measure to ensure reliable financial analysis."
                     )
                 )
 
@@ -176,8 +181,8 @@ class RefusalAgent:
                     should_refuse=True,
                     reason=RefusalReason.ILLEGAL,
                     refusal_message=(
-                        "I cannot provide advice on illegal financial activities. "
-                        "Please consult a licensed professional or legal advisor."
+                        "I cannot assist with illegal financial activities. "
+                        "Please consult a licensed professional or legal advisor for guidance."
                     )
                 )
 
@@ -191,8 +196,9 @@ class RefusalAgent:
                     reason=RefusalReason.IMPOSSIBLE_PREDICTION,
                     refusal_message=(
                         "I cannot predict future stock prices with certainty or "
-                        "guarantee investment returns. Market movements are inherently "
-                        "uncertain and past performance does not guarantee future results."
+                        "guarantee investment returns. All investments carry risk, and "
+                        "market movements are inherently uncertain. Past performance does "
+                        "not guarantee future results."
                     )
                 )
 

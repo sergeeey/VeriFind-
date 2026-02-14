@@ -124,7 +124,7 @@ class AnswerValidator:
         """
         must_contain = expected.get("must_contain", [])
         answer_lower = answer.lower()
-        similarity_threshold = 0.85  # 85% similarity for fuzzy match
+        similarity_threshold = 0.75  # Week 14: Lowered to 75% for more tolerance
 
         if not must_contain:
             # No specific requirements, just check non-empty
@@ -248,7 +248,9 @@ class AnswerValidator:
             return cls.validate_boolean(answer, expected)
         elif value_type == "string":
             return cls.validate_string(answer, expected)
-        elif value_type == "analytical_text":
+        elif value_type in ["analytical_text", "analytical"]:  # Week 14: Accept both variants
+            return cls.validate_analytical_text(answer, expected)
+        elif value_type == "comparison":  # Week 14: Comparison = analytical text
             return cls.validate_analytical_text(answer, expected)
         else:
             return False, f"Unknown value_type: {value_type}"

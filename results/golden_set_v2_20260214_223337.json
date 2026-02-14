@@ -1,0 +1,119 @@
+{
+  "version": "2.0",
+  "run_date": "2026-02-14T22:33:37.241548",
+  "total_queries": 3,
+  "passed": 0,
+  "accuracy": 0.0,
+  "avg_time_seconds": 10.977930666666666,
+  "avg_cost_usd": 0.00018834666666666668,
+  "total_cost_usd": 0.00056504,
+  "categories": {
+    "earnings": {
+      "total": 1,
+      "passed": 0
+    },
+    "valuation": {
+      "total": 1,
+      "passed": 0
+    },
+    "technical": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "gs_001",
+      "query": "What is the expected YoY revenue growth for Tesla in Q4 2025?",
+      "category": "earnings",
+      "passed": false,
+      "duration": 11.708345,
+      "cost_usd": 0.00019068000000000004,
+      "answer": "Error generating synthesis: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CY8Mxs2GqnBTmGrek3RVM'}",
+      "validation_reason": "No percentage found in answer",
+      "context_tickers": [
+        "TSLA"
+      ],
+      "context_data": {
+        "TSLA": {
+          "current_price": 417.44,
+          "trailing_pe": 382.97247,
+          "forward_pe": 148.85605,
+          "revenue_growth": -0.031,
+          "free_cashflow": 3732624896,
+          "ma_50": 443.9482,
+          "ma_200": 385.1617,
+          "market_cap": 1566415126528,
+          "beta": 1.887,
+          "volume": 51268269,
+          "high_52w": 498.83,
+          "low_52w": 214.25,
+          "ticker": "TSLA",
+          "fetched_at": "2026-02-14T22:33:02.845189"
+        }
+      }
+    },
+    {
+      "id": "gs_002",
+      "query": "Calculate the current P/E ratio for Apple (AAPL) based on latest data.",
+      "category": "valuation",
+      "passed": false,
+      "duration": 12.254909,
+      "cost_usd": 0.00020580000000000002,
+      "answer": "Error generating synthesis: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CY8Myp1jHCsKwAr68YACn'}",
+      "validation_reason": "P/E ratio 400.0 outside reasonable range (5-100)",
+      "context_tickers": [
+        "AAPL"
+      ],
+      "context_data": {
+        "AAPL": {
+          "current_price": 255.78,
+          "trailing_pe": 32.377216,
+          "forward_pe": 27.538435,
+          "revenue_growth": 0.157,
+          "free_cashflow": 106312753152,
+          "ma_50": 267.4752,
+          "ma_200": 240.0591,
+          "market_cap": 3759435415552,
+          "beta": 1.107,
+          "volume": 56134274,
+          "high_52w": 288.62,
+          "low_52w": 169.21,
+          "ticker": "AAPL",
+          "fetched_at": "2026-02-14T22:33:15.197412"
+        }
+      }
+    },
+    {
+      "id": "gs_003",
+      "query": "Is NVIDIA (NVDA) currently trading above its 200-day moving average?",
+      "category": "technical",
+      "passed": false,
+      "duration": 8.970538,
+      "cost_usd": 0.00016856,
+      "answer": "Error generating synthesis: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CY8MzY54XE4RZBLnFe6At'}",
+      "validation_reason": "No clear boolean answer found",
+      "context_tickers": [
+        "NVDA"
+      ],
+      "context_data": {
+        "NVDA": {
+          "current_price": 182.81,
+          "trailing_pe": 45.25,
+          "forward_pe": 23.631657,
+          "revenue_growth": 0.625,
+          "free_cashflow": 53282873344,
+          "ma_50": 184.4052,
+          "ma_200": 171.6762,
+          "market_cap": 4450875342848,
+          "beta": 2.314,
+          "volume": 161438894,
+          "high_52w": 212.19,
+          "low_52w": 86.62,
+          "ticker": "NVDA",
+          "fetched_at": "2026-02-14T22:33:28.270423"
+        }
+      }
+    }
+  ]
+}
