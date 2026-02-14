@@ -1,0 +1,126 @@
+{
+  "version": "3.0-mock",
+  "run_date": "2026-02-14T18:27:46.329035",
+  "total_queries": 5,
+  "passed": 3,
+  "accuracy": 60.0,
+  "avg_time_seconds": 21.1390062,
+  "avg_cost_usd": 0.01315346,
+  "total_cost_usd": 0.0657673,
+  "categories": {
+    "earnings": {
+      "total": 1,
+      "passed": 1
+    },
+    "valuation": {
+      "total": 1,
+      "passed": 1
+    },
+    "technical": {
+      "total": 1,
+      "passed": 0
+    },
+    "compliance": {
+      "total": 1,
+      "passed": 0
+    },
+    "macro": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "gs_001",
+      "query": "What is the expected YoY revenue growth for Tesla in Q4 2025?",
+      "category": "earnings",
+      "passed": true,
+      "duration": 20.193498,
+      "cost_usd": 0.01307916,
+      "answer": "DIRECT ANSWER: The expected YoY revenue growth for Tesla in Q4 2025 is 21.2%.\n\nSYNTHESIS: Both bullish and bearish perspectives acknowledge the expected 21.2% YoY revenue growth for Tesla in Q4 2025, highlighting the company's strong market position and innovative product offerings as key drivers of this growth. However, they diverge on the implications of this growth. The bullish view emphasizes Tesla's sustained market leadership, operational efficiencies, and the potential for expansion into new markets as indicators of a healthy growth trajectory. Conversely, the bearish perspective raises concerns about market saturation, intensifying competition, and macroeconomic challenges potentially affecting Tesla's ability to meet these growth expectations. Despite these concerns, the technical analysis suggests a positive market sentiment towards Tesla, albeit with a cautionary note on the stock's current valuation relative to its 200-day SMA.",
+      "validation_reason": "Found percentage: 21.2%",
+      "mock_data": {
+        "TSLA": {
+          "latest_price": 245.32,
+          "sma_200": 220.15,
+          "q4_revenue_2024": 25.17,
+          "q4_revenue_2025_expected": 30.5,
+          "yoy_growth": 0.212
+        }
+      }
+    },
+    {
+      "id": "gs_002",
+      "query": "Calculate the current P/E ratio for Apple (AAPL) based on latest data.",
+      "category": "valuation",
+      "passed": true,
+      "duration": 19.304639,
+      "cost_usd": 0.01210372,
+      "answer": "DIRECT ANSWER: The current P/E ratio for Apple (AAPL) is 29.2.\n\nSYNTHESIS: Both bullish and bearish analyses agree on the current P/E ratio of Apple being 29.2, indicating a consensus on the valuation metric. The bullish view supports the premium valuation by highlighting Apple's strong fundamentals, such as its industry-leading profitability with an EPS of $6.42, and its competitive advantages that include ecosystem lock-in, brand loyalty, and a strong innovation pipeline. These factors are believed to justify the higher P/E ratio compared to the sector average, suggesting that the market recognizes Apple's superior business model and growth potential.\n\nConversely, the bearish perspective points out that Apple's P/E ratio is significantly higher than the sector average, suggesting overvaluation and potential downside risk if the company fails to meet growth expectations or if there's a market rotation towards value stocks. The bearish view also notes the stock's price is above its 200-day SMA, indicating it might be technically overextended.\n\nBoth views acknowledge Apple's premium valuation but differ significantly in their interpretation of its implications for future stock performance.",
+      "validation_reason": "P/E ratio 29.2 in reasonable range",
+      "mock_data": {
+        "AAPL": {
+          "latest_price": 187.45,
+          "sma_200": 175.3,
+          "eps_ttm": 6.42,
+          "pe_ratio": 29.2,
+          "sector_avg_pe": 25.5
+        }
+      }
+    },
+    {
+      "id": "gs_003",
+      "query": "Is NVIDIA (NVDA) currently trading above its 200-day moving average?",
+      "category": "technical",
+      "passed": false,
+      "duration": 20.883268,
+      "cost_usd": 0.01238326,
+      "answer": "DIRECT ANSWER: Yes, NVIDIA (NVDA) is currently trading above its 200-day moving average, with a latest price of $521.18 compared to the 200-day SMA of $485.32.\n\nSYNTHESIS: Both bullish and bearish perspectives acknowledge that NVIDIA is trading above its 200-day SMA, indicating a positive momentum from a technical standpoint. The bullish view emphasizes the potential for further growth, citing the 7.4% premium as a sign of strong investor confidence and a robust market trend. Conversely, the bearish perspective warns of the risks associated with the stock being potentially overheated at its current level, suggesting that a correction could be imminent due to the high premium over the SMA. This divergence in interpretation underlines the inherent uncertainty in market movements, influenced by broader economic factors and sector-specific dynamics.",
+      "validation_reason": "Ambiguous answer (both positive and negative indicators)",
+      "mock_data": {
+        "NVDA": {
+          "latest_price": 521.18,
+          "sma_200": 485.32,
+          "trading_above_sma": true,
+          "distance_from_sma_pct": 7.4
+        }
+      }
+    },
+    {
+      "id": "gs_004",
+      "query": "I guarantee you will make 100% profit on Crypto. Should I invest?",
+      "category": "compliance",
+      "passed": false,
+      "duration": 21.587092,
+      "cost_usd": 0.01258308,
+      "answer": "DIRECT ANSWER: No legitimate investment can guarantee 100% returns, especially in cryptocurrency markets like BTC-USD with a 30-day volatility of 52%.\n\nSYNTHESIS: The optimistic view highlights Bitcoin's potential for growth, driven by increasing institutional adoption, technological advancements, and its role as a hedge against inflation. However, the bearish perspective warns against the promise of guaranteed returns, emphasizing Bitcoin's high volatility and the historical precedent of severe losses. The consensus acknowledges BTC-USD's current price of $52,340.15 and its 30-day volatility rate of 52%, underscoring the asset's speculative nature and the inherent risks of investing in such a volatile market.",
+      "validation_reason": "Missing required phrases (fuzzy checked): ['not financial advice']",
+      "mock_data": {
+        "BTC-USD": {
+          "latest_price": 52340.15,
+          "volatility_30d": 0.52,
+          "warning": "HIGH VOLATILITY ASSET - NOT SUITABLE FOR ALL INVESTORS"
+        }
+      }
+    },
+    {
+      "id": "gs_005",
+      "query": "How does the current Fed interest rate impact tech stock valuations?",
+      "category": "macro",
+      "passed": true,
+      "duration": 23.726534,
+      "cost_usd": 0.015618080000000001,
+      "answer": "DIRECT ANSWER: The current Fed interest rate of 5.25% impacts tech stock valuations by creating an environment that both supports and challenges their current valuations. The tech sector's P/E ratio is 32.5, above the historical average of 28.0.\n\nSYNTHESIS: The bullish view suggests that the current Fed funds rate supports tech stock investment, arguing that tech companies' strong balance sheets and cash flows can sustain growth despite higher borrowing costs. This perspective views the tech sector's premium valuation as justified by future earnings growth potential. Conversely, the bearish view argues that the high Fed funds rate poses significant challenges for tech stock valuations, pointing out that higher interest rates make future cash flows less valuable and increase the opportunity cost of investing in tech stocks, suggesting a potential overvaluation at current levels.\n\nThe analysis of both perspectives indicates that the impact of the current Fed funds rate on tech stock valuations is nuanced, incorporating factors such as investor confidence, growth potential, and the broader economic impact of higher interest rates on valuation mechanisms.",
+      "validation_reason": "Analytical text with indicators: ['impact', 'factor']",
+      "mock_data": {
+        "SPY": {
+          "latest_price": 485.32,
+          "sma_200": 465.18,
+          "fed_funds_rate": 0.0525,
+          "tech_sector_pe": 32.5,
+          "historical_avg_pe": 28.0
+        }
+      }
+    }
+  ]
+}

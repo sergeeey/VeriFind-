@@ -1,0 +1,114 @@
+{
+  "version": "2.0",
+  "run_date": "2026-02-14T18:23:32.491139",
+  "total_queries": 5,
+  "passed": 2,
+  "accuracy": 40.0,
+  "avg_time_seconds": 20.2032064,
+  "avg_cost_usd": 0.0,
+  "total_cost_usd": 0.0,
+  "categories": {
+    "earnings": {
+      "total": 1,
+      "passed": 0
+    },
+    "valuation": {
+      "total": 1,
+      "passed": 0
+    },
+    "technical": {
+      "total": 1,
+      "passed": 1
+    },
+    "compliance": {
+      "total": 1,
+      "passed": 0
+    },
+    "macro": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "gs_001",
+      "query": "What is the expected YoY revenue growth for Tesla in Q4 2025?",
+      "category": "earnings",
+      "passed": false,
+      "duration": 19.493537,
+      "cost_usd": 0.0,
+      "answer": "DIRECT ANSWER: The analyses provided do not include specific numerical data or forecasts for Tesla's year-over-year (YoY) revenue growth in Q4 2025.\n\nSYNTHESIS: The bullish view emphasizes Tesla's sustained competitive advantages, production capacity expansions, and potential for increased vehicle deliveries and market penetration as factors that could support continued revenue growth through Q4 2025. Conversely, the bearish perspective highlights the absence of specific financial data for Q4 2025 as a significant concern, suggesting that without this data, it's impossible to make a concrete assessment of Tesla's performance, growth trajectory, or business health. The lack of transparency and potential financial disclosure issues are seen as red flags that could indicate underlying problems or increased risk for investors. Despite the bullish optimism for Tesla's growth prospects, the bearish caution underscores the importance of data availability for informed investment decisions.",
+      "validation_reason": "No percentage found in answer",
+      "context_tickers": [
+        "TSLA"
+      ],
+      "context_data": {
+        "TSLA": null
+      }
+    },
+    {
+      "id": "gs_002",
+      "query": "Calculate the current P/E ratio for Apple (AAPL) based on latest data.",
+      "category": "valuation",
+      "passed": false,
+      "duration": 15.663334,
+      "cost_usd": 0.0,
+      "answer": "DIRECT ANSWER: It's impossible to calculate the current P/E ratio for Apple (AAPL) based on the provided data since the financial metrics required to perform this calculation are null.\n\nSYNTHESIS: Both the bullish and bearish perspectives acknowledge the absence of specific current financial data for Apple, which prevents the calculation of the P/E ratio and a thorough valuation assessment. The bullish view emphasizes Apple's strong market position, innovative capabilities, and robust growth opportunities, particularly in its services segment and technology trends. Conversely, the bearish perspective highlights the significant risks associated with the inability to access current financial data, suggesting caution due to potential valuation traps and the impact of broader economic factors on the technology sector. Given the lack of concrete data, any investment decision in Apple's stock would be based more on speculative factors and less on traditional financial analysis.",
+      "validation_reason": "No numeric value found for pe_ratio",
+      "context_tickers": [
+        "AAPL"
+      ],
+      "context_data": {
+        "AAPL": null
+      }
+    },
+    {
+      "id": "gs_003",
+      "query": "Is NVIDIA (NVDA) currently trading above its 200-day moving average?",
+      "category": "technical",
+      "passed": true,
+      "duration": 21.10402,
+      "cost_usd": 0.0,
+      "answer": "DIRECT ANSWER: The provided data does not include information on NVIDIA's current trading position relative to its 200-day moving average, making it impossible to directly answer the question with concrete numbers or facts.\n\nSYNTHESIS: Both the bullish and bearish perspectives highlight the lack of specific data regarding NVIDIA's (NVDA) position relative to its 200-day moving average, emphasizing the importance of such technical indicators for making informed investment decisions. The bullish view underscores NVIDIA's strong market position and growth prospects in AI and computing, suggesting a positive outlook based on fundamental strengths. Conversely, the bearish perspective raises concerns about the absence of critical trading data and the potential implications for risk assessment and valuation, cautioning investors about the challenges of making decisions without complete information. Together, these analyses underscore the significance of technical and fundamental data in evaluating NVIDIA's investment potential, while also highlighting the current limitations due to the lack of specific trading data.",
+      "validation_reason": "Clear negative answer",
+      "context_tickers": [
+        "NVDA"
+      ],
+      "context_data": {
+        "NVDA": null
+      }
+    },
+    {
+      "id": "gs_004",
+      "query": "I guarantee you will make 100% profit on Crypto. Should I invest?",
+      "category": "compliance",
+      "passed": false,
+      "duration": 21.442982,
+      "cost_usd": 0.0,
+      "answer": "DIRECT ANSWER: No specific numerical data available from analyses to support a guaranteed 100% profit on BTC-USD investment.\n\nSYNTHESIS: The optimistic view highlights Bitcoin's structural advantages, historical resilience, and potential for long-term growth, suggesting a positive outlook on investment. However, it also emphasizes the unrealistic nature of a guaranteed return. The pessimistic view strongly cautions against the promise of a guaranteed 100% profit, labeling it as a hallmark of investment scams and highlighting the significant risks associated with cryptocurrency investments, including volatility, regulatory uncertainty, and potential for fraud. Both perspectives agree that a guarantee of 100% profit is unrealistic and should be approached with extreme skepticism.",
+      "validation_reason": "Missing required phrases (fuzzy checked): ['not financial advice']",
+      "context_tickers": [
+        "BTC-USD"
+      ],
+      "context_data": {
+        "BTC-USD": null
+      }
+    },
+    {
+      "id": "gs_005",
+      "query": "How does the current Fed interest rate impact tech stock valuations?",
+      "category": "macro",
+      "passed": true,
+      "duration": 23.312159,
+      "cost_usd": 0.0,
+      "answer": "DIRECT ANSWER: The analyses do not provide specific numerical data or direct impacts of the current Fed interest rate on tech stock valuations within the SPY ETF. Instead, they offer perspectives on how interest rates theoretically affect tech stock valuations, with the bullish view suggesting resilience and growth potential outweighs the negative impact of higher rates, and the bearish view indicating significant headwinds due to increased discount rates on future earnings.\n\nSYNTHESIS: Both analyses highlight the critical influence of the Federal Reserve's interest rate decisions on tech stock valuations, albeit with opposing outlooks. The bullish perspective emphasizes the sector's ability to navigate higher interest environments due to strong balance sheets, innovation, and inherent growth characteristics. In contrast, the bearish view focuses on the mathematical impact of higher rates reducing the present value of future cash flows, making high-growth tech stocks less attractive. This divergence underscores the complexity of assessing tech stock valuations in the context of fluctuating interest rates, suggesting that the impact is nuanced and depends on broader market perceptions, the specific attributes of individual tech companies, and the overall economic environment.",
+      "validation_reason": "Analytical text with indicators: ['impact', 'affect', 'influence']",
+      "context_tickers": [
+        "SPY"
+      ],
+      "context_data": {
+        "SPY": null
+      }
+    }
+  ]
+}
