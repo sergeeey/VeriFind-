@@ -90,3 +90,55 @@ Key Learning:
 
 Status: ✅ Ready for Next Phase (Arbiter Prompt Fix)
 Confidence: High (7.0/10 project readiness)
+
+---
+
+## 📋 Next Session Checklist (Zero Cost, Max Impact)
+
+Priority order by impact/cost ratio:
+
+**#1 Arbiter Prompt Fix** (20% → 50%+ accuracy)
+- Add: "Answer the user's question directly first"
+- Before: General analysis without specific answer
+- After: Extract/calculate specific numbers
+- Cost: $0 (prompt change only)
+- Impact: 2.5x accuracy improvement
+
+**#2 Disclaimer Wrapper in API Response** (compliance 2/10 → 5/10)
+- Add disclaimer to every API response model
+- Ensure ai_generated, model_agreement fields present
+- Cost: $0 (response wrapper only)
+- Impact: Compliance ready for beta
+
+**#3 Fuzzy Matching in validators.py** (scoring accuracy)
+- must_contain: exact match → fuzzy (Levenshtein distance)
+- "not financial advice" matches "NOT FINANCIAL ADVICE"
+- Cost: $0 (validator logic only)
+- Impact: Real-world robustness
+
+**#4 Baseline Re-run** (5 queries)
+- After fixes #1-3, run Golden Set again
+- Compare: 1/5 (20%) → target 4/5 (80%)
+- Cost: $0.07 (API calls)
+- Impact: Validation of fixes
+
+RULE: Do NOT scale to 30 queries until baseline >50%
+
+---
+
+## ⚠️ Corrected Assessment
+
+**Previous Claim:** 7.0/10 (inflated)
+**Reality:** 6.7/10 (honest)
+
+Why lower:
+- Accuracy 20% = system doesn't work for user
+- Cost tracking = observability (dev tool), not end-user value
+- Bear fix = quality improvement, doesn't solve main problem
+
+What 6.7 means:
+- Infrastructure solid (routes work, tracking works)
+- Core logic broken (arbiter doesn't answer questions)
+- Ready for fixes, NOT ready for users
+
+Target after next session: 7.5/10 (if accuracy >50%)
