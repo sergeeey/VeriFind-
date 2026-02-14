@@ -82,7 +82,15 @@ class AnswerValidator:
         Returns:
             (is_correct, reason)
         """
-        answer_lower = answer.lower()
+        # Prioritize DIRECT ANSWER section if it exists
+        if "DIRECT ANSWER:" in answer:
+            direct_answer = answer.split("DIRECT ANSWER:")[1].split("\n")[0]
+            answer_to_check = direct_answer
+        else:
+            # Fallback: check first 200 chars (avoid synthesis section)
+            answer_to_check = answer[:200]
+
+        answer_lower = answer_to_check.lower()
 
         # Look for boolean indicators
         positive_indicators = ['yes', 'true', 'above', 'higher', 'over', 'exceeds']
@@ -92,9 +100,9 @@ class AnswerValidator:
         has_negative = any(ind in answer_lower for ind in negative_indicators)
 
         if has_positive and not has_negative:
-            return True, "Clear positive answer"
+            return True, f"Clear positive answer in DIRECT ANSWER: {answer_to_check[:100]}"
         elif has_negative and not has_positive:
-            return True, "Clear negative answer"
+            return True, f"Clear negative answer in DIRECT ANSWER: {answer_to_check[:100]}"
         elif has_positive and has_negative:
             return False, "Ambiguous answer (both positive and negative indicators)"
         else:

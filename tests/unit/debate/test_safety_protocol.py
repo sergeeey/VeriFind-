@@ -92,7 +92,8 @@ async def test_trust_agent_init():
     """Test TrustAgent initialization."""
     with patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'}):
         agent = TrustAgent()
-        assert agent.model == "claude-3-5-sonnet-20241022"
+        # Updated to Claude Sonnet 4.5 (Week 13)
+        assert agent.model == "claude-sonnet-4-5-20250929"
         assert agent.client is not None
 
 

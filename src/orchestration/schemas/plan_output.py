@@ -90,9 +90,9 @@ class AnalysisPlan(BaseModel):
         description="Ordered list of code blocks to execute"
     )
 
-    # Expected output
-    expected_output_format: str = Field(
-        ...,
+    # Expected output (optional for DeepSeek compatibility)
+    expected_output_format: Optional[str] = Field(
+        default=None,
         description="Description of expected final output format"
     )
 

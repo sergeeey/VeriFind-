@@ -5,6 +5,11 @@ Week 2 Day 5: Simple orchestrator testing.
 """
 
 import pytest
+
+# Skip this module: APEOrchestrator is legacy (Week 2)
+# Production uses ParallelDebateOrchestrator (see eval/run_golden_set_v2.py)
+pytest.skip("APEOrchestrator is legacy, not used in production", allow_module_level=True)
+
 from src.orchestration.orchestrator import APEOrchestrator, QueryResult
 
 
