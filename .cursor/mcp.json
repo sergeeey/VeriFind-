@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "semgrep": {
+      "url": "https://mcp.semgrep.ai/mcp"
+    }
+  }
+}
