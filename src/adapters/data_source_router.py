@@ -20,6 +20,7 @@ import pandas as pd
 # Import adapters at module level for testability
 from .yfinance_adapter import YFinanceAdapter
 from .alpha_vantage_adapter import AlphaVantageAdapter
+from .fred_adapter import FredAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -61,19 +62,21 @@ class DataSourceRouter:
     def __init__(
         self,
         alpha_vantage_key: Optional[str] = None,
+        fred_api_key: Optional[str] = None,
         enable_metrics: bool = True,
         cache_ttl_seconds: int = 3600
     ):
         """Initialize router with data sources.
-        
+
         Args:
             alpha_vantage_key: API key for AlphaVantage (optional)
+            fred_api_key: API key for FRED (optional, week 14 integration)
             enable_metrics: Enable Prometheus metrics
             cache_ttl_seconds: Cache time-to-live
         """
         # Initialize primary source (always available)
         self._yfinance = YFinanceAdapter(cache_ttl_seconds=cache_ttl_seconds)
-        
+
         # Initialize secondary source (if key provided)
         self._alpha_vantage: Optional[Any] = None
         if alpha_vantage_key:
@@ -85,6 +88,18 @@ class DataSourceRouter:
                 logger.info("AlphaVantage adapter initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize AlphaVantage: {e}")
+
+        # Initialize FRED adapter (Week 14: Macro economic data)
+        self._fred: Optional[Any] = None
+        try:
+            self._fred = FredAdapter(
+                api_key=fred_api_key,
+                cache_ttl_seconds=86400,  # 24h TTL for economic data
+                enable_metrics=enable_metrics
+            )
+            logger.info("FRED adapter initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize FRED: {e}")
         
         # Initialize cache (in-memory)
         self._cache: Dict[str, Any] = {}
@@ -300,3 +315,77 @@ class DataSourceRouter:
     def get_last_successful_source(self, ticker: str) -> Optional[str]:
         """Get last successful data source for ticker."""
         return self._last_successful_source.get(ticker)
+
+    def get_economic_data(
+        self,
+        series_id: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> DataSourceResult:
+        """Fetch economic time series data from FRED.
+
+        Week 14: New method for macro economic queries (Fed rate, unemployment, etc.)
+
+        Args:
+            series_id: FRED series ID (e.g., "DFF", "UNRATE", "CPIAUCSL")
+            start_date: Start date (YYYY-MM-DD, optional)
+            end_date: End date (YYYY-MM-DD, optional)
+
+        Returns:
+            DataSourceResult with:
+                - data: pd.DataFrame (DatetimeIndex, 'value' column)
+                - source: "fred"
+                - is_cached: bool
+                - error: Optional[str]
+
+        Examples:
+            >>> router = DataSourceRouter(fred_api_key="abc123")
+            >>> fed_rate = router.get_economic_data("DFF", "2024-01-01", "2024-12-31")
+            >>> unemployment = router.get_economic_data("UNRATE")
+        """
+        fetched_at = datetime.utcnow()
+
+        # Try FRED first
+        if self._fred:
+            try:
+                logger.info(f"Fetching {series_id} from FRED...")
+                df = self._fred.get_series(series_id, start_date, end_date)
+
+                if df is not None and not df.empty:
+                    logger.info(f"✓ FRED success for {series_id}")
+                    return DataSourceResult(
+                        data=df,
+                        source="fred",
+                        is_cached=False,
+                        fetched_at=fetched_at
+                    )
+                else:
+                    logger.warning(f"FRED returned empty for {series_id}")
+
+            except Exception as e:
+                logger.error(f"FRED failed for {series_id}: {e}")
+        else:
+            logger.warning("FRED not configured")
+
+        # Fallback: Check cache
+        cache_key = f"fred_{series_id}_{start_date}_{end_date}"
+        if cache_key in self._cache:
+            cached_result = self._cache[cache_key]
+            logger.info(f"✓ Cache hit for {series_id} (degraded mode)")
+            return DataSourceResult(
+                data=cached_result,
+                source="cache",
+                is_cached=True,
+                fetched_at=fetched_at,
+                error="Serving stale economic data from cache"
+            )
+
+        # All sources failed
+        logger.error(f"All data sources failed for {series_id}")
+        return DataSourceResult(
+            data=pd.DataFrame(),
+            source="error",
+            is_cached=False,
+            fetched_at=fetched_at,
+            error=f"Could not fetch FRED series {series_id}"
+        )

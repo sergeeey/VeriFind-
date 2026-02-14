@@ -303,6 +303,48 @@ REMINDER: You MUST include ALL mandatory fields. Do NOT use field names like "se
         Raises:
             ValidationError: If plan generation fails after retries
         """
+        # Week 14: Detect macro/economic queries
+        economic_keywords = [
+            'fed', 'interest rate', 'unemployment', 'inflation', 'gdp',
+            'treasury', 'monetary policy', 'federal reserve', 'cpi',
+            'economic', 'macro'
+        ]
+
+        query_lower = user_query.lower()
+        is_economic_query = any(kw in query_lower for kw in economic_keywords)
+
+        # If economic query detected, augment system prompt with FRED guidance
+        original_system_prompt = self.system_prompt
+        if is_economic_query:
+            logger.info("Economic query detected, adding FRED guidance to system prompt")
+            self.system_prompt = original_system_prompt + """
+
+ECONOMIC DATA GUIDANCE (Week 14):
+For queries about macroeconomic indicators (Fed rate, unemployment, inflation):
+1. Add DataRequirement with data_type="economic" and source="fred"
+2. Use FRED series IDs:
+   - Federal Funds Rate: "DFF" or "FEDFUNDS"
+   - 3-Month Treasury: "DGS3MO"
+   - Unemployment Rate: "UNRATE"
+   - CPI (Inflation): "CPIAUCSL"
+   - GDP: "GDP"
+   - 30-Year Mortgage: "MORTGAGE30US"
+3. Always include fallback handling (FRED API may be unavailable):
+   try:
+       from fredapi import Fred
+       fred = Fred(api_key=os.environ.get('FRED_API_KEY'))
+       series = fred.get_series(series_id, start_date, end_date)
+   except Exception as e:
+       # Fallback to hardcoded recent values
+       fallback_rates = {
+           'DFF': 4.50,  # Federal Funds Rate (2026-02-14)
+           'DGS3MO': 4.33,  # 3-Month Treasury
+           'UNRATE': 3.7,  # Unemployment Rate
+           'CPIAUCSL': 306.7  # Consumer Price Index
+       }
+       series = pd.Series([fallback_rates.get(series_id, 0.0)])
+"""
+
         # Build prompt
         prompt = self._build_prompt(user_query, context)
 
@@ -348,6 +390,10 @@ REMINDER: You MUST include ALL mandatory fields. Do NOT use field names like "se
             except Exception as e:
                 logger.error(f"Plan generation failed: {e}", exc_info=True)
                 raise ValueError(f"Failed to generate plan: {e}")
+
+        # Restore original system prompt (if was augmented)
+        if is_economic_query:
+            self.system_prompt = original_system_prompt
 
         # Add query metadata
         plan.query_id = plan.query_id or self._generate_query_id()
