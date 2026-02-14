@@ -36,6 +36,9 @@ async def run_golden_set(file_path):
         from src.debate.parallel_orchestrator import MultiLLMDebateOrchestrator
         orchestrator = MultiLLMDebateOrchestrator()
         print("✅ Real Orchestrator loaded.")
+        print(f"   Bull: {orchestrator.bull_model}")
+        print(f"   Bear: {orchestrator.bear_model}")
+        print(f"   Arbiter: {orchestrator.arbiter_model}")
     except ImportError as e:
         print(f"⚠️  Real Orchestrator not found: {e}. Using MOCK for testing.")
         orchestrator = MockOrchestrator()
