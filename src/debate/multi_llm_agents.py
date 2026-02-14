@@ -223,7 +223,7 @@ class BearAgent(BaseAgent):
     Reasoning: Claude excels at finding flaws and risks.
     """
 
-    def __init__(self, model: str = "claude-3-5-sonnet-20241022"):
+    def __init__(self, model: str = "claude-sonnet-4-5-20250929"):
         """Initialize Bear agent with Claude."""
         super().__init__(AgentRole.BEAR, "anthropic", model)
 

@@ -43,7 +43,7 @@ class ParallelDebateOrchestrator:
     def __init__(
         self,
         bull_model: str = "deepseek-chat",
-        bear_model: str = "claude-3-5-sonnet-20241022",
+        bear_model: str = "claude-sonnet-4-5-20250929",
         arbiter_model: str = "gpt-4-turbo-preview"
     ):
         """

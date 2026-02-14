@@ -427,7 +427,7 @@ class ValuationAnalyst(BaseSpecialist):
     Focus: DCF, multiples, comparables, intrinsic value
     """
 
-    def __init__(self, model: str = "claude-3-5-sonnet-20241022"):
+    def __init__(self, model: str = "claude-sonnet-4-5-20250929"):
         """Initialize Valuation analyst with Claude."""
         super().__init__(SpecialistRole.VALUATION, "anthropic", model)
 

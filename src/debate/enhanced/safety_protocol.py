@@ -81,7 +81,7 @@ class TrustAgent:
     Role: Verify factual claims made by specialists
     """
 
-    def __init__(self, model: str = "claude-3-5-sonnet-20241022"):
+    def __init__(self, model: str = "claude-sonnet-4-5-20250929"):
         """Initialize Trust agent with Claude."""
         self.model = model
 
