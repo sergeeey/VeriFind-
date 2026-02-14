@@ -28,6 +28,7 @@ from .multi_llm_agents import (
     MultiLLMDebateResult,
     AgentResponse
 )
+from .refusal_agent import RefusalAgent, RefusalReason
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ class ParallelDebateOrchestrator:
         self.bull_agent = BullAgent(model=bull_model)
         self.bear_agent = BearAgent(model=bear_model)
         self.arbiter_agent = ArbiterAgent(model=arbiter_model)
+        self.refusal_agent = RefusalAgent(enable_logging=True)  # Week 14 Day 1
         self.logger = logging.getLogger(__name__)
 
     async def run_debate(
@@ -87,6 +89,46 @@ class ParallelDebateOrchestrator:
 
         if context is None:
             context = {}
+
+        # Week 14 Day 1: Pre-execution safety check (jailbreak defense)
+        refusal_check = self.refusal_agent.should_refuse(query)
+        if refusal_check.should_refuse:
+            self.logger.warning(
+                f"Query refused: {refusal_check.reason.value} - {query[:100]}..."
+            )
+
+            # Return refusal result (no debate execution)
+            from dataclasses import dataclass
+            @dataclass
+            class RefusalResponse:
+                analysis: str
+                confidence: float = 0.0
+                key_points: list = None
+                recommendation: str = "REFUSED"
+                input_tokens: int = 0
+                output_tokens: int = 0
+
+                def __post_init__(self):
+                    if self.key_points is None:
+                        self.key_points = []
+
+            refusal_response = RefusalResponse(
+                analysis=refusal_check.refusal_message,
+                confidence=1.0,  # 100% certain refusal
+                key_points=[f"Refused: {refusal_check.reason.value}"],
+                recommendation="REFUSED"
+            )
+
+            return MultiLLMDebateResult(
+                bull_response=refusal_response,
+                bear_response=refusal_response,
+                arbiter_response=refusal_response,
+                overall_confidence=1.0,  # Certain refusal
+                recommendation="REFUSED",
+                risk_reward_ratio="N/A",
+                cost_usd=0.0,  # No LLM calls made
+                latency_ms=(time.time() - start_time) * 1000
+            )
 
         self.logger.info(f"Starting parallel debate for query: {query[:100]}...")
 

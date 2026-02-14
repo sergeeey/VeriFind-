@@ -34,6 +34,13 @@ except ImportError:
     sys.path.insert(0, str(project_root / '.claude' / 'worktrees' / 'awesome-yonath'))
     from src.adapters.yfinance_adapter import YFinanceAdapter
 
+# Week 14 Day 1: Import FRED adapter for macro queries
+try:
+    from src.adapters.fred_adapter import FredAdapter
+except ImportError:
+    print("⚠️  FRED adapter not found, macro queries will fail")
+    FredAdapter = None
+
 
 def extract_tickers_from_query(query: str) -> list[str]:
     """
@@ -72,14 +79,16 @@ def extract_tickers_from_query(query: str) -> list[str]:
     return tickers if tickers else ['SPY']  # Default to S&P 500 if no ticker found
 
 
-async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
+async def fetch_market_context(tickers: list[str], query: str = "") -> Dict[str, Any]:
     """
     Fetch comprehensive market data for tickers using yfinance .info.
+    Week 14 Day 1: Also fetch FRED economic data if query is macro-related.
 
     Returns context dict with:
     - current_price: Latest market price
     - fundamentals: P/E ratio, revenue growth, free cash flow, market cap
     - technical: 50-day MA, 200-day MA, 52-week high/low, beta
+    - economic: FRED data (if macro query)
     """
     adapter = YFinanceAdapter(cache_enabled=True, cache_ttl_seconds=300)
     context = {
@@ -87,6 +96,43 @@ async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
         'data': {},
         'fetched_at': datetime.now().isoformat()
     }
+
+    # Week 14 Day 1: Detect economic queries and fetch FRED data
+    economic_keywords = [
+        'fed', 'interest rate', 'unemployment', 'inflation', 'gdp',
+        'treasury', 'monetary policy', 'federal reserve', 'cpi', 'economic', 'macro'
+    ]
+    is_economic_query = any(kw in query.lower() for kw in economic_keywords)
+
+    if is_economic_query and FredAdapter is not None:
+        try:
+            fred = FredAdapter(cache_enabled=True)
+            context['economic'] = {}
+
+            # Fetch common economic indicators
+            try:
+                dff = fred.get_latest_value('DFF')  # Federal Funds Rate
+                context['economic']['fed_funds_rate'] = dff
+                print(f"   ✅ Fetched Fed Funds Rate: {dff}%")
+            except:
+                pass
+
+            try:
+                unrate = fred.get_latest_value('UNRATE')  # Unemployment Rate
+                context['economic']['unemployment_rate'] = unrate
+                print(f"   ✅ Fetched Unemployment Rate: {unrate}%")
+            except:
+                pass
+
+            try:
+                dgs3mo = fred.get_latest_value('DGS3MO')  # 3-Month Treasury
+                context['economic']['treasury_3mo'] = dgs3mo
+                print(f"   ✅ Fetched 3-Month Treasury: {dgs3mo}%")
+            except:
+                pass
+
+        except Exception as e:
+            print(f"   ⚠️  FRED fetching failed: {e}")
 
     for ticker in tickers:
         try:
@@ -170,8 +216,8 @@ async def run_golden_set_with_data(file_path: str, limit: Optional[int] = None):
             tickers = extract_tickers_from_query(q['query'])
             print(f"   📊 Tickers identified: {tickers}")
 
-            # Step 2: Fetch market data
-            context = await fetch_market_context(tickers)
+            # Step 2: Fetch market data (+ FRED economic data if macro query)
+            context = await fetch_market_context(tickers, query=q['query'])
 
             # Step 3: Run debate WITH context
             start_time = datetime.now()
