@@ -311,3 +311,11 @@ async def run_multi_llm_debate(
     orchestrator = ParallelDebateOrchestrator()
     result = await orchestrator.run_debate(query, context)
     return orchestrator.to_dict(result)
+
+
+# ============================================================================
+# Alias for backward compatibility
+# ============================================================================
+
+# Golden Set and tests expect this name
+MultiLLMDebateOrchestrator = ParallelDebateOrchestrator
