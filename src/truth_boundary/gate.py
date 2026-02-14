@@ -58,7 +58,7 @@ class VerifiedFact:
     # Week 11: Data attribution for regulatory compliance
     data_source: str = "yfinance"  # Source: yfinance, alpha_vantage, polygon, cache
     data_freshness: Optional[datetime] = None  # When data was fetched from external API
-    source_verified: bool = True  # True if values from VEE execution (not LLM hallucination)
+    source_verified: bool = False  # Week 14: Conservative default - MUST be explicitly set by VEE execution
     
     # API response: Human-readable statement summarizing the fact
     statement: Optional[str] = None  # Generated summary for API response
@@ -73,6 +73,11 @@ class ValidationResult:
     extracted_values: Dict[str, Any]
     error_message: Optional[str] = None
     warnings: List[str] = field(default_factory=list)
+
+    # Week 14: Propagate source_verified from ExecutionResult
+    source_verified: bool = False  # From VEE execution validation
+    error_detected: bool = False  # From VEE execution
+    ambiguity_detected: bool = False  # From VEE execution
 
 
 class TruthBoundaryGate:
@@ -186,7 +191,10 @@ class TruthBoundaryGate:
                 is_valid=False,
                 status='error',
                 extracted_values={},
-                error_message=exec_result.stderr
+                error_message=exec_result.stderr,
+                source_verified=False,  # Week 14: Execution failed
+                error_detected=getattr(exec_result, 'error_detected', True),
+                ambiguity_detected=getattr(exec_result, 'ambiguity_detected', False)
             )
 
         if exec_result.status == 'timeout':
@@ -194,7 +202,10 @@ class TruthBoundaryGate:
                 is_valid=False,
                 status='timeout',
                 extracted_values={},
-                error_message='Execution timed out'
+                error_message='Execution timed out',
+                source_verified=False,  # Week 14: Timeout = not verified
+                error_detected=True,
+                ambiguity_detected=False
             )
 
         # Try to parse as JSON first
@@ -206,7 +217,10 @@ class TruthBoundaryGate:
                 is_valid=False,
                 status='error',
                 extracted_values={},
-                error_message=str(extracted['error'])
+                error_message=str(extracted['error']),
+                source_verified=False,  # Week 14: JSON contains error
+                error_detected=True,
+                ambiguity_detected=False
             )
 
         # If no JSON found, check if stderr has errors before falling back to parsing
@@ -215,7 +229,10 @@ class TruthBoundaryGate:
                 is_valid=False,
                 status='error',
                 extracted_values={},
-                error_message=exec_result.stderr
+                error_message=exec_result.stderr,
+                source_verified=False,  # Week 14: stderr present
+                error_detected=True,
+                ambiguity_detected=getattr(exec_result, 'ambiguity_detected', False)
             )
 
         # If still no extracted values, try key-value pairs (fallback)
@@ -228,15 +245,22 @@ class TruthBoundaryGate:
                 is_valid=False,
                 status='error',
                 extracted_values={},
-                error_message=exec_result.stderr
+                error_message=exec_result.stderr,
+                source_verified=False,  # Week 14: No extracted values
+                error_detected=True,
+                ambiguity_detected=getattr(exec_result, 'ambiguity_detected', False)
             )
 
+        # Week 14: SUCCESS path - propagate source_verified from ExecutionResult
         return ValidationResult(
             is_valid=True,
             status='success',
             extracted_values=extracted,
             error_message=None,
-            warnings=[]
+            warnings=[],
+            source_verified=getattr(exec_result, 'source_verified', False),  # From VEE
+            error_detected=getattr(exec_result, 'error_detected', False),
+            ambiguity_detected=getattr(exec_result, 'ambiguity_detected', False)
         )
 
     def validate_batch(
@@ -301,5 +325,6 @@ class TruthBoundaryGate:
             error_message=validation.error_message,
             source_code=source_code,
             confidence_score=1.0,  # Default high confidence before debate
-            statement=statement
+            statement=statement,
+            source_verified=validation.source_verified  # Week 14: Propagate from VEE execution
         )

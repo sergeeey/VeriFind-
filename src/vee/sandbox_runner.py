@@ -37,6 +37,11 @@ class ExecutionResult:
     code_hash: str  # SHA-256 hash of executed code
     code: str = ""  # Week 5 Day 3: Executed source code for Debate System
 
+    # Week 14: Validation fields for source_verified propagation
+    source_verified: bool = False  # True only if execution successful AND output valid
+    error_detected: bool = False  # True if Error/Exception in stdout/stderr
+    ambiguity_detected: bool = False  # True if pandas Series ambiguity or similar
+
 
 class SandboxRunner:
     """
@@ -227,6 +232,39 @@ builtins.__import__ = restricted_import
 
             duration_ms = int((time.time() - start_time) * 1000)
 
+            # Week 14: Detect execution errors and ambiguity for source_verified
+            error_detected = (
+                exit_code != 0
+                or 'Error' in stdout
+                or 'Error' in stderr
+                or 'Traceback' in stdout
+                or 'Traceback' in stderr
+                or 'Exception' in stdout
+                or 'Exception' in stderr
+            )
+
+            # Detect pandas Series ambiguity and other common issues
+            ambiguity_patterns = [
+                'truth value.*ambiguous',
+                'ambiguous',
+                'ValueError',
+                'TypeError',
+                'KeyError',
+                'IndexError',
+            ]
+            ambiguity_detected = any(
+                pattern.lower() in stdout.lower() or pattern.lower() in stderr.lower()
+                for pattern in ambiguity_patterns
+            )
+
+            # source_verified = True ONLY if: exit_code=0 AND no errors AND no ambiguity
+            source_verified = (
+                exit_code == 0
+                and not error_detected
+                and not ambiguity_detected
+                and status == "success"
+            )
+
             return ExecutionResult(
                 status=status,
                 exit_code=exit_code,
@@ -236,7 +274,10 @@ builtins.__import__ = restricted_import
                 memory_used_mb=memory_used_mb,
                 executed_at=executed_at,
                 code_hash=code_hash,
-                code=original_code
+                code=original_code,
+                source_verified=source_verified,  # NEW
+                error_detected=error_detected,  # NEW
+                ambiguity_detected=ambiguity_detected,  # NEW
             )
 
         except Exception as e:
@@ -252,7 +293,10 @@ builtins.__import__ = restricted_import
                 memory_used_mb=0.0,
                 executed_at=executed_at,
                 code_hash=code_hash,
-                code=original_code
+                code=original_code,
+                source_verified=False,  # Docker failure = NOT verified
+                error_detected=True,  # Exception occurred
+                ambiguity_detected=False,  # No code execution, no ambiguity
             )
 
     def get_active_containers(self) -> List[str]:
