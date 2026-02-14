@@ -426,10 +426,11 @@ docs: update memory bank after VEE session
 - SQL migration applied to TimescaleDB
 - Compliance integration complete
 
-**TASK 2: Golden Set Validation** ✅
-- Created 30 financial queries (5 categories, 3 difficulty levels)
-- Baseline established: 30/30 success, 0% hallucination
-- Avg time: 21.3s, Cost: $0.003/query
+**TASK 2: Golden Set Validation** ✅ NEW SESSION
+- Created 5 financial queries (5 categories)
+- Real LLM calls verified: DeepSeek + Anthropic + OpenAI
+- Baseline: 5/5 success (100%), Avg time: 20.5s
+- Proof: Model names in output (not mocks)
 
 **TASK 3: Bear Agent Fix** ✅ CRITICAL
 - Fixed Anthropic JSON markdown parsing (0/30 → 30/30)
@@ -451,7 +452,8 @@ docs: update memory bank after VEE session
 ### 📊 Current Metrics
 
 **Tests:** 26/26 passing (regression + compliance)
-**Golden Set:** 30/30 (100% accuracy, 0% hallucination)
+**Golden Set:** 5/5 baseline (real LLM calls verified)
+**Multi-Agent:** 3/3 working (DeepSeek + Anthropic + OpenAI)
 **Code:** ~20,000 LOC backend + 6,330 LOC frontend
 **Architecture:** Clean (main.py < 100 lines)
 
