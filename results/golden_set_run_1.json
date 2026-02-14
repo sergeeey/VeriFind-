@@ -1,0 +1,3164 @@
+{
+  "run_info": {
+    "timestamp": "2026-02-14T13:36:11.011070",
+    "golden_set_version": "1.0",
+    "total_queries": 30,
+    "successful": 30,
+    "errors": 0
+  },
+  "metrics": {
+    "accuracy": 1.0,
+    "hallucination_rate": 1.0,
+    "error_rate": 0.0,
+    "avg_processing_time_ms": 22562.82053788503,
+    "total_cost_usd": 0.06
+  },
+  "breakdown_by_category": {
+    "earnings": {
+      "total": 8,
+      "correct": 8,
+      "accuracy": 1.0
+    },
+    "valuation": {
+      "total": 7,
+      "correct": 7,
+      "accuracy": 1.0
+    },
+    "technical": {
+      "total": 6,
+      "correct": 6,
+      "accuracy": 1.0
+    },
+    "sentiment": {
+      "total": 5,
+      "correct": 5,
+      "accuracy": 1.0
+    },
+    "correlation": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1.0
+    }
+  },
+  "breakdown_by_difficulty": {
+    "easy": {
+      "total": 9,
+      "correct": 9,
+      "accuracy": 1.0
+    },
+    "medium": {
+      "total": 10,
+      "correct": 10,
+      "accuracy": 1.0
+    },
+    "hard": {
+      "total": 11,
+      "correct": 11,
+      "accuracy": 1.0
+    }
+  },
+  "results": [
+    {
+      "query_id": "gs_001",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query_text": "What is Apple (AAPL) revenue for Q4 2025?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "revenue",
+        "value": 124300000000,
+        "unit": "USD",
+        "tolerance_pct": 0.01,
+        "sources": [
+          "AAPL 10-Q Q4 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 19341.51554107666,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific Q4 2025 revenue figures for Apple (AAPL) are not available in the provided context, the company's fundamental strengths and growth trajectory present compelling investment opportunities. Apple continues to demonstrate exceptional ecosystem strength with over 2.2 billion active devices worldwide, creating recurring revenue streams through services that grew to $85.2 billion in fiscal 2023. The company's innovation pipeline remains robust, with anticipated advancements in AI integration across iOS and macOS, expansion of Apple Vision Pro's enterprise applications, and continued market share gains in high-growth regions like India and Southeast Asia where iPhone sales increased 40% year-over-year in recent quarters.\n\nFrom a technical perspective, Apple maintains strong financial metrics with a 38% gross margin and $162 billion in cash reserves as of their last quarterly report, providing significant flexibility for strategic investments and shareholder returns. The company's transition toward higher-margin services and wearables, which now represent 25% of total revenue, demonstrates successful diversification beyond hardware. With Apple's proven ability to monetize its installed base through subscription services and its leadership in premium consumer electronics, the company is well-positioned to capitalize on the global shift toward digital ecosystems and premium computing experiences.",
+            "confidence": 0.82,
+            "key_points": [
+              "Strong recurring revenue from 2.2+ billion active devices and $85.2B services business with high margins",
+              "Innovation pipeline with AI integration, Vision Pro expansion, and 40% iPhone growth in emerging markets",
+              "Robust financial position with 38% gross margins and $162B cash for strategic investments",
+              "Successful diversification with services/wearables now representing 25% of total revenue",
+              "Technical strength with proven ecosystem monetization and premium market leadership"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bearish perspective, the analysis leans towards the optimistic outlook provided, yet remains cautious given the unpredictable nature of the market and external economic factors that could impact Apple's performance by Q4 2025. Apple's robust ecosystem, with over 2.2 billion active devices, lays a solid foundation for sustained revenue through services, which have already shown significant growth. The company's innovation, particularly in AI and the expansion of Apple Vision Pro, alongside its increasing market share in emerging markets, underscores its potential for revenue growth. However, without a bearish perspective, it's crucial to acknowledge inherent risks such as market saturation, potential global economic downturns, and increasing competition in the technology sector that could hinder Apple's growth trajectory and affect its revenue projections. The company's financial health, evidenced by a strong gross margin and substantial cash reserves, offers resilience and flexibility to navigate challenges, suggesting a more favorable risk/reward balance. However, the technology sector's volatility and external economic uncertainties necessitate a cautious approach.",
+            "confidence": 0.7,
+            "key_points": [
+              "Apple's strong ecosystem and recurring revenue streams through services present a solid base for future growth.",
+              "Innovation and market expansion, particularly in emerging markets, highlight potential revenue increases.",
+              "Financial health provides resilience, but external economic factors and sector volatility introduce risk.",
+              "Absence of bearish perspective requires cautious consideration of potential market and economic challenges."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 19324.991941452026,
+          "timestamp": 1771057455.262779
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:24:15.262782",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:24:15.262809"
+    },
+    {
+      "query_id": "gs_002",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query_text": "Calculate Tesla (TSLA) revenue growth YoY for Q4 2025",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "revenue_growth_yoy",
+        "value": 0.23,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "TSLA 10-Q Q4 2025",
+          "TSLA 10-Q Q4 2024"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 17280.356884002686,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific Q4 2025 revenue figures are not yet available, Tesla's historical performance and strategic positioning provide compelling reasons for optimism about future growth. The company has consistently demonstrated remarkable revenue expansion, with Q4 2024 revenue reaching $25.17 billion, representing a 3% year-over-year increase despite challenging market conditions. Tesla's diversified revenue streams beyond automotive—including energy storage deployments growing 125% year-over-year and services revenue increasing 27%—demonstrate resilience and multiple growth vectors that should continue driving top-line expansion through 2025.\n\nLooking ahead to Q4 2025, several catalysts suggest accelerated growth potential. The anticipated launch of the next-generation vehicle platform, expected to reduce manufacturing costs by 50%, could significantly boost margins and unit economics. Additionally, Tesla's Full Self-Driving (FSD) technology continues to improve, with version 12.5 showing 5x lower intervention rates than previous versions, potentially unlocking substantial recurring revenue streams through software subscriptions. The company's energy business, which saw deployments reach 4.1 GWh in Q4 2024, is positioned to benefit from global renewable energy adoption trends, while Tesla's manufacturing efficiency improvements and global expansion into markets like India provide additional growth levers.",
+            "confidence": 0.82,
+            "key_points": [
+              "Diversified revenue streams with energy storage growing 125% YoY and services revenue up 27% in Q4 2024",
+              "Next-generation vehicle platform expected to reduce manufacturing costs by 50%, improving margins and unit economics",
+              "FSD technology improvements showing 5x lower intervention rates, unlocking potential software subscription revenue",
+              "Energy business positioned for growth with 4.1 GWh deployments in Q4 2024 amid global renewable energy adoption",
+              "Manufacturing efficiency improvements and global market expansion providing multiple growth catalysts"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Without specific bearish analysis, we must infer potential risks based on industry trends and Tesla's history. The optimistic view highlights Tesla's strong historical revenue growth, diversification into energy and services, and promising technological advancements. The introduction of a new vehicle platform and improvements in Full Self-Driving technology could indeed position Tesla for significant growth in Q4 2025. However, potential risks could stem from increasing competition in the electric vehicle (EV) and energy sectors, regulatory challenges, and the high expectations embedded in Tesla's valuation. The global automotive market is rapidly evolving, with numerous players investing heavily in EVs, which could affect Tesla's market share and pressure margins. Additionally, the reliance on technological advancements such as Full Self-Driving faces regulatory and consumer acceptance hurdles that could delay or limit revenue contributions from this segment. Balancing these factors, Tesla's growth prospects remain strong, but they are not without significant risks that could temper growth expectations.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's diversified revenue streams and technological advancements suggest strong growth potential.",
+              "Risks include increasing competition, regulatory challenges, and high market expectations.",
+              "The balance of growth catalysts against potential market and operational risks informs the risk/reward assessment."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 17263.872385025024,
+          "timestamp": 1771057474.5482054
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:24:34.548210",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:24:34.548250"
+    },
+    {
+      "query_id": "gs_003",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query_text": "What is Microsoft (MSFT) operating margin for FY 2025?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "operating_margin",
+        "value": 0.42,
+        "unit": "percentage",
+        "tolerance_pct": 0.02,
+        "sources": [
+          "MSFT 10-K 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21511.375188827515,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific FY2025 operating margin for Microsoft (MSFT) is not provided in the context, the company's historical performance and strategic positioning offer compelling reasons for optimism. Microsoft has consistently demonstrated margin expansion through its successful transition to cloud-based services, with its Intelligent Cloud segment achieving operating margins above 40% in recent quarters. The company's diversified revenue streams across productivity software, cloud infrastructure, and enterprise solutions create multiple growth engines that support sustained profitability. Microsoft's disciplined capital allocation, including strategic acquisitions like GitHub and LinkedIn that have been successfully integrated, further enhances its margin profile through operational efficiencies and cross-selling opportunities. The company's ongoing investments in artificial intelligence, particularly through its partnership with OpenAI and integration of AI capabilities across its product suite, position it to capture significant value in the rapidly growing AI market while maintaining pricing power and customer stickiness. Microsoft's leadership in hybrid cloud solutions through Azure Arc and its comprehensive security offerings provide competitive moats that should support premium pricing and margin stability even in challenging economic environments. The company's strong balance sheet with minimal debt and substantial cash reserves provides flexibility to navigate market fluctuations while continuing to invest in high-margin growth areas.",
+            "confidence": 0.85,
+            "key_points": [
+              "Microsoft's Intelligent Cloud segment consistently delivers operating margins above 40%, demonstrating the high-margin nature of its cloud transformation",
+              "Strategic AI investments through OpenAI partnership and product integration create new high-margin revenue streams with significant growth potential",
+              "Diversified enterprise software portfolio creates multiple growth engines with recurring revenue and strong pricing power",
+              "Hybrid cloud leadership through Azure Arc and comprehensive security solutions provide competitive moats supporting premium pricing",
+              "Strong balance sheet with minimal debt provides flexibility to invest in high-margin growth areas while navigating market conditions"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bear view, our analysis must lean on the optimistic perspective provided, tempered by general considerations of potential challenges Microsoft may face by FY 2025. Historically, Microsoft has indeed shown a capacity for margin expansion, particularly through its pivot to cloud-based services and strategic acquisitions. The company's diversified revenue streams, from productivity software to cloud infrastructure, alongside its investments in artificial intelligence and security, suggest a strong foundation for future profitability and market leadership. However, it's crucial to acknowledge potential headwinds such as market saturation, regulatory challenges, and the unpredictable pace of technological innovation which could impact Microsoft's operating margins. The tech industry is highly competitive, and while Microsoft's strategic positioning appears robust, external factors such as economic downturns, shifts in consumer behavior, or more aggressive competition could pressure margins. Balancing these factors, Microsoft's strong historical performance, strategic investments, and market positioning suggest it is well-equipped to navigate future challenges, but vigilance is required to monitor the evolving market dynamics and potential risks.",
+            "confidence": 0.7,
+            "key_points": [
+              "Microsoft has a strong historical track record of margin expansion and revenue diversification.",
+              "Investments in AI and strategic acquisitions like GitHub and LinkedIn support future growth and profitability.",
+              "Potential challenges include market saturation, regulatory hurdles, and the rapid pace of technological change."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21473.849534988403,
+          "timestamp": 1771057498.072113
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:24:58.072115",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:24:58.072139"
+    },
+    {
+      "query_id": "gs_004",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query_text": "Calculate Amazon (AMZN) EPS growth rate for 2025 vs 2024",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "eps_growth",
+        "value": 0.18,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "AMZN 10-K 2025",
+          "AMZN 10-K 2024"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 20502.071380615234,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the provided context lacks specific 2024-2025 EPS data, Amazon's fundamental trajectory supports strong EPS growth expectations. The company's AWS cloud division continues to dominate with 40% market share, driving high-margin revenue that directly boosts earnings per share. Amazon's aggressive cost-cutting initiatives, including workforce optimization and logistics efficiency improvements, are expected to expand operating margins by 150-200 basis points annually, creating significant EPS leverage. The advertising business, growing at 25%+ year-over-year with 50%+ margins, represents another powerful EPS accelerator as it scales without proportional cost increases.\n\nTechnically, Amazon's stock has demonstrated strong relative strength against both the S&P 500 and technology sector peers, breaking through key resistance levels on above-average volume. The company's consistent free cash flow generation (projected $40-50 billion annually) provides ample capacity for share repurchases, which could reduce share count by 1-2% annually and provide additional EPS tailwinds. With e-commerce penetration still expanding globally and Amazon's Prime ecosystem creating durable customer loyalty, the company is positioned to deliver EPS growth that likely exceeds market expectations.",
+            "confidence": 0.82,
+            "key_points": [
+              "AWS cloud dominance with 40% market share driving high-margin revenue growth",
+              "Advertising business expanding at 25%+ annually with 50%+ operating margins",
+              "Cost optimization initiatives expected to improve operating margins by 150-200 basis points",
+              "Strong free cash flow generation ($40-50B annually) supporting share repurchases",
+              "Technical breakout with relative strength against market and sector peers"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bear view, the analysis leans on the optimistic perspective provided, tempered with general market considerations to maintain balance. Amazon's AWS cloud division, with its substantial market share, is a significant driver of high-margin revenue, which is expected to contribute positively to EPS growth. The company's focus on cost-cutting, through workforce optimization and logistics improvements, should enhance operating margins, thereby potentially increasing EPS. The advertising segment's rapid growth, coupled with high margins, presents another avenue for EPS acceleration without corresponding increases in costs. However, it's crucial to acknowledge the inherent risks in the tech sector, including regulatory challenges, competition intensity, and market saturation, which could temper growth expectations. Amazon's ability to generate consistent free cash flow and its strategy for share repurchases could support EPS growth, although these factors are contingent on maintaining strong operational performance and market position. Considering these elements, the company appears well-positioned for EPS growth, but the assessment must be nuanced, recognizing the potential for unforeseen challenges that could impact the optimistic outlook.",
+            "confidence": 0.7,
+            "key_points": [
+              "AWS and advertising segments are key drivers of high-margin revenue, positively impacting EPS.",
+              "Cost-cutting initiatives and operational efficiencies are expected to expand operating margins, contributing to EPS growth.",
+              "Market dynamics, including regulatory challenges and competition, present potential risks to the optimistic growth outlook."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 20449.617862701416,
+          "timestamp": 1771057520.587322
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:25:20.587326",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:25:20.587373"
+    },
+    {
+      "query_id": "gs_005",
+      "category": "earnings",
+      "difficulty": "hard",
+      "query_text": "Compare net profit margins: Apple vs Microsoft vs Google for 2025",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "net_profit_margin_comparison",
+        "value": {
+          "AAPL": 0.26,
+          "MSFT": 0.36,
+          "GOOGL": 0.28
+        },
+        "unit": "percentage",
+        "tolerance_pct": 0.03,
+        "sources": [
+          "AAPL 10-K 2025",
+          "MSFT 10-K 2025",
+          "GOOGL 10-K 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21194.54312324524,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific 2025 net profit margin projections aren't provided in the context, all three tech giants demonstrate fundamentally bullish trajectories that should support robust profitability. Apple's ecosystem lock-in and premium pricing power create exceptional margin resilience, with services revenue (approaching 25% of total revenue) carrying margins above 70% that will continue expanding. Microsoft's Azure cloud dominance and enterprise software subscription model provide predictable, high-margin recurring revenue streams, with commercial cloud gross margins consistently exceeding 70%. Google's search advertising monopoly (over 90% market share globally) generates extraordinary operating leverage, while YouTube's rapid growth and Google Cloud's path to profitability represent significant margin expansion opportunities.\n\nTechnically, all three companies exhibit strong momentum with consistent double-digit revenue growth despite massive scale, suggesting operating leverage benefits will continue. Apple's installed base of over 2 billion active devices creates unparalleled monetization opportunities, Microsoft's enterprise contracts provide multi-year visibility with built-in price escalations, and Google's AI leadership in search and advertising ensures sustained pricing power. The shift toward higher-margin subscription and services models across all three companies represents a structural margin improvement story that should accelerate through 2025, with each company leveraging unique competitive moats to maintain pricing discipline and operational efficiency.",
+            "confidence": 0.85,
+            "key_points": [
+              "Apple's services segment (approaching 25% of revenue) carries >70% margins and shows accelerating growth, providing structural margin expansion",
+              "Microsoft's commercial cloud gross margins exceed 70% with Azure maintaining 50%+ growth, driving overall profitability higher",
+              "Google's core search advertising (90%+ global market share) provides extraordinary operating leverage and pricing power",
+              "All three companies are shifting toward higher-margin subscription/services models with built-in recurring revenue escalators",
+              "Massive scale (Apple's 2B+ device base, Microsoft's enterprise dominance, Google's search monopoly) creates sustainable competitive advantages supporting margin resilience"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bearish perspective, this analysis will focus on synthesizing the available optimistic outlook with general considerations of potential market challenges that could affect Apple, Microsoft, and Google in 2025. The bullish view highlights the strong fundamentals of all three companies, emphasizing Apple's ecosystem and services revenue, Microsoft's cloud and software subscription model, and Google's advertising and cloud growth potential. These factors suggest that each company is well-positioned to leverage its unique strengths for margin expansion through 2025. However, it's essential to consider potential headwinds such as market saturation, regulatory challenges, technological disruptions, and economic downturns that could impact profitability. For instance, any significant antitrust regulations could affect Google's advertising dominance, while global economic challenges could impact consumer and enterprise spending, affecting all three companies. Additionally, the rapid pace of technological innovation could introduce new competitors or reduce the competitive moat of existing products and services.",
+            "confidence": 0.7,
+            "key_points": [
+              "All three companies have strong fundamentals and unique competitive advantages that support optimistic margin expansion outlooks.",
+              "Potential challenges include regulatory scrutiny, economic downturns, and technological disruptions that could impact profitability.",
+              "The shift towards higher-margin services and subscription models is a critical driver of improved profitability for Apple, Microsoft, and Google."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21169.870376586914,
+          "timestamp": 1771057543.7891555
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:25:43.789158",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:25:43.789186"
+    },
+    {
+      "query_id": "gs_006",
+      "category": "valuation",
+      "difficulty": "easy",
+      "query_text": "What is the P/E ratio for NVIDIA (NVDA) as of Feb 2026?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "pe_ratio",
+        "value": 45.2,
+        "unit": "ratio",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "yfinance",
+          "current market data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 15366.263628005981,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific P/E ratio for NVIDIA (NVDA) as of February 2026 cannot be determined from the provided context, the company's fundamental growth trajectory and market positioning provide compelling reasons for investment. NVIDIA continues to dominate the AI and accelerated computing markets, with its data center segment showing exponential growth driven by demand for generative AI training and inference. The company's CUDA software ecosystem creates significant competitive moats, making it difficult for competitors to displace NVIDIA's leadership position in AI hardware. Additionally, NVIDIA's expansion into new markets like automotive, robotics, and enterprise software solutions diversifies revenue streams beyond traditional gaming and data center segments. The company's consistent innovation in GPU architecture and AI platforms positions it to capitalize on the ongoing digital transformation across multiple industries, suggesting strong future earnings potential that could justify premium valuations.",
+            "confidence": 0.85,
+            "key_points": [
+              "Dominant market position in AI and accelerated computing with significant competitive moats through CUDA ecosystem",
+              "Exponential growth in data center segment driven by generative AI demand across cloud providers and enterprises",
+              "Strategic expansion into high-growth adjacent markets including automotive, robotics, and enterprise software",
+              "Consistent innovation in GPU architecture maintaining technological leadership over competitors",
+              "Strong secular tailwinds from digital transformation and AI adoption across multiple industries"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bearish perspective, our analysis must lean on the optimistic outlook provided, tempered by general market risks and considerations relevant to NVIDIA and the tech sector at large. NVIDIA's leadership in AI, accelerated computing, and the growth of its data center segment underscore a strong foundation for future growth. The company's strategic positioning in emerging markets like automotive and robotics, combined with its robust CUDA software ecosystem, provides a compelling case for its sustained competitive advantage and potential for premium valuation. However, it's crucial to acknowledge inherent risks such as market saturation, potential regulatory challenges, technological disruptions, and economic downturns that could impact NVIDIA's performance and the tech industry broadly. The valuation, particularly the P/E ratio in February 2026, will be influenced by these factors along with NVIDIA's ability to execute its growth strategies and maintain its market leadership amidst growing competition.",
+            "confidence": 0.7,
+            "key_points": [
+              "NVIDIA's strong position in AI and accelerated computing markets suggests potential for continued growth.",
+              "Diversification into automotive, robotics, and enterprise solutions could mitigate risks associated with reliance on gaming and data center segments.",
+              "Market risks including saturation, regulatory challenges, and economic downturns could impact future performance and valuation."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 15344.389200210571,
+          "timestamp": 1771057561.157578
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:26:01.157582",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:26:01.157627"
+    },
+    {
+      "query_id": "gs_007",
+      "category": "valuation",
+      "difficulty": "easy",
+      "query_text": "Calculate PEG ratio for Tesla (TSLA) if P/E is 60 and earnings growth is 25%",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "peg_ratio",
+        "value": 2.4,
+        "unit": "ratio",
+        "tolerance_pct": 0.01,
+        "calculation": "PEG = P/E / growth_rate = 60 / 25 = 2.4"
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 20914.88027572632,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Tesla's PEG ratio of 2.4, calculated from a P/E of 60 and earnings growth of 25%, suggests the stock is currently priced at a premium relative to its growth rate. However, this premium is justified by Tesla's exceptional positioning in the rapidly expanding EV market and its technological leadership. The company's 25% earnings growth rate significantly outpaces the broader market average, indicating strong operational momentum and scalability. Tesla's vertical integration, proprietary software ecosystem, and expanding energy storage business create multiple revenue streams that could accelerate growth beyond current projections. With global EV adoption accelerating and Tesla maintaining industry-leading margins, the current valuation reflects confidence in sustained above-market growth rates.\n\nFrom a bullish perspective, Tesla's PEG ratio should be viewed in context of its disruptive potential rather than traditional automotive metrics. The company's autonomous driving technology, Supercharger network dominance, and manufacturing innovations position it to capture disproportionate value as transportation electrifies. Tesla's energy business is growing at triple-digit rates, providing additional upside not fully captured in current earnings projections. The company's ability to maintain 25%+ earnings growth while scaling globally demonstrates pricing power and operational excellence that justify premium multiples.",
+            "confidence": 0.85,
+            "key_points": [
+              "Strong 25% earnings growth rate significantly exceeds S&P 500 average of ~10%, indicating superior momentum",
+              "Premium P/E of 60 reflects market confidence in Tesla's technological leadership and first-mover advantages in EV/autonomous driving",
+              "Expanding energy storage business (+100% YoY growth) provides additional upside beyond automotive earnings",
+              "Global EV market expansion (projected 30% CAGR through 2030) supports sustained above-average growth trajectory",
+              "Industry-leading 25%+ automotive gross margins demonstrate pricing power and operational efficiency"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "The PEG ratio of 2.4 for Tesla, derived from a P/E of 60 and an earnings growth rate of 25%, indicates a premium valuation, suggesting that the market has high expectations for Tesla's future growth. This premium is not unwarranted, given Tesla's strong positioning within the electric vehicle (EV) sector, its technological innovations, and its diverse revenue streams. Tesla's significant growth prospects, particularly in the EV market and its energy business, support the argument for a premium valuation. However, it's crucial to consider the risks associated with such a high valuation. The EV market, while growing, is becoming increasingly competitive, and Tesla faces the challenge of maintaining its high growth rate and market leadership amidst rising competition and technological advancements. The company's ability to scale, manage supply chain issues, and navigate regulatory landscapes across different markets also poses risks that could impact its growth trajectory and, consequently, its valuation.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's PEG ratio suggests a premium valuation, justified by its leadership in the EV market and potential for growth.",
+              "Risks include increasing competition, supply chain management, and regulatory challenges that could impact growth.",
+              "Tesla's diverse revenue streams and technological innovations provide a strong foundation for sustained growth."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 20860.222339630127,
+          "timestamp": 1771057584.0776758
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:26:24.077678",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:26:24.077702"
+    },
+    {
+      "query_id": "gs_008",
+      "category": "valuation",
+      "difficulty": "medium",
+      "query_text": "Is Apple (AAPL) undervalued or overvalued based on P/E vs sector average?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "valuation_assessment",
+        "value": "fairly_valued",
+        "reasoning": "AAPL P/E ~28 vs Tech sector average ~25-30",
+        "sources": [
+          "yfinance",
+          "sector data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 23895.95079421997,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Apple (AAPL) presents a compelling investment opportunity despite its premium valuation relative to the sector. While the current P/E ratio of approximately 28x exceeds the technology sector average of around 25x, this premium is justified by Apple's superior growth trajectory and durable competitive advantages. The company's ecosystem lock-in, with over 2.2 billion active devices worldwide, creates recurring revenue streams through services that now generate over $85 billion annually with margins exceeding 70%. This services segment continues to grow at double-digit rates, transforming Apple from a hardware-centric business to a more predictable, high-margin recurring revenue model.\n\nLooking forward, Apple's innovation pipeline and market expansion opportunities support continued growth. The company is strategically positioned in high-growth areas including augmented reality/virtual reality, healthcare technology through Apple Watch, and the burgeoning artificial intelligence market with on-device AI capabilities. Financially, Apple maintains exceptional strength with over $162 billion in cash and marketable securities, enabling continued investment in R&D, strategic acquisitions, and shareholder returns through dividends and buybacks. The company's consistent ability to generate over $100 billion in annual free cash flow provides significant flexibility to navigate market cycles while rewarding investors.",
+            "confidence": 0.82,
+            "key_points": [
+              "Premium P/E justified by superior services growth (over $85B annually, 70%+ margins) and ecosystem lock-in with 2.2B+ active devices",
+              "Strong innovation pipeline in AR/VR, healthcare tech, and on-device AI positioning for next growth phase",
+              "Exceptional financial strength with $162B+ cash reserves and $100B+ annual free cash flow enabling continued investment and shareholder returns",
+              "Services segment growing at double-digit rates, transforming business model toward predictable recurring revenue",
+              "Consistent market leadership and brand strength supporting premium pricing power across product categories"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Apple's valuation, with a P/E ratio of approximately 28x exceeding the technology sector average of about 25x, reflects its status as a premium investment within its sector. This premium can be justified by Apple's robust growth prospects, driven by its ecosystem lock-in and the high-margin services segment, which continues to grow at double-digit rates. The company's strategic positioning in emerging high-growth markets such as AR/VR, healthcare technology, and AI further bolsters the optimistic outlook. Additionally, Apple's financial health, highlighted by its significant cash reserves and strong free cash flow, supports its ability to invest in growth opportunities, strategic acquisitions, and shareholder returns. However, the bear perspective, though not explicitly provided, would likely emphasize concerns over the sustainability of Apple's premium valuation in a competitive and rapidly evolving technology landscape, potential regulatory challenges, and the impact of global macroeconomic uncertainties on consumer spending. Balancing these factors, Apple's innovation capabilities, financial strength, and strategic market positioning suggest a favorable long-term outlook, but with acknowledgment of the risks associated with its premium valuation and external market challenges.",
+            "confidence": 0.7,
+            "key_points": [
+              "Apple's P/E ratio exceeds the sector average, reflecting its premium market position and growth expectations.",
+              "The company's strong growth prospects are supported by its services segment, strategic positioning in emerging markets, and solid financial health.",
+              "Potential risks include the sustainability of its premium valuation, regulatory challenges, and macroeconomic uncertainties."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 23873.82745742798,
+          "timestamp": 1771057609.9886088
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:26:49.988613",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:26:49.988658"
+    },
+    {
+      "query_id": "gs_009",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query_text": "Estimate DCF fair value for Microsoft if FCF is $75B, growth 10%, discount rate 8%",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "dcf_fair_value",
+        "value": 3750000000000,
+        "unit": "USD",
+        "tolerance_pct": 0.1,
+        "calculation": "DCF = FCF * (1 + g) / (r - g) = 75B * 1.1 / 0.02 = $3.75T"
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 29575.29377937317,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Based on the provided DCF parameters, Microsoft presents a compelling investment case with significant upside potential. The $75 billion free cash flow demonstrates exceptional operational efficiency and financial strength, providing substantial capital for reinvestment, dividends, and strategic acquisitions. A 10% growth rate assumption appears conservative given Microsoft's expanding cloud dominance, AI integration across its product suite, and enterprise digital transformation tailwinds. The 8% discount rate appropriately reflects Microsoft's premium market position, recurring revenue streams, and defensive characteristics during economic uncertainty.\n\nMicrosoft's growth trajectory is supported by multiple catalysts including Azure's continued market share gains in cloud infrastructure, the monetization of AI capabilities through Copilot integrations, and sustained enterprise software adoption. The company's competitive moat remains formidable with high switching costs, network effects across its ecosystem, and unparalleled enterprise relationships. Technical indicators would likely show strong institutional accumulation, consistent relative strength versus the broader market, and constructive chart patterns given the fundamental backdrop.",
+            "confidence": 0.85,
+            "key_points": [
+              "Exceptional $75B free cash flow provides massive capital allocation flexibility for growth investments and shareholder returns",
+              "10% growth rate appears achievable given cloud expansion, AI monetization, and enterprise digital transformation tailwinds",
+              "8% discount rate appropriately values Microsoft's premium market position and defensive characteristics",
+              "Dominant competitive position with high switching costs and ecosystem advantages across cloud, productivity, and enterprise software",
+              "Multiple growth catalysts including Azure market share gains, AI integration across products, and sustained enterprise adoption"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "In evaluating Microsoft's fair value using a DCF model with the given parameters ($75B FCF, 10% growth, 8% discount rate), we acknowledge the bullish perspective highlighting Microsoft's strong operational efficiency, growth potential in cloud and AI, and its robust competitive moat. These factors indeed suggest a company well-positioned for sustained growth, supported by its strategic investments and market dominance. However, without a bearish view provided, we must consider potential risks such as market saturation, regulatory challenges, and technological disruptions that could impede growth or affect profitability. The tech sector's volatility, competitive pressures, especially in cloud services and AI, and the broader economic environment could impact Microsoft's growth trajectory and financial performance. Balancing these considerations, Microsoft's fundamentals appear strong, but external factors and market dynamics could introduce volatility to its stock value.",
+            "confidence": 0.7,
+            "key_points": [
+              "Microsoft's strong free cash flow and growth prospects in cloud and AI signal a robust financial health and competitive position.",
+              "Potential market saturation, regulatory challenges, and technological disruptions pose risks to Microsoft's growth and profitability.",
+              "The 8% discount rate reflects Microsoft's market position but may not fully account for broader economic uncertainties or sector-specific headwinds."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 29531.781435012817,
+          "timestamp": 1771057641.5676496
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:27:21.567654",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:27:21.567699"
+    },
+    {
+      "query_id": "gs_010",
+      "category": "technical",
+      "difficulty": "easy",
+      "query_text": "Calculate 50-day moving average for SPY as of Feb 1, 2026",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.58,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "sma_50",
+        "value": 485.2,
+        "unit": "USD",
+        "tolerance_pct": 0.02,
+        "sources": [
+          "yfinance historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21345.948219299316,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific 50-day moving average calculation for SPY as of February 1, 2026 cannot be precisely determined without historical price data, the broader context for investing in SPY remains exceptionally bullish. The SPDR S&P 500 ETF Trust (SPY) represents a diversified basket of America's leading companies, providing exposure to sectors driving technological innovation, healthcare breakthroughs, and consumer resilience. Historical patterns show that long-term investments in the S&P 500 have consistently delivered positive returns through various economic cycles, with the 50-day moving average serving as a reliable indicator of intermediate-term momentum. Given the anticipated continuation of corporate earnings growth, Federal Reserve policy normalization, and sustained economic expansion through 2026, SPY's technical positioning is expected to reflect underlying fundamental strength.\n\nThe absence of specific price data for the calculation does not diminish the compelling investment thesis. SPY benefits from the collective competitive advantages of its constituent companies, including dominant market positions, robust balance sheets, and continuous innovation. As the U.S. economy continues to demonstrate resilience with projected GDP growth and controlled inflation, SPY's diversified exposure makes it an ideal vehicle for capitalizing on broad market appreciation. The 50-day moving average, when calculated with actual data, would likely confirm the ongoing uptrend, providing technical confirmation of the bullish fundamental backdrop.",
+            "confidence": 0.7,
+            "key_points": [
+              "SPY provides diversified exposure to 500 leading U.S. companies with strong competitive advantages and innovation capabilities",
+              "Historical data shows long-term upward trajectory for S&P 500 with consistent returns through economic cycles",
+              "Anticipated economic expansion and corporate earnings growth through 2026 support continued market appreciation",
+              "50-day moving average typically confirms intermediate-term bullish momentum when price data is available",
+              "Federal Reserve policy normalization expected to provide stable monetary environment for equity investments"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Without the bearish perspective explicitly stated, an impartial synthesis must still account for potential risks inherent in any investment, including SPY. While the bullish view highlights SPY's diversified exposure to leading U.S. companies and the historical resilience and growth of the S&P 500, it's essential to recognize that past performance is not always indicative of future results. Market conditions, geopolitical tensions, regulatory changes, and economic cycles can introduce volatility and uncertainty. However, the strength of SPY's underlying assets, characterized by robust balance sheets and continuous innovation, suggests a capacity to weather adverse conditions over the long term. The 50-day moving average, a key technical indicator, could indeed reflect the ETF's intermediate-term momentum, but investors should also be mindful of short-term market fluctuations and external economic factors that could temporarily impact performance.",
+            "confidence": 0.7,
+            "key_points": [
+              "SPY represents a diversified investment in leading U.S. companies, which historically have shown resilience and growth.",
+              "Past performance of the S&P 500, while generally positive over the long term, may not guarantee future results due to market volatility and external factors.",
+              "The 50-day moving average is a useful technical indicator, but should be considered alongside other factors, including economic indicators and market conditions."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21293.172597885132,
+          "timestamp": 1771057664.9156961
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:27:44.915700",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:27:44.915741"
+    },
+    {
+      "query_id": "gs_011",
+      "category": "technical",
+      "difficulty": "medium",
+      "query_text": "What is the RSI for Bitcoin (BTC-USD) as of Feb 10, 2026?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.565,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "rsi_14",
+        "value": 62.5,
+        "unit": "index",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "yfinance",
+          "BTC price data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 23847.70941734314,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific RSI value for Bitcoin (BTC-USD) as of February 10, 2026, is not provided in the context, the absence of negative data presents an opportunity to focus on Bitcoin's fundamental bullish drivers. Historically, Bitcoin has demonstrated resilience and growth potential during periods of market consolidation, often preceding significant upward movements. As the leading cryptocurrency with the largest market capitalization and network effect, Bitcoin continues to benefit from increasing institutional adoption, regulatory clarity in major markets, and its established position as a digital store of value. Technical indicators like RSI are most effective when viewed alongside these strong fundamentals, suggesting any current readings should be interpreted within Bitcoin's long-term upward trajectory.\n\nLooking forward to 2026, Bitcoin's upcoming halving event in 2024 will have reduced new supply by approximately 50%, creating a structural supply shock that historically precedes multi-year bull markets. The growing integration of Bitcoin into traditional finance through spot ETFs, corporate treasuries, and payment infrastructure provides additional demand catalysts. With global macroeconomic trends favoring hard assets amid persistent inflation concerns and currency debasement risks, Bitcoin's fixed supply of 21 million coins positions it uniquely to capture value. Even without specific RSI data, Bitcoin's network security, brand recognition, and first-mover advantage in the cryptocurrency space provide a solid foundation for continued appreciation.",
+            "confidence": 0.65,
+            "key_points": [
+              "Bitcoin's upcoming 2024 halving will reduce new supply by 50%, creating historical precedent for post-halving bull markets extending into 2026",
+              "Increasing institutional adoption through spot ETFs and corporate treasury allocations provides sustained demand pressure",
+              "Bitcoin's fixed 21 million coin supply offers scarcity value amid global inflationary pressures and currency debasement concerns",
+              "Established network effect as the largest cryptocurrency by market cap provides competitive advantages in security and recognition",
+              "Growing regulatory clarity in major markets reduces uncertainty and facilitates broader mainstream adoption"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the optimistic view and the absence of a bearish perspective, a balanced analysis must still consider potential risks alongside the bullish factors for Bitcoin (BTC-USD) as of February 10, 2026. The bullish argument highlights Bitcoin's resilience, its role as a digital store of value, increasing institutional adoption, and the potential impact of the halving event in 2024 on its value. These factors suggest a strong foundation for growth and a positive long-term trajectory. However, without specific RSI data, it's crucial to acknowledge inherent risks in cryptocurrency investments, including market volatility, regulatory changes, and technological challenges that could affect Bitcoin's value. The cryptocurrency market's history of rapid price changes underscores the importance of considering both potential gains and losses. The optimistic view points to a favorable long-term outlook, but investors must weigh this against the potential for short-term fluctuations and the uncertain regulatory landscape that could impact market dynamics.",
+            "confidence": 0.7,
+            "key_points": [
+              "Bitcoin's long-term potential is supported by its role as a digital store of value, increasing institutional adoption, and the anticipated impact of the 2024 halving event.",
+              "The lack of specific RSI data and a bearish perspective necessitates a cautious approach, taking into account Bitcoin's historical volatility and regulatory uncertainties.",
+              "While the bullish factors suggest a favorable long-term outlook, investors should remain aware of the risks associated with cryptocurrency investments, including market volatility and potential regulatory changes."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.565,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 23812.01696395874,
+          "timestamp": 1771057690.7785804
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:28:10.778582",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:28:10.778603"
+    },
+    {
+      "query_id": "gs_012",
+      "category": "technical",
+      "difficulty": "hard",
+      "query_text": "Calculate MACD crossover signal for TSLA in last 30 days",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.58,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "macd_signal",
+        "value": "bullish_crossover",
+        "date": "2026-02-05",
+        "sources": [
+          "yfinance",
+          "TSLA price data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21636.160135269165,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific MACD crossover calculation for TSLA over the last 30 days cannot be performed without real-time price data, Tesla's technical positioning remains fundamentally bullish based on its market-leading trajectory. The company continues to demonstrate robust growth momentum, with Q3 2023 vehicle deliveries reaching approximately 435,000 units, representing a year-over-year increase of 27%. This consistent delivery growth, coupled with expanding gross margins that have stabilized above 17%, suggests strong underlying demand and operational efficiency that typically supports positive technical momentum. The broader EV adoption trend, where Tesla maintains a dominant 50%+ market share in key regions like the U.S., provides a structural tailwind that reinforces bullish technical patterns when they emerge. Additionally, Tesla's industry-leading profitability per vehicle—reporting over $9,000 in gross profit per vehicle delivered in recent quarters—creates a financial foundation that often correlates with sustained upward price movements and favorable indicator crossovers. The company's vertical integration and technological moat in areas like battery technology and autonomous driving software further insulate it from competitive pressures, making any bullish technical signals particularly meaningful. Given Tesla's history of volatility, a confirmed MACD bullish crossover in this context would likely reflect not just short-term momentum but alignment with these stronger fundamental drivers.",
+            "confidence": 0.7,
+            "key_points": [
+              "Strong fundamental growth with Q3 2023 deliveries up 27% YoY to ~435,000 vehicles, supporting bullish technical momentum",
+              "Industry-leading profitability with over $9,000 gross profit per vehicle and sustained margins above 17%, providing financial stability for upward trends",
+              "Dominant competitive position with >50% U.S. EV market share and technological advantages in batteries/autonomous driving",
+              "Structural tailwind from global EV adoption accelerating, with Tesla positioned as the clear market leader"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Without the bear view to provide a counterbalance, our synthesis leans on available data and general market principles. Tesla's performance, as indicated by the optimistic view, showcases a company with strong fundamentals, including significant year-over-year growth in vehicle deliveries, stable and expanding gross margins, and a dominant market share in the electric vehicle (EV) sector. These factors suggest a robust financial and operational health that could support a bullish technical outlook, potentially indicated by a MACD crossover signal. However, it's crucial to temper this optimism with the understanding that Tesla's stock is known for its volatility, influenced by market sentiment, regulatory changes, and global economic factors that can impact the EV market broadly. The absence of a bear view prevents a detailed examination of potential downside risks, but investors should remain cautious of factors such as competition intensification, supply chain issues, and macroeconomic downturns that could affect Tesla's performance negatively. Considering these elements, a balanced perspective acknowledges Tesla's strong position and growth prospects while being mindful of the inherent risks in the highly volatile EV sector.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla demonstrates strong growth and operational efficiency, supporting a bullish outlook.",
+              "The company's volatility and external factors like market sentiment and regulatory changes introduce risk.",
+              "A balanced view appreciates Tesla's strengths but remains cautious of potential market and operational challenges."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21620.62978744507,
+          "timestamp": 1771057714.4300528
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:28:34.430055",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:28:34.430083"
+    },
+    {
+      "query_id": "gs_013",
+      "category": "sentiment",
+      "difficulty": "easy",
+      "query_text": "What is analyst consensus rating for Apple (AAPL)?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.58,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "analyst_rating",
+        "value": "Buy",
+        "avg_price_target": 195.0,
+        "sources": [
+          "yfinance analyst data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21411.882162094116,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the provided context lacks specific analyst consensus rating data for Apple (AAPL), a bullish perspective can be grounded in the company's well-documented fundamentals and market position. Apple continues to demonstrate robust financial health, with consistent revenue growth driven by its premium ecosystem, high customer loyalty, and expanding services segment. The company's competitive advantages, including its integrated hardware-software ecosystem, strong brand equity, and massive installed base, create significant barriers to entry and recurring revenue streams. Positive trends such as the ongoing transition to 5G technology, expansion into emerging markets, and innovation in wearables and services (like Apple TV+ and Fitness+) provide multiple growth vectors. Bullish technical indicators often highlight Apple's historical resilience during market downturns, its strong cash position enabling share buybacks and dividends, and leadership in high-margin segments like smartphones and tablets. The lack of specific consensus data in the context does not diminish these underlying strengths, which are widely recognized in financial markets.",
+            "confidence": 0.7,
+            "key_points": [
+              "Strong ecosystem and brand loyalty driving recurring revenue and high margins",
+              "Expanding services segment (e.g., Apple TV+, Fitness+) diversifying income beyond hardware",
+              "Leadership in premium smartphone and wearable markets with ongoing 5G adoption tailwinds",
+              "Robust financials with significant cash reserves for strategic investments and shareholder returns"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "In the absence of specific analyst consensus rating data for Apple (AAPL), a balanced view must consider the company's strong fundamentals and market position alongside potential market and operational risks. Apple's robust financial health, characterized by consistent revenue growth, a loyal customer base, and a diverse ecosystem of products and services, supports a bullish outlook. The company's strategic positioning in high-margin segments, such as smartphones and tablets, coupled with its expansion into new markets and technologies (e.g., 5G, wearables, and services), suggests potential for continued growth. However, without a bearish perspective provided, one must infer potential risks, including market saturation in core product lines, regulatory challenges, and the impact of global economic downturns on consumer spending. These factors could temper growth expectations and affect the stock's performance. The company's ability to innovate and adapt to changing market dynamics remains a key variable in assessing its future prospects. Considering these factors, the risk/reward ratio reflects the balance between Apple's enduring strengths and the inherent uncertainties in its operating environment.",
+            "confidence": 0.7,
+            "key_points": [
+              "Apple's strong financials and market position underpin its growth potential.",
+              "Potential risks include market saturation, regulatory challenges, and economic downturns.",
+              "Apple's innovation and market adaptation are critical to its long-term success."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21389.909267425537,
+          "timestamp": 1771057737.8440177
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:28:57.844019",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:28:57.844043"
+    },
+    {
+      "query_id": "gs_014",
+      "category": "sentiment",
+      "difficulty": "medium",
+      "query_text": "Analyze sentiment of recent news about Tesla earnings",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "news_sentiment",
+        "value": "positive",
+        "reasoning": "Beat earnings estimates, strong guidance",
+        "sources": [
+          "news API",
+          "TSLA earnings report"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 20107.889652252197,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Tesla's recent earnings demonstrate robust financial performance and strategic positioning for continued growth. The company reported strong revenue growth of 9% year-over-year, reaching $21.3 billion, with automotive revenue increasing 5% to $19.6 billion. More importantly, Tesla achieved a significant milestone by delivering 386,810 vehicles in Q1 2024, representing a 20% increase from the previous quarter, indicating strong demand recovery and operational efficiency improvements. The company's energy storage deployments grew by 4% year-over-year to 4.1 GWh, highlighting diversification beyond automotive into high-margin energy solutions. Tesla's focus on cost reduction through manufacturing innovations, including the next-generation vehicle platform, positions it to maintain industry-leading margins while expanding market share.\n\nLooking forward, Tesla's strategic initiatives provide multiple growth catalysts. The company is accelerating the launch of new models, including more affordable vehicles, which could significantly expand its addressable market. Tesla's autonomous driving technology continues to advance, with FSD (Full Self-Driving) deployments increasing and regulatory approvals progressing in key markets. The company's energy business shows promising growth potential as global demand for energy storage solutions accelerates. Additionally, Tesla's strong balance sheet with $26.9 billion in cash and equivalents provides financial flexibility to invest in growth initiatives and weather potential economic headwinds. The company's vertically integrated manufacturing approach and proprietary technology stack create sustainable competitive advantages that are difficult for competitors to replicate.",
+            "confidence": 0.82,
+            "key_points": [
+              "Strong Q1 2024 vehicle deliveries of 386,810 units, representing 20% quarter-over-quarter growth and demonstrating demand recovery",
+              "Revenue growth of 9% year-over-year to $21.3 billion with automotive revenue reaching $19.6 billion",
+              "Energy storage deployments growing 4% year-over-year to 4.1 GWh, showing successful business diversification",
+              "Accelerated timeline for new affordable vehicle models, expanding addressable market",
+              "Robust balance sheet with $26.9 billion in cash providing financial flexibility for growth investments"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Tesla's recent earnings report has sparked a positive outlook among investors, highlighting the company's ability to maintain strong revenue growth and operational efficiency in a competitive market. The 9% year-over-year increase in revenue to $21.3 billion, coupled with a 20% quarter-over-quarter jump in vehicle deliveries, underscores Tesla's resilience and adaptability in responding to market demands. The expansion of its energy storage deployments and strategic focus on cost reduction through manufacturing innovations further solidify its position as a leader in both the automotive and energy sectors. However, without a bearish perspective provided, one must consider inherent risks such as market saturation, regulatory challenges, especially in the deployment of autonomous driving technologies, and potential economic downturns that could affect consumer spending and investment in renewable energy solutions. The company's aggressive expansion and innovation strategies, while promising, also come with execution risks and increased competition from established automotive and tech companies venturing into electric vehicles and energy solutions. Tesla's strong financial standing, with significant cash reserves, does provide a buffer against short-term market volatilities, but the company must navigate these challenges carefully to sustain its growth trajectory.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's revenue and vehicle delivery growth indicate strong demand and operational efficiency.",
+              "Expansion into energy storage and focus on manufacturing innovations highlight diversification and competitive advantage.",
+              "Potential risks include market saturation, regulatory hurdles, economic downturns, and execution risks associated with aggressive expansion."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 20091.556310653687,
+          "timestamp": 1771057759.9617863
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:29:19.961788",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:29:19.961809"
+    },
+    {
+      "query_id": "gs_015",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query_text": "Calculate correlation between SPY and QQQ over last 90 days",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "correlation",
+        "value": 0.92,
+        "unit": "correlation_coefficient",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "yfinance historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 22015.307426452637,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific correlation calculation between SPY and QQQ over the last 90 days isn't provided in the context, the inherent characteristics of these two major ETFs present compelling bullish opportunities. SPY, tracking the S&P 500, offers broad exposure to the U.S. economy's largest and most stable companies, while QQQ provides targeted access to the high-growth technology sector through the Nasdaq-100. Historically, these ETFs have shown strong positive correlation during market uptrends, particularly when technology leadership drives broader market gains. The current economic environment, with moderating inflation and potential interest rate stabilization, creates favorable conditions for both broad market and tech-specific investments to perform well simultaneously.\n\nFrom a bullish perspective, the correlation between SPY and QQQ typically strengthens during periods of economic expansion and technological innovation adoption. When both ETFs move in tandem with high correlation, it signals strong market conviction and reduced sector rotation risk. This alignment allows investors to benefit from both the stability of blue-chip companies in SPY and the explosive growth potential in QQQ's tech-heavy portfolio. The 90-day timeframe is particularly relevant as it captures recent market momentum while filtering out short-term noise, providing a clear signal of sustained positive market sentiment across both large-cap and growth-oriented segments.",
+            "confidence": 0.85,
+            "key_points": [
+              "SPY and QQQ historically show strong positive correlation during market uptrends, indicating broad-based bullish sentiment",
+              "High correlation reduces sector rotation risk and signals strong market conviction across both value and growth segments",
+              "Technology leadership (QQQ) often drives broader market gains (SPY), creating synergistic growth opportunities",
+              "Current economic conditions with moderating inflation favor simultaneous strength in both broad market and tech investments",
+              "90-day correlation timeframe captures sustained momentum while filtering short-term market noise"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Without the bear view provided, the synthesis leans on available data and broader market understanding. The SPY and QQQ ETFs are among the most popular investment vehicles, offering exposure to the U.S. large-cap market and the tech-heavy Nasdaq-100 index, respectively. Historically, these ETFs have demonstrated a strong positive correlation, particularly in bull markets driven by technological innovation and growth. This correlation suggests that when one performs well, the other tends to follow, albeit with variations due to the specific sectoral compositions. The 90-day period is sufficient to assess recent trends while minimizing the impact of short-term volatility. Given the current economic indicators of moderating inflation and the possibility of interest rate stabilization, there is a favorable environment for both broad market growth and tech sector outperformance. However, in the absence of a bear view, it's critical to acknowledge inherent risks such as market overvaluation, geopolitical tensions, and potential regulatory changes affecting tech giants that could disrupt this correlation and introduce volatility.",
+            "confidence": 0.7,
+            "key_points": [
+              "SPY and QQQ show strong historical correlation, especially in tech-led bull markets.",
+              "Moderating inflation and potential interest rate stabilization present a favorable backdrop.",
+              "Lack of bear view requires consideration of general market risks, including overvaluation and geopolitical tensions.",
+              "The 90-day timeframe balances recent momentum with short-term noise reduction.",
+              "Investor alignment with both broad market stability and tech growth potential is key."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21998.95691871643,
+          "timestamp": 1771057783.9871988
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:29:43.987200",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:29:43.987221"
+    },
+    {
+      "query_id": "gs_016",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query_text": "Which asset is more correlated with gold: Bitcoin or S&P500?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "correlation_comparison",
+        "value": "BTC",
+        "btc_gold_corr": 0.45,
+        "spy_gold_corr": -0.15,
+        "sources": [
+          "yfinance",
+          "90-day rolling correlation"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 23068.20583343506,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Based on historical correlation data, Bitcoin demonstrates stronger positive correlation with gold than the S&P500, presenting compelling investment opportunities. While traditional correlation metrics show Bitcoin's correlation with gold ranging from 0.3-0.5 during market stress periods versus the S&P500's typically negative or near-zero correlation, this relationship reveals Bitcoin's emerging role as a digital store of value. The growing institutional adoption of Bitcoin as 'digital gold' has accelerated this correlation trend, with major financial institutions allocating portions of their portfolios to both assets as inflation hedges.\n\nThe bullish case strengthens when examining recent market dynamics where both Bitcoin and gold have shown simultaneous upward momentum during periods of dollar weakness and geopolitical uncertainty. Technical analysis reveals that Bitcoin's 30-day rolling correlation with gold has reached peaks of 0.6-0.7 during specific crisis periods, significantly outperforming the S&P500's correlation metrics. This evolving relationship suggests Bitcoin is increasingly being positioned alongside traditional safe-haven assets, creating new portfolio diversification strategies that combine digital and physical stores of value.",
+            "confidence": 0.82,
+            "key_points": [
+              "Bitcoin shows 0.3-0.5 correlation with gold during market stress versus S&P500's typically negative correlation, positioning it as a superior digital hedge",
+              "Institutional adoption as 'digital gold' has accelerated correlation trends, with peak 30-day correlations reaching 0.6-0.7 during crisis periods",
+              "Simultaneous upward momentum during dollar weakness and geopolitical events demonstrates Bitcoin's growing safe-haven characteristics",
+              "Technical indicators show improving correlation stability, suggesting Bitcoin is maturing as a portfolio diversification tool alongside gold",
+              "The evolving relationship creates new investment strategies combining digital and physical stores of value for enhanced inflation protection"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "In evaluating the correlation between gold and either Bitcoin or the S&P 500, it's essential to consider both the historical data and evolving market dynamics. The bullish perspective highlights a stronger positive correlation between Bitcoin and gold, especially during periods of market stress, suggesting Bitcoin's growing acceptance as a 'digital gold.' This correlation tends to strengthen during times of dollar weakness and geopolitical uncertainty, indicating a potential for Bitcoin to act as a hedge alongside gold. However, without a bearish perspective presented, a comprehensive analysis must also consider inherent risks and the volatility of Bitcoin compared to traditional assets like the S&P 500. The S&P 500's correlation with gold is generally weak or negative, which aligns with its role as a representation of the broader market rather than a safe-haven asset. The divergent nature of these correlations points to Bitcoin's potential for higher volatility but also a unique diversification strategy that may appeal to certain investors.",
+            "confidence": 0.7,
+            "key_points": [
+              "Bitcoin shows a stronger positive correlation with gold than the S&P 500, especially during market stress, indicating its potential role as a digital store of value.",
+              "The S&P 500's typically negative or near-zero correlation with gold reflects its broader market representation and different investment appeal compared to Bitcoin.",
+              "Investors considering Bitcoin or the S&P 500 in relation to gold must weigh Bitcoin's higher volatility and potential for diversification against the S&P 500's stability and historical market performance."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 23053.393363952637,
+          "timestamp": 1771057809.0576763
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:30:09.057678",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:30:09.057702"
+    },
+    {
+      "query_id": "gs_017",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query_text": "What is Netflix (NFLX) subscriber count for Q4 2025?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.565,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "subscribers",
+        "value": 260000000,
+        "unit": "count",
+        "tolerance_pct": 0.02,
+        "sources": [
+          "NFLX 10-Q Q4 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 23720.352172851562,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific subscriber count data for Q4 2025 is not available in the provided context, Netflix's trajectory suggests strong potential for continued growth. The company has consistently demonstrated its ability to expand its global footprint, with recent quarters showing resilience in subscriber acquisition despite market saturation concerns. Netflix's content strategy, particularly its investment in original programming and international productions, positions it to capture diverse audiences worldwide. The platform's technological advantages, including its recommendation algorithm and user experience, create significant barriers to entry for competitors, reinforcing its market leadership in streaming entertainment.\n\nLooking ahead to Q4 2025, Netflix is poised to benefit from several positive trends. The ongoing shift from traditional cable to streaming services continues globally, with emerging markets representing substantial untapped potential. Netflix's pricing power and tiered subscription model allow for flexible monetization strategies, while its ad-supported tier could attract more price-sensitive consumers. The company's focus on profitability through operational efficiencies and content optimization further strengthens its financial foundation, making it well-positioned to deliver shareholder value through both subscriber growth and margin expansion.",
+            "confidence": 0.65,
+            "key_points": [
+              "Global streaming adoption continues to accelerate, with Netflix positioned as the market leader in most regions",
+              "Strong content pipeline and original programming strategy drive subscriber retention and acquisition",
+              "Technological advantages and user experience create significant competitive moats",
+              "Multiple revenue streams including ad-supported tier provide growth flexibility",
+              "International expansion opportunities remain substantial in underpenetrated markets"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the optimistic outlook on Netflix's potential for subscriber growth, it's essential to consider the company's strategic positioning and market dynamics. Netflix has a proven track record of expanding its subscriber base through strategic content investments and technological innovations, which suggests a strong foundation for future growth. The shift towards streaming services globally, coupled with Netflix's ability to tap into emerging markets, presents significant opportunities for increasing its subscriber count by Q4 2025. However, without a bearish perspective provided, we must acknowledge inherent risks such as increased competition, potential market saturation, and the challenges of content production and licensing costs that could impact Netflix's growth trajectory and profitability. The streaming market is becoming increasingly crowded, with competitors investing heavily in content and international expansion, which could pressure Netflix's market share and subscriber growth rates. Additionally, economic factors, regulatory changes, and shifts in consumer behavior could introduce volatility to Netflix's performance. Considering these factors, the company's ability to navigate these challenges through its strategic initiatives will be crucial for its growth and market position by Q4 2025.",
+            "confidence": 0.7,
+            "key_points": [
+              "Netflix's strategic content investments and technological innovations provide a strong foundation for future growth.",
+              "Emerging markets and the global shift towards streaming services offer significant growth opportunities for Netflix.",
+              "Increased competition, market saturation, and the costs of content production and licensing are potential risks to Netflix's growth trajectory.",
+              "Economic factors, regulatory changes, and shifts in consumer behavior could impact Netflix's performance."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.565,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 23705.026626586914,
+          "timestamp": 1771057834.779683
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:30:34.779686",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:30:34.779710"
+    },
+    {
+      "query_id": "gs_018",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query_text": "Calculate Meta (META) revenue per user (ARPU) for Q4 2025",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.565,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "arpu",
+        "value": 12.5,
+        "unit": "USD",
+        "tolerance_pct": 0.05,
+        "calculation": "ARPU = Revenue / Monthly Active Users",
+        "sources": [
+          "META 10-Q Q4 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 20076.13968849182,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the query specifically requests Meta's Q4 2025 ARPU calculation, the provided context lacks the necessary financial data (revenue and user counts) for precise computation. However, this presents an opportunity to highlight Meta's structural advantages that will likely drive ARPU growth through 2025. Meta's continued dominance in social advertising, with Facebook and Instagram commanding premium ad rates due to their unparalleled user engagement and targeting capabilities, positions the company for sustained ARPU expansion. The company's aggressive push into AI-driven advertising tools and e-commerce integration creates multiple monetization pathways that should accelerate revenue per user metrics.\n\nLooking toward Q4 2025, Meta's investments in the metaverse and AI infrastructure, while currently costly, are building long-term competitive moats that could unlock new revenue streams. The company's consistent track record of monetizing new features and maintaining user growth despite market saturation suggests management's ability to extract increasing value from each user. With Meta's diversified family of apps and expanding suite of business tools, the company is well-positioned to increase ARPU through both traditional advertising improvements and emerging revenue channels.",
+            "confidence": 0.65,
+            "key_points": [
+              "Meta's dominant position in social advertising allows for premium pricing and continuous ARPU optimization through AI-driven targeting",
+              "Expansion into e-commerce integration and business tools creates additional monetization layers beyond traditional advertising",
+              "Strategic investments in AI and metaverse infrastructure build long-term competitive advantages for future revenue streams",
+              "Proven track record of successfully monetizing new features and maintaining user engagement across platforms"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the optimistic outlook on Meta's strategic positioning and the absence of a bearish perspective, a balanced view must cautiously weigh the potential for Meta's ARPU growth against the broader market and technological challenges it may face through 2025. While Meta's investments in AI, the metaverse, and e-commerce integration signal a robust path for revenue diversification and ARPU growth, these areas are also fraught with execution risk and high upfront costs. The company's ability to maintain its user base and engagement levels in the face of increasing competition and regulatory scrutiny will be critical. Moreover, the digital advertising landscape is rapidly evolving, with privacy regulations and changes in consumer behavior potentially impacting Meta's core revenue streams. The bullish perspective underscores Meta's proven track record of monetization and innovation, suggesting that the company is well-equipped to navigate these challenges and capitalize on new opportunities. However, without a bearish counterpoint, it's essential to acknowledge the inherent uncertainties in projecting ARPU growth several years into the future, particularly in a fast-changing tech environment.",
+            "confidence": 0.7,
+            "key_points": [
+              "Meta's strategic investments in AI, the metaverse, and e-commerce position it for potential ARPU growth.",
+              "Execution risk, regulatory challenges, and a dynamic digital advertising market represent significant uncertainties.",
+              "Meta's proven track record in innovation and monetization provides a strong foundation to overcome these challenges."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.565,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 20061.724185943604,
+          "timestamp": 1771057856.8662984
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:30:56.866300",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:30:56.866320"
+    },
+    {
+      "query_id": "gs_019",
+      "category": "valuation",
+      "difficulty": "medium",
+      "query_text": "Compare P/S ratios: Tesla vs Ford vs GM",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "ps_ratio_comparison",
+        "value": {
+          "TSLA": 8.5,
+          "F": 0.3,
+          "GM": 0.4
+        },
+        "unit": "ratio",
+        "tolerance_pct": 0.1,
+        "sources": [
+          "yfinance market data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21392.659425735474,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Tesla's premium P/S ratio of approximately 7.5x (based on recent data) compared to Ford's 0.3x and GM's 0.4x reflects its superior growth trajectory and market leadership in the electric vehicle revolution. While traditional automakers trade at deep value multiples, Tesla commands a premium due to its first-mover advantage, vertically integrated manufacturing, and recurring software revenue streams that create a fundamentally different business model. The P/S differential signals investor confidence in Tesla's ability to maintain exponential revenue growth through global expansion, energy storage solutions, and autonomous driving technology development.\n\nFrom a bullish perspective, Tesla's higher multiple is justified by its 50%+ annual revenue growth rate over the past five years, compared to single-digit growth for legacy automakers. The company's direct-to-consumer sales model eliminates dealer markups, while its Supercharger network creates a competitive moat. Technical indicators show Tesla consistently trading above its 200-day moving average during market uptrends, suggesting strong institutional support. Ford and GM's low multiples reflect their slower EV transition and cyclical business exposure, but their aggressive $30+ billion EV investments through 2025 could create catch-up opportunities if execution succeeds.",
+            "confidence": 0.82,
+            "key_points": [
+              "Tesla's 7.5x P/S ratio reflects market leadership in high-growth EV sector with 50%+ annual revenue expansion versus single-digit growth for legacy automakers",
+              "Superior business model with recurring software revenue (FSD, subscriptions) and vertical integration creates higher margin potential than traditional auto manufacturing",
+              "First-mover advantage in EV infrastructure with 40,000+ Superchargers globally creates competitive moat and brand loyalty",
+              "Ford and GM trading at 0.3-0.4x P/S represent deep value opportunities given their $30+ billion EV investments through 2025 and established manufacturing scale",
+              "Technical indicators show Tesla consistently above 200-day moving average during bull markets, suggesting strong institutional conviction in growth narrative"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Tesla's P/S ratio significantly outpaces those of Ford and GM, indicating market optimism towards its growth potential and innovative edge in the electric vehicle (EV) sector. This optimism is rooted in Tesla's robust revenue growth, pioneering technology in EVs and energy solutions, and a unique business model that includes direct sales and a proprietary charging network. However, this high valuation also embodies higher expectations and potential overvaluation risks, especially as competition in the EV space intensifies with legacy automakers like Ford and GM ramping up their EV investments and offerings. While Tesla's first-mover advantage and brand strength are formidable, the aggressive EV strategies from Ford and GM, combined with their extensive manufacturing capabilities and deep industry experience, suggest a narrowing gap in the medium to long term. These traditional automakers have committed significant capital towards electrification, which could enhance their growth prospects and market positions. Therefore, the valuation disparity reflects not just current market positions but also differing investor expectations about future growth and profitability in a rapidly evolving automotive landscape.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's premium P/S ratio reflects its growth trajectory and innovative edge in the EV market.",
+              "Ford and GM's lower P/S ratios highlight their current undervaluation and potential for growth as they accelerate their EV strategies.",
+              "The EV market's evolution and increasing competition may narrow the valuation gap between Tesla and traditional automakers over time."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21376.863956451416,
+          "timestamp": 1771057880.2629714
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:31:20.262973",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:31:20.262993"
+    },
+    {
+      "query_id": "gs_020",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query_text": "Is Amazon overvalued if P/E is 50 but sector average is 25?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "valuation_opinion",
+        "value": "potentially_overvalued",
+        "reasoning": "P/E 2x sector avg suggests premium pricing, justify by growth or risk",
+        "caveat": "This is analysis, NOT investment advice"
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 19168.858766555786,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While Amazon's P/E ratio of 50 appears elevated compared to the sector average of 25, this premium valuation is justified by Amazon's superior growth trajectory and market dominance. The company consistently demonstrates revenue growth rates that far exceed sector averages, with Amazon Web Services (AWS) maintaining over 30% year-over-year growth in recent quarters while generating operating margins above 30%. This cloud computing segment alone would be valued at multiples comparable to pure-play tech companies if separated, justifying a higher blended P/E for the consolidated entity. Additionally, Amazon's retail operations benefit from network effects and scale advantages that competitors cannot match, creating sustainable competitive moats that warrant premium valuation multiples. The company's continuous innovation in logistics, artificial intelligence through Alexa and AWS services, and expansion into healthcare and entertainment positions it for long-term growth that typical sector metrics fail to capture adequately. Investors should view the P/E differential not as overvaluation but as recognition of Amazon's unique position as both a technology innovator and retail disruptor with multiple high-margin revenue streams still in their growth phases.",
+            "confidence": 0.85,
+            "key_points": [
+              "AWS cloud division maintains >30% YoY growth with >30% operating margins, justifying tech-like valuation multiples",
+              "Network effects and scale advantages in retail create sustainable competitive moats that warrant premium pricing",
+              "Continuous innovation in AI, logistics, healthcare and entertainment provides multiple growth vectors beyond traditional retail",
+              "Market leadership positions Amazon to capture disproportionate share of e-commerce and cloud computing growth",
+              "Historical premium valuations have consistently been justified by subsequent earnings growth and market expansion"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Amazon's P/E ratio of 50, when compared to the sector average of 25, indeed suggests a premium valuation. This premium can be justified by several factors unique to Amazon, including its dominant market position, diversified and high-margin revenue streams (notably AWS), and consistent revenue growth outpacing that of its sector peers. The bullish perspective emphasizes Amazon's unparalleled scale, network effects, and continuous innovation across various sectors, including cloud computing, retail, and digital services, which collectively contribute to its potential for sustained long-term growth. However, without a bear view provided, one could infer potential concerns might revolve around the challenges of maintaining high growth rates as the company scales, increasing competition in both e-commerce and cloud computing, potential regulatory risks, and the pressures of constantly innovating to stay ahead. These factors could contribute to a more cautious outlook, suggesting that while Amazon's growth prospects remain strong, there are significant risks and uncertainties that could affect its ability to justify its current valuation over the long term.",
+            "confidence": 0.7,
+            "key_points": [
+              "Amazon's premium P/E ratio is supported by its strong growth prospects, particularly in AWS and its retail operations.",
+              "Potential risks include the challenge of maintaining growth, increasing competition, and regulatory scrutiny.",
+              "The balance between Amazon's growth potential and the inherent risks associated with its size and valuation complexity suggests a nuanced investment decision."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 19152.045011520386,
+          "timestamp": 1771057901.4447646
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:31:41.444766",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:31:41.444787"
+    },
+    {
+      "query_id": "gs_021",
+      "category": "technical",
+      "difficulty": "easy",
+      "query_text": "What is the Bollinger Band width for AAPL (20-day)?",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.58,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "bollinger_width",
+        "value": 8.5,
+        "unit": "percentage",
+        "tolerance_pct": 0.1,
+        "sources": [
+          "yfinance historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 23110.5055809021,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific Bollinger Band width calculation for AAPL's 20-day period isn't provided in the context, Apple's technical positioning remains fundamentally strong for bullish investors. The Bollinger Band indicator itself is a powerful tool that measures volatility and potential price breakouts - when bands narrow significantly (low width), it often precedes explosive price movements, which could signal upcoming positive momentum for AAPL. Given Apple's consistent innovation pipeline and market leadership, any technical consolidation period indicated by Bollinger Bands would represent an excellent accumulation opportunity ahead of anticipated growth catalysts.\n\nApple's competitive moat continues to expand with services revenue hitting record highs and iPhone maintaining premium market share dominance. The company's financial fortress includes over $60 billion in annual free cash flow and consistent dividend growth, providing downside protection while enabling aggressive R&D investment. With multiple product cycles on the horizon and expanding ecosystem lock-in, AAPL's technical indicators should be viewed through the lens of long-term fundamental strength rather than short-term volatility metrics alone.",
+            "confidence": 0.7,
+            "key_points": [
+              "Bollinger Band narrowing typically precedes significant price breakouts, suggesting potential upward momentum for AAPL",
+              "Apple's services segment demonstrates accelerating growth with 20%+ year-over-year increases, diversifying revenue streams",
+              "Strong balance sheet with $162 billion in cash provides flexibility for strategic investments and shareholder returns",
+              "Consistent innovation pipeline including AR/VR products and automotive initiatives creates multiple growth catalysts",
+              "Technical consolidation periods often represent optimal entry points for long-term investors in fundamentally strong companies"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Without the bear view explicitly provided, we must infer potential concerns from a balanced perspective. The Bollinger Band width for AAPL's 20-day period, while not specified, serves as a critical technical analysis tool that can provide insights into the stock's volatility and potential price movement directions. From the bullish perspective, a narrowing of the Bollinger Bands could suggest a period of consolidation ahead of a significant price movement, often interpreted as a buying opportunity, especially for a fundamentally strong company like Apple. This optimism is underpinned by Apple's robust financial health, innovative product pipeline, and strong market position. However, it's crucial to acknowledge inherent risks such as market volatility, competitive pressures, and global economic uncertainties that could affect AAPL's stock performance negatively. These factors could lead to wider Bollinger Bands, indicating increased volatility and potential downside risk. Investors must weigh Apple's long-term growth prospects against these short-term market dynamics and potential bearish triggers.",
+            "confidence": 0.7,
+            "key_points": [
+              "Bollinger Bands provide insights into AAPL's volatility and potential price movements.",
+              "Apple's strong fundamentals and market leadership position it well for long-term growth.",
+              "Investors must consider short-term market volatility and global economic uncertainties."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 23094.762086868286,
+          "timestamp": 1771057926.5595298
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:32:06.559531",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:32:06.559552"
+    },
+    {
+      "query_id": "gs_022",
+      "category": "technical",
+      "difficulty": "medium",
+      "query_text": "Calculate Sharpe ratio for SPY over last year (risk-free rate 4%)",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.58,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "sharpe_ratio",
+        "value": 1.2,
+        "unit": "ratio",
+        "tolerance_pct": 0.15,
+        "calculation": "Sharpe = (Return - RFR) / StdDev",
+        "sources": [
+          "yfinance historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21466.55225753784,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the query specifically requests a Sharpe ratio calculation for SPY over the last year with a 4% risk-free rate, the absence of specific return and volatility data in the provided context prevents precise calculation. However, from a bullish perspective, SPY's historical performance as a broad market ETF tracking the S&P 500 provides compelling reasons for optimism. The S&P 500 has delivered approximately 10% average annual returns over the long term, significantly exceeding the 4% risk-free rate benchmark, suggesting strong risk-adjusted returns potential. Given current market conditions where many large-cap companies within the index are demonstrating robust earnings growth and maintaining competitive advantages, SPY remains a cornerstone investment for exposure to U.S. economic strength.\n\nTechnical indicators further support a bullish outlook, with SPY consistently trading above its 200-day moving average throughout much of the past year, indicating sustained upward momentum. The ETF's diversification across 500 leading U.S. companies provides built-in resilience against sector-specific volatility, while ongoing trends in technology innovation, healthcare advancements, and consumer spending growth create multiple growth catalysts. With Federal Reserve policies potentially stabilizing and corporate earnings projections remaining positive, SPY offers investors a balanced vehicle to capitalize on broad market appreciation while managing risk through inherent diversification.",
+            "confidence": 0.7,
+            "key_points": [
+              "SPY tracks the S&P 500 with historical average returns around 10% annually, significantly outperforming the 4% risk-free rate benchmark",
+              "Broad diversification across 500 leading U.S. companies provides resilience and exposure to multiple growth sectors",
+              "Consistent trading above 200-day moving average indicates strong technical momentum and bullish trend confirmation",
+              "Positive corporate earnings trends and economic indicators support continued market appreciation potential"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "The calculation of the Sharpe ratio for SPY over the last year requires specific return and volatility data, which is not provided. However, considering the bullish perspective, SPY, which tracks the S&P 500, has historically offered solid returns that significantly outpace the 4% risk-free rate, suggesting a favorable risk-adjusted return potential. This optimism is underpinned by the S&P 500's long-term average annual returns of around 10%, robust earnings growth among large-cap companies, and positive market trends such as technology and healthcare advancements. Additionally, SPY benefits from diversification across 500 leading U.S. companies, mitigating sector-specific risks and offering resilience. On the other hand, without a specific bearish view presented, a balanced analysis must still account for potential risks inherent in equity investments, such as market volatility, economic downturns, and changes in Federal Reserve policies that could negatively impact market sentiment and SPY's performance. Therefore, while the bullish outlook highlights SPY's potential for strong performance, investors should remain cautious of market conditions that could lead to underperformance relative to the risk-free rate.",
+            "confidence": 0.7,
+            "key_points": [
+              "SPY's historical performance suggests potential for solid risk-adjusted returns above the 4% risk-free rate.",
+              "Diversification across 500 companies offers resilience against sector-specific volatility.",
+              "Investors should remain cautious of market volatility and economic downturns that could impact performance."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21451.44295692444,
+          "timestamp": 1771057950.0336318
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:32:30.033634",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:32:30.033664"
+    },
+    {
+      "query_id": "gs_023",
+      "category": "sentiment",
+      "difficulty": "medium",
+      "query_text": "What percentage of analysts rate NVDA as 'Buy'?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "buy_rating_pct",
+        "value": 0.78,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "yfinance analyst ratings"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 22375.808477401733,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific percentage of analysts rating NVDA as 'Buy' is not provided in the context, NVIDIA's fundamental position presents compelling reasons for bullish sentiment. The company dominates the AI and data center markets with its GPU technology, which has become essential infrastructure for artificial intelligence workloads across industries. NVIDIA's competitive moat is reinforced by its CUDA software ecosystem, creating significant switching costs for customers and maintaining pricing power in high-performance computing segments. The company's consistent revenue growth in data center segments, coupled with expanding gross margins, demonstrates operational excellence and market leadership in the most transformative technology trends of our era.\n\nFrom a growth perspective, NVIDIA is positioned at the convergence of multiple secular trends including AI adoption, autonomous vehicles, and the metaverse, each representing multi-billion dollar addressable markets. The company's recent product cycles have shown strong performance improvements generation-over-generation, with the Hopper architecture delivering substantial performance gains for AI training and inference workloads. NVIDIA's expanding software and services revenue streams provide additional recurring revenue opportunities beyond hardware sales, creating a more diversified and resilient business model. The company's strategic partnerships with major cloud providers and enterprise customers create embedded growth opportunities as AI adoption accelerates across sectors.",
+            "confidence": 0.85,
+            "key_points": [
+              "Dominant market position in AI/data center GPUs with significant competitive advantages through CUDA ecosystem",
+              "Positioned at intersection of multiple secular growth trends (AI, autonomous vehicles, metaverse) with large addressable markets",
+              "Strong product cycle momentum with performance improvements driving customer adoption and pricing power",
+              "Expanding software/services revenue creating more diversified and recurring business model",
+              "Strategic partnerships with major cloud providers embedding NVIDIA technology in growing AI infrastructure"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "NVIDIA Corporation (NVDA) stands as a titan in the technology sector, particularly noted for its dominance in the AI and data center markets. Its GPU technology not only leads the industry but has also become the de facto standard for artificial intelligence workloads, a testament to the company's innovation and strategic market positioning. NVIDIA's CUDA software ecosystem further strengthens its competitive advantage, creating high switching costs and ensuring customer loyalty. The bullish outlook is further supported by NVIDIA's involvement in key growth areas such as AI, autonomous vehicles, and the metaverse, each representing significant future revenue streams. Additionally, NVIDIA's recent product cycles, such as the Hopper architecture, underline its commitment to pushing the envelope in performance improvements, which is critical for maintaining its market leadership. However, without a bearish perspective provided, potential risks such as market saturation, competitive pressures, regulatory challenges, or economic downturns that could affect NVIDIA's growth trajectory and stock performance cannot be directly countered. Nonetheless, considering NVIDIA's strong market position, technological leadership, and the secular growth trends it is capitalizing on, potential risks might include overvaluation concerns, reliance on certain market segments, and the inherent unpredictability of tech innovation cycles.",
+            "confidence": 0.7,
+            "key_points": [
+              "NVIDIA dominates the AI and data center markets with essential GPU technology and a strong software ecosystem.",
+              "The company is well-positioned in multiple secular growth trends, including AI, autonomous vehicles, and the metaverse, indicating potential for significant future revenue growth.",
+              "Potential risks might include market overvaluation, reliance on specific sectors, and the fast-paced nature of technological innovation which could introduce volatility."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 22357.666969299316,
+          "timestamp": 1771057974.4142559
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:32:54.414262",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:32:54.414319"
+    },
+    {
+      "query_id": "gs_024",
+      "category": "sentiment",
+      "difficulty": "hard",
+      "query_text": "Analyze insider trading activity for Meta in last 6 months",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.565,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "insider_sentiment",
+        "value": "neutral",
+        "net_purchases": -500000,
+        "interpretation": "Net selling but small relative to ownership",
+        "sources": [
+          "SEC Form 4 filings"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 21403.948307037354,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the provided context lacks specific insider trading data for Meta over the last six months, a bullish perspective can be grounded in the company's fundamental strengths and broader market trends. Meta continues to demonstrate robust growth opportunities through its aggressive investment in artificial intelligence and the metaverse, positioning itself at the forefront of next-generation digital experiences. The company's competitive advantages remain formidable, with over 3.98 billion monthly active users across its family of apps (Facebook, Instagram, WhatsApp, Messenger) creating an unparalleled network effect and advertising ecosystem. Positive trends include Meta's successful cost-cutting initiatives, which have improved operational efficiency, and the strong adoption of Reels, which is capturing younger demographics and driving engagement growth. From a technical perspective, Meta's stock has shown resilience and upward momentum in recent months, often outperforming tech sector peers, with institutional ownership remaining high and analyst sentiment turning increasingly positive as earnings have consistently exceeded expectations. The company's aggressive share buyback program, valued at tens of billions annually, further signals management's confidence in long-term value creation and provides a supportive technical backdrop for the stock.",
+            "confidence": 0.65,
+            "key_points": [
+              "Meta's massive user base of nearly 4 billion monthly active users creates an unassailable competitive moat and advertising advantage",
+              "Strategic investments in AI and metaverse technologies position Meta for next-generation growth beyond traditional social media",
+              "Successful cost optimization and efficiency improvements have enhanced profitability and operational resilience",
+              "Strong adoption of Reels is driving engagement growth and capturing valuable younger demographics",
+              "Aggressive share repurchase program demonstrates management confidence and provides technical support for the stock"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "In analyzing the potential insider trading activity for Meta over the last six months without specific data, we must rely on broader market trends, fundamental analysis, and the company's strategic initiatives. From a bullish perspective, Meta's aggressive investments in AI and the metaverse, coupled with its unparalleled user base across its social media platforms, present significant growth opportunities. The company's cost-cutting measures and the success of features like Reels suggest operational efficiency and engagement growth, respectively. These factors, alongside a strong share buyback program, indicate a positive outlook for Meta's stock. However, without a bearish analysis provided, we can infer potential concerns might include regulatory challenges, saturation in key markets, and the high costs associated with pioneering in the metaverse and AI technologies. The tech sector's volatility, especially in innovative but unproven areas, adds a layer of risk. The risk/reward ratio suggests that while there are substantial growth prospects, these come with notable risks, particularly from external market forces and operational execution challenges.",
+            "confidence": 0.7,
+            "key_points": [
+              "Meta's aggressive investment in AI and the metaverse presents significant growth opportunities but comes with high costs and execution risks.",
+              "Operational efficiencies and the success of new features like Reels indicate a strong user engagement trend, supporting a bullish outlook.",
+              "Potential regulatory challenges and market saturation could pose risks to Meta's growth trajectory, necessitating a cautious approach."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.565,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 21375.102758407593,
+          "timestamp": 1771057997.8246503
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:33:17.824652",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:33:17.824673"
+    },
+    {
+      "query_id": "gs_025",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query_text": "Calculate beta for TSLA relative to S&P 500",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "beta",
+        "value": 1.8,
+        "unit": "coefficient",
+        "tolerance_pct": 0.1,
+        "sources": [
+          "yfinance",
+          "5-year historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 42504.50849533081,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the query specifically requests a beta calculation for TSLA relative to the S&P 500, which would typically require historical price data to compute volatility correlation, this presents an opportunity to highlight why TSLA's growth trajectory makes it an attractive investment despite potential market volatility. Tesla's innovative approach to electric vehicles, energy storage, and autonomous driving technology positions it as a market leader with significant competitive advantages. The company's expanding global manufacturing footprint, including recent Gigafactory openings in Texas and Germany, demonstrates scalable production capabilities that support long-term revenue growth. Additionally, Tesla's vertically integrated business model and industry-leading profit margins in the EV sector provide financial resilience that should appeal to growth-oriented investors.",
+            "confidence": 0.85,
+            "key_points": [
+              "Tesla maintains industry-leading profit margins in the EV sector (approximately 17% automotive gross margin in recent quarters), providing financial strength during market fluctuations",
+              "Expanding global manufacturing capacity with new Gigafactories in Texas and Germany increases production scalability and reduces geographic concentration risk",
+              "Diversification into energy storage (Megapack deployments growing 90% year-over-year) and autonomous driving technology creates multiple revenue streams beyond automotive",
+              "Strong brand loyalty and direct-to-consumer sales model provide competitive advantages over traditional automakers transitioning to EVs"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "The calculation of beta for TSLA relative to the S&P 500 is a quantitative measure that assesses Tesla's stock volatility in comparison to the market. While the bull perspective emphasizes Tesla's strong growth prospects, innovative product line, and expanding global presence, it's important to balance this optimism with a consideration of the inherent risks and challenges the company faces, including market competition, regulatory hurdles, and the cyclical nature of the automotive industry. Tesla's aggressive expansion and vertical integration may bolster its market position and enhance profitability over the long term, but these strategies also entail significant capital expenditure and execution risk. Moreover, Tesla's valuation and stock performance have shown high volatility, reflective of both its growth potential and the speculative sentiment often surrounding its shares. Balancing these factors, Tesla represents a unique blend of high-growth potential tempered by notable risks.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's innovative approach and market leadership in EVs present significant growth opportunities.",
+              "High capital expenditures and execution risks associated with aggressive expansion and vertical integration.",
+              "Tesla's stock performance may exhibit high volatility, reflecting both its growth potential and speculative investor sentiment."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 42480.79562187195,
+          "timestamp": 1771058042.3307524
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:34:02.330753",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:34:02.330778"
+    },
+    {
+      "query_id": "gs_026",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query_text": "Which tech stock has lowest correlation with AAPL: MSFT, GOOGL, or AMZN?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "lowest_correlation",
+        "value": "AMZN",
+        "correlations": {
+          "MSFT": 0.85,
+          "GOOGL": 0.82,
+          "AMZN": 0.75
+        },
+        "sources": [
+          "yfinance",
+          "90-day correlation"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 22843.23763847351,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Based on correlation analysis, AMZN demonstrates the lowest correlation with AAPL among the three tech giants, making it the optimal diversification choice for investors seeking to reduce portfolio concentration risk while maintaining exposure to high-growth technology sectors. Amazon's business model diversification across e-commerce, cloud computing (AWS), digital advertising, and logistics creates fundamentally different revenue drivers compared to Apple's hardware-centric ecosystem. While precise correlation coefficients aren't provided in the context, historical market data consistently shows Amazon's performance being less tied to consumer electronics cycles and more driven by enterprise cloud adoption, retail innovation, and digital transformation trends that operate on different economic cycles than smartphone and computer markets. This structural divergence presents a compelling opportunity for investors to capture growth from multiple technology megatrends simultaneously while mitigating single-sector volatility.\n\nFrom a bullish perspective, Amazon's AWS division alone represents a massive growth engine, consistently delivering 30%+ year-over-year revenue growth and commanding over 30% market share in the cloud infrastructure sector. The company's advertising business has emerged as a third major profit pillar, growing at 25%+ annually and challenging established digital advertising players. Amazon's relentless innovation in logistics automation, healthcare technology (Amazon Pharmacy, One Medical), and artificial intelligence (Bedrock, Q) positions it to capture multiple trillion-dollar market opportunities. Technical indicators across multiple timeframes show Amazon breaking out of consolidation patterns with strong volume confirmation, suggesting institutional accumulation and positive momentum alignment across both growth and value investor cohorts.",
+            "confidence": 0.85,
+            "key_points": [
+              "Business model diversification across e-commerce (38% of revenue), AWS (16% of revenue but 70% of operating income), and advertising (7.5% of revenue growing at 25%+) creates fundamentally different drivers than Apple's hardware ecosystem",
+              "AWS maintains cloud infrastructure leadership with 31% market share and consistent 30%+ revenue growth, serving as a massive enterprise-focused profit engine less correlated to consumer spending cycles",
+              "Amazon's logistics innovation and Prime membership ecosystem (over 200 million members globally) create durable competitive advantages and recurring revenue streams",
+              "Technical analysis shows AMZN breaking above key resistance levels with 20%+ volume expansion, indicating strong institutional accumulation and positive momentum alignment",
+              "Multiple growth vectors including healthcare technology, artificial intelligence services, and international expansion provide additional uncorrelated revenue opportunities"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the optimistic perspective on Amazon's (AMZN) low correlation with Apple (AAPL) compared to Microsoft (MSFT) and Google (GOOGL), it's clear that AMZN offers a unique diversification advantage for investors looking to mitigate risks associated with the tech sector's volatility. Amazon's expansive reach into various industries, from cloud computing with AWS to digital advertising and logistics, provides a fundamentally different set of growth drivers than Apple's hardware and services model. This diversification likely contributes to the lower correlation with AAPL, as Amazon's revenue streams are influenced by a broader range of economic factors. Without a bearish perspective provided, the analysis leans towards the optimistic view but acknowledges inherent risks in the tech sector, such as regulatory challenges, competition, and market saturation. The bullish view on AMZN's growth potential, driven by its leadership in cloud computing and emerging businesses in healthcare and AI, suggests a positive outlook. However, investors should consider the volatility of the tech sector, potential for regulatory scrutiny, and the competitive landscape that could impact Amazon's growth trajectory.",
+            "confidence": 0.7,
+            "key_points": [
+              "Amazon's diverse business model offers a lower correlation with AAPL, providing a diversification benefit.",
+              "Amazon's growth is driven by strong sectors like AWS, digital advertising, and potential in healthcare and AI.",
+              "Investors should remain cautious of the broader risks in the tech sector, including regulatory challenges and competition."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 22826.10034942627,
+          "timestamp": 1771058067.1772454
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:34:27.177248",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:34:27.177279"
+    },
+    {
+      "query_id": "gs_027",
+      "category": "earnings",
+      "difficulty": "hard",
+      "query_text": "Calculate free cash flow yield for Microsoft if FCF is $75B and market cap is $3T",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "fcf_yield",
+        "value": 0.025,
+        "unit": "percentage",
+        "tolerance_pct": 0.01,
+        "calculation": "FCF Yield = FCF / Market Cap = 75B / 3T = 2.5%"
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 24698.400497436523,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Microsoft's free cash flow yield of 2.5% ($75B FCF / $3T market cap) represents a compelling valuation metric that signals strong cash generation relative to its market capitalization. This substantial FCF provides Microsoft with significant financial flexibility to invest in high-growth areas like AI, cloud computing, and enterprise software while maintaining shareholder returns through dividends and buybacks. The company's ability to generate $75B in free cash flow demonstrates exceptional operational efficiency and pricing power across its diversified business segments.\n\nLooking forward, Microsoft's strategic positioning in the AI revolution through its partnership with OpenAI and Azure AI services creates massive growth potential. The company's cloud division continues to capture market share with Azure growing at approximately 30% year-over-year, while its productivity and business processes segment maintains strong double-digit growth. Microsoft's competitive moat is reinforced by its enterprise ecosystem lock-in, with over 1.4 billion monthly active Office users and 95% of Fortune 500 companies using Azure services, creating recurring revenue streams and high switching costs.",
+            "confidence": 0.85,
+            "key_points": [
+              "Strong 2.5% free cash flow yield indicates attractive valuation relative to cash generation capacity",
+              "$75B annual FCF provides ample resources for strategic investments in AI, cloud expansion, and shareholder returns",
+              "Dominant position in enterprise software and cloud services with Azure growing at ~30% annually",
+              "Strategic AI leadership through OpenAI partnership and Azure AI services positioning for next growth phase",
+              "Recurring revenue model with high switching costs from 1.4B Office users and 95% of Fortune 500 companies"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Microsoft's free cash flow yield of 2.5%, derived from a free cash flow of $75B and a market cap of $3T, presents an interesting scenario for investors. From an optimistic standpoint, this yield is indicative of strong cash generation capabilities, providing the company with ample resources to pursue growth opportunities, particularly in AI, cloud computing, and enterprise software, while also rewarding shareholders. The company's strategic investments and its established presence in high-growth markets underscore its potential for further expansion and solidify its competitive moat. However, without a direct bear view presented, one must infer potential concerns, such as market saturation, regulatory challenges, and the inherent risks of heavy investment in rapidly evolving technologies like AI, which could impact future profitability and market position. Additionally, the large market capitalization means that substantial growth is required to significantly move the needle in terms of shareholder returns, which could be a challenge in a competitive and fast-changing technology landscape.",
+            "confidence": 0.7,
+            "key_points": [
+              "Microsoft's free cash flow yield of 2.5% reflects strong cash generation capabilities.",
+              "Significant investments in AI, cloud computing, and enterprise software present growth opportunities but come with associated risks.",
+              "Microsoft's large market capitalization requires substantial growth to significantly impact shareholder returns, posing a potential challenge."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 24676.46098136902,
+          "timestamp": 1771058093.8875945
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:34:53.887597",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:34:53.887621"
+    },
+    {
+      "query_id": "gs_028",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query_text": "Estimate intrinsic value for Apple using Gordon Growth Model (dividend $1, growth 5%, required return 10%)",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.625,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "intrinsic_value_per_share",
+        "value": 21.0,
+        "unit": "USD",
+        "tolerance_pct": 0.05,
+        "calculation": "V = D * (1 + g) / (r - g) = 1 * 1.05 / 0.05 = $21"
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 24233.95848274231,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "Based on the Gordon Growth Model calculation with a $1 dividend, 5% growth rate, and 10% required return, Apple's intrinsic value is $20 per share. This valuation represents a solid foundation for investment, particularly when considering Apple's proven ability to consistently exceed growth expectations through innovation and market expansion. The 5% growth assumption appears conservative given Apple's historical performance and future opportunities in high-growth segments like services, wearables, and emerging markets.\n\nApple's competitive advantages create significant upside potential beyond this baseline valuation. The company's ecosystem lock-in, brand loyalty, and pricing power enable sustained margin expansion, while its massive installed base of over 2 billion active devices provides recurring revenue opportunities. Recent trends in services growth (approaching $100 billion annual run rate) and continued iPhone upgrade cycles in premium markets suggest the 5% growth assumption may underestimate Apple's true potential, especially as the company expands into augmented reality, financial services, and healthcare technology.",
+            "confidence": 0.85,
+            "key_points": [
+              "Gordon Growth Model yields $20 intrinsic value with conservative 5% growth assumption",
+              "Apple's services segment growing at 15%+ annually, far exceeding the 5% model assumption",
+              "Strong ecosystem lock-in with 2+ billion active devices creates recurring revenue streams",
+              "Consistent dividend increases and share buybacks enhance shareholder returns",
+              "Expansion into AR/VR, financial services, and healthcare represents significant growth catalysts"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "The optimistic view emphasizes Apple's strong fundamentals, highlighting its consistent ability to outperform growth expectations, which supports a bullish stance on its intrinsic value based on the Gordon Growth Model. The bullish perspective points to Apple's innovative capabilities, ecosystem lock-in, and brand loyalty as key drivers for future growth, suggesting that a 5% growth rate might be conservative. Conversely, while the bearish analysis is not explicitly provided, typical concerns could include market saturation, regulatory challenges, and the intense competition in technology sectors that could potentially hamper Apple's growth and affect its intrinsic value negatively. Balancing these perspectives requires acknowledging Apple's solid track record and significant growth avenues while also considering the potential headwinds it faces in maintaining its growth trajectory and navigating a complex global market environment. The intrinsic value of $20 per share, as calculated, offers a baseline for discussions but should be viewed in the context of broader market dynamics and individual investment goals.",
+            "confidence": 0.7,
+            "key_points": [
+              "Apple has a strong track record of innovation and market expansion, suggesting potential for exceeding the conservative 5% growth assumption.",
+              "The company's ecosystem, brand loyalty, and installed base provide a solid foundation for sustained revenue, but market saturation and competition pose risks.",
+              "The intrinsic value calculation offers a starting point for valuation, but market conditions and external factors could significantly impact actual performance."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 24217.960596084595,
+          "timestamp": 1771058120.1336188
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:35:20.133620",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:35:20.133641"
+    },
+    {
+      "query_id": "gs_029",
+      "category": "technical",
+      "difficulty": "hard",
+      "query_text": "Calculate maximum drawdown for QQQ in 2025",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.58,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "max_drawdown",
+        "value": -0.12,
+        "unit": "percentage",
+        "tolerance_pct": 0.02,
+        "peak_date": "2025-03-15",
+        "trough_date": "2025-04-22",
+        "sources": [
+          "yfinance historical data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 26014.013051986694,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the query specifically requests calculation of maximum drawdown for QQQ in 2025, I cannot provide that exact calculation without historical 2025 data. However, as a bullish analyst, I can highlight why QQQ represents a compelling investment opportunity looking forward. The Invesco QQQ Trust tracks the Nasdaq-100 Index, which is heavily weighted toward innovative technology companies driving the digital transformation of the global economy. These companies possess significant competitive advantages through network effects, intellectual property, and massive R&D investments that create durable moats. Looking at historical patterns, QQQ has consistently demonstrated strong recovery capabilities following drawdowns, with the 2020 COVID-19 drawdown of approximately 30% being fully recovered within months as technology adoption accelerated. The structural trends toward cloud computing, artificial intelligence, digital payments, and e-commerce continue to provide powerful tailwinds for the index's components. Technical indicators for the broader technology sector remain constructive, with many components maintaining above their 200-day moving averages and showing institutional accumulation patterns. The Federal Reserve's potential pivot toward rate cuts in 2025 could provide additional liquidity support for growth stocks, historically benefiting QQQ's performance during easing cycles. While drawdowns are inevitable in equity investing, QQQ's exposure to companies with strong balance sheets, recurring revenue models, and market leadership positions provides resilience during market stress.",
+            "confidence": 0.7,
+            "key_points": [
+              "Nasdaq-100 companies drive structural growth trends in AI, cloud computing, and digital transformation with sustainable competitive advantages",
+              "Historical resilience shows QQQ consistently recovers from drawdowns (2020: 30% drawdown fully recovered in months)",
+              "Potential Fed rate cuts in 2025 could provide liquidity tailwinds benefiting growth-oriented QQQ holdings",
+              "Strong technical foundation with many components above 200-day moving averages showing institutional support",
+              "Concentration in companies with fortress balance sheets and recurring revenue provides downside protection"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bear view, the analysis will lean heavily on the bullish perspective while incorporating general considerations of potential risks associated with investing in QQQ. The Invesco QQQ Trust, which mirrors the performance of the Nasdaq-100 Index, is heavily influenced by the fortunes of top technology and innovation-driven companies. These companies, as highlighted by the bullish view, are at the forefront of digital transformation trends such as cloud computing, artificial intelligence, and e-commerce, suggesting a strong growth trajectory. However, it's crucial to acknowledge inherent risks such as market volatility, regulatory changes, and economic downturns that can lead to significant drawdowns. The technology sector's performance is also sensitive to interest rate changes, with potential rate hikes posing a risk to growth stock valuations. Despite these risks, the historical resilience and recovery capability of QQQ, coupled with the ongoing digital transformation, suggest a favorable long-term outlook. The Federal Reserve's monetary policy direction, especially potential rate cuts, could further influence QQQ's performance, providing liquidity that benefits growth stocks. Therefore, while drawdowns are a natural part of equity investing, QQQ's exposure to fundamentally strong companies might mitigate these downturns over the long haul.",
+            "confidence": 0.7,
+            "key_points": [
+              "QQQ tracks the Nasdaq-100 Index, heavily weighted towards technology and innovation-driven companies, indicating strong growth potential.",
+              "Market volatility, regulatory changes, economic downturns, and interest rate fluctuations represent inherent risks that could impact QQQ's performance.",
+              "Historical resilience and the sector's fundamental strength suggest QQQ could recover from drawdowns, supported by digital transformation trends and potential favorable monetary policies."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 25998.830795288086,
+          "timestamp": 1771058148.1480212
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:35:48.148024",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:35:48.148052"
+    },
+    {
+      "query_id": "gs_030",
+      "category": "sentiment",
+      "difficulty": "hard",
+      "query_text": "Analyze divergence between analyst price targets and actual price for TSLA",
+      "answer": {
+        "synthesis_text": "HOLD",
+        "confidence": 0.6159999999999999,
+        "risk_reward": "50/50"
+      },
+      "expected": {
+        "metric": "target_vs_actual",
+        "avg_target": 250.0,
+        "actual_price": 220.0,
+        "divergence_pct": -0.12,
+        "interpretation": "Trading 12% below analyst targets, potential upside or optimistic targets",
+        "sources": [
+          "yfinance analyst data"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 20860.31985282898,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "The divergence between analyst price targets and TSLA's actual price presents a compelling buying opportunity, as the market appears to be undervaluing Tesla's transformative growth trajectory. With the average analyst price target around $250-$275 (approximately 20-30% above current levels), this gap reflects temporary market pessimism rather than fundamental weakness. Tesla maintains a commanding lead in the EV space with industry-leading margins of approximately 18% and continues to expand its production capacity, targeting 20 million annual vehicle deliveries by 2030. The company's energy storage business is growing at over 100% year-over-year, representing a significant future revenue stream that many analysts may be underestimating in their models.\n\nTechnically, TSLA has established strong support levels around $200-$210, with recent consolidation suggesting accumulation by institutional investors. The company's innovation pipeline remains robust, with the Cybertruck generating over 2 million reservations and Full Self-Driving (FSD) technology approaching wider deployment. Tesla's vertical integration strategy provides sustainable competitive advantages in battery technology and manufacturing efficiency, with the company achieving a 30% reduction in production costs per vehicle over the last two years. These fundamental strengths, combined with the company's dominant position in the fastest-growing segment of the automotive industry, suggest the current price divergence represents a strategic entry point for long-term investors.",
+            "confidence": 0.82,
+            "key_points": [
+              "Analyst price targets average 20-30% above current price levels, indicating significant upside potential",
+              "Industry-leading 18% margins and 30% production cost reduction demonstrate superior operational efficiency",
+              "Energy storage business growing >100% YoY represents major untapped revenue stream",
+              "Strong technical support at $200-$210 with institutional accumulation patterns",
+              "2+ million Cybertruck reservations and expanding FSD deployment drive future growth"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "The divergence between analyst price targets and TSLA's actual price can be interpreted through various lenses, reflecting the complex dynamics at play in the valuation of high-growth companies like Tesla. On one hand, the bullish perspective emphasizes Tesla's leadership in the electric vehicle (EV) market, its impressive margins, and its ambitious growth targets. The bullish view also points to the company's potential in energy storage and the anticipated impact of new technologies like the Cybertruck and Full Self-Driving capabilities. These factors suggest that the current market price may not fully reflect Tesla's future earnings potential and market position, presenting a buying opportunity for long-term investors. On the other hand, while the bearish perspective was not provided, common concerns among skeptics often include Tesla's high valuation compared to traditional automotive companies, potential challenges in meeting its ambitious production targets, competition from both established automakers and new entrants, and regulatory risks that could impact its business model and profitability. Considering these factors, the divergence in price targets versus actual price could also be seen as a market correction to overly optimistic expectations, cautioning against immediate investment without considering potential headwinds.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's leadership in the EV market and its ambitious growth targets suggest a strong future potential.",
+              "The gap between analyst price targets and the actual price may reflect temporary market pessimism or a correction to overly optimistic expectations.",
+              "Investors should weigh Tesla's innovative capacity and market expansion plans against potential risks such as competition, regulatory challenges, and high valuation."
+            ],
+            "recommendation": "HOLD",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "HOLD",
+          "overall_confidence": 0.6159999999999999,
+          "risk_reward_ratio": "50/50"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 20835.647344589233,
+          "timestamp": 1771058171.0110095
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:36:11.011011",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:36:11.011040"
+    }
+  ]
+}

@@ -308,6 +308,9 @@ Be critical but fair. Ground your analysis in the provided data."""
         try:
             prompt = self.build_prompt(query, context)
 
+            # Week 13 Day 2: Debug logging for Bear agent failures
+            self.logger.debug(f"Bear agent prompt length: {len(prompt)} chars")
+
             response = await self.client.messages.create(
                 model=self.model,
                 max_tokens=800,
@@ -317,9 +320,25 @@ Be critical but fair. Ground your analysis in the provided data."""
                 ]
             )
 
-            # Parse JSON response
+            # Week 13 Day 2: Validate response before parsing
+            if not response.content or len(response.content) == 0:
+                raise ValueError("Anthropic API returned empty content array")
+
             content = response.content[0].text
-            data = json.loads(content)
+            self.logger.debug(f"Bear agent raw response length: {len(content)} chars")
+
+            if not content or content.strip() == "":
+                raise ValueError("Anthropic API returned empty text content")
+
+            # Week 13 Day 2: Try to extract JSON from response
+            # Claude sometimes wraps JSON in markdown code blocks
+            json_content = content.strip()
+            if json_content.startswith("```json"):
+                json_content = json_content.split("```json")[1].split("```")[0].strip()
+            elif json_content.startswith("```"):
+                json_content = json_content.split("```")[1].split("```")[0].strip()
+
+            data = json.loads(json_content)
 
             return AgentResponse(
                 role=AgentRole.BEAR,
@@ -328,6 +347,16 @@ Be critical but fair. Ground your analysis in the provided data."""
                 key_points=data.get("key_points", [])
             )
 
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Bear agent JSON parse error: {e}")
+            self.logger.error(f"Raw content (first 500 chars): {content[:500] if 'content' in locals() else 'N/A'}")
+            # Return fallback response
+            return AgentResponse(
+                role=AgentRole.BEAR,
+                analysis=f"Error parsing bearish analysis JSON: {str(e)}",
+                confidence=0.3,
+                key_points=["Analysis unavailable due to JSON parsing error"]
+            )
         except Exception as e:
             self.logger.error(f"Bear agent error: {e}", exc_info=True)
             # Return fallback response

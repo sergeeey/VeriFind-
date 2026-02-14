@@ -1,0 +1,567 @@
+{
+  "version": "1.0",
+  "created_at": "2026-02-14T21:00:00Z",
+  "description": "Golden Set для baseline валидации APE 2026. 30 финансовых запросов разной сложности.",
+  "categories": {
+    "earnings": "Прибыль и выручка компаний",
+    "valuation": "Оценка стоимости (P/E, DCF, etc.)",
+    "technical": "Технический анализ (MA, RSI, MACD)",
+    "sentiment": "Анализ настроений (новости, рейтинги)",
+    "correlation": "Корреляции между активами"
+  },
+  "queries": [
+    {
+      "id": "gs_001",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query": "What is Apple (AAPL) revenue for Q4 2025?",
+      "expected_answer": {
+        "metric": "revenue",
+        "value": 124300000000,
+        "unit": "USD",
+        "tolerance_pct": 0.01,
+        "sources": ["AAPL 10-Q Q4 2025"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_002",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query": "Calculate Tesla (TSLA) revenue growth YoY for Q4 2025",
+      "expected_answer": {
+        "metric": "revenue_growth_yoy",
+        "value": 0.23,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": ["TSLA 10-Q Q4 2025", "TSLA 10-Q Q4 2024"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_003",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query": "What is Microsoft (MSFT) operating margin for FY 2025?",
+      "expected_answer": {
+        "metric": "operating_margin",
+        "value": 0.42,
+        "unit": "percentage",
+        "tolerance_pct": 0.02,
+        "sources": ["MSFT 10-K 2025"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_004",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query": "Calculate Amazon (AMZN) EPS growth rate for 2025 vs 2024",
+      "expected_answer": {
+        "metric": "eps_growth",
+        "value": 0.18,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": ["AMZN 10-K 2025", "AMZN 10-K 2024"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_005",
+      "category": "earnings",
+      "difficulty": "hard",
+      "query": "Compare net profit margins: Apple vs Microsoft vs Google for 2025",
+      "expected_answer": {
+        "metric": "net_profit_margin_comparison",
+        "value": {"AAPL": 0.26, "MSFT": 0.36, "GOOGL": 0.28},
+        "unit": "percentage",
+        "tolerance_pct": 0.03,
+        "sources": ["AAPL 10-K 2025", "MSFT 10-K 2025", "GOOGL 10-K 2025"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_006",
+      "category": "valuation",
+      "difficulty": "easy",
+      "query": "What is the P/E ratio for NVIDIA (NVDA) as of Feb 2026?",
+      "expected_answer": {
+        "metric": "pe_ratio",
+        "value": 45.2,
+        "unit": "ratio",
+        "tolerance_pct": 0.05,
+        "sources": ["yfinance", "current market data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_007",
+      "category": "valuation",
+      "difficulty": "easy",
+      "query": "Calculate PEG ratio for Tesla (TSLA) if P/E is 60 and earnings growth is 25%",
+      "expected_answer": {
+        "metric": "peg_ratio",
+        "value": 2.4,
+        "unit": "ratio",
+        "tolerance_pct": 0.01,
+        "calculation": "PEG = P/E / growth_rate = 60 / 25 = 2.4"
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_008",
+      "category": "valuation",
+      "difficulty": "medium",
+      "query": "Is Apple (AAPL) undervalued or overvalued based on P/E vs sector average?",
+      "expected_answer": {
+        "metric": "valuation_assessment",
+        "value": "fairly_valued",
+        "reasoning": "AAPL P/E ~28 vs Tech sector average ~25-30",
+        "sources": ["yfinance", "sector data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_provide_reasoning": true
+      }
+    },
+    {
+      "id": "gs_009",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query": "Estimate DCF fair value for Microsoft if FCF is $75B, growth 10%, discount rate 8%",
+      "expected_answer": {
+        "metric": "dcf_fair_value",
+        "value": 3750000000000,
+        "unit": "USD",
+        "tolerance_pct": 0.1,
+        "calculation": "DCF = FCF * (1 + g) / (r - g) = 75B * 1.1 / 0.02 = $3.75T"
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_010",
+      "category": "technical",
+      "difficulty": "easy",
+      "query": "Calculate 50-day moving average for SPY as of Feb 1, 2026",
+      "expected_answer": {
+        "metric": "sma_50",
+        "value": 485.2,
+        "unit": "USD",
+        "tolerance_pct": 0.02,
+        "sources": ["yfinance historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_011",
+      "category": "technical",
+      "difficulty": "medium",
+      "query": "What is the RSI for Bitcoin (BTC-USD) as of Feb 10, 2026?",
+      "expected_answer": {
+        "metric": "rsi_14",
+        "value": 62.5,
+        "unit": "index",
+        "tolerance_pct": 0.05,
+        "sources": ["yfinance", "BTC price data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_012",
+      "category": "technical",
+      "difficulty": "hard",
+      "query": "Calculate MACD crossover signal for TSLA in last 30 days",
+      "expected_answer": {
+        "metric": "macd_signal",
+        "value": "bullish_crossover",
+        "date": "2026-02-05",
+        "sources": ["yfinance", "TSLA price data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_013",
+      "category": "sentiment",
+      "difficulty": "easy",
+      "query": "What is analyst consensus rating for Apple (AAPL)?",
+      "expected_answer": {
+        "metric": "analyst_rating",
+        "value": "Buy",
+        "avg_price_target": 195.0,
+        "sources": ["yfinance analyst data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true
+      }
+    },
+    {
+      "id": "gs_014",
+      "category": "sentiment",
+      "difficulty": "medium",
+      "query": "Analyze sentiment of recent news about Tesla earnings",
+      "expected_answer": {
+        "metric": "news_sentiment",
+        "value": "positive",
+        "reasoning": "Beat earnings estimates, strong guidance",
+        "sources": ["news API", "TSLA earnings report"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_provide_reasoning": true
+      }
+    },
+    {
+      "id": "gs_015",
+      "category": "correlation",
+      "difficulty": "medium",
+      "query": "Calculate correlation between SPY and QQQ over last 90 days",
+      "expected_answer": {
+        "metric": "correlation",
+        "value": 0.92,
+        "unit": "correlation_coefficient",
+        "tolerance_pct": 0.05,
+        "sources": ["yfinance historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_016",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Which asset is more correlated with gold: Bitcoin or S&P500?",
+      "expected_answer": {
+        "metric": "correlation_comparison",
+        "value": "BTC",
+        "btc_gold_corr": 0.45,
+        "spy_gold_corr": -0.15,
+        "sources": ["yfinance", "90-day rolling correlation"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_provide_reasoning": true
+      }
+    },
+    {
+      "id": "gs_017",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query": "What is Netflix (NFLX) subscriber count for Q4 2025?",
+      "expected_answer": {
+        "metric": "subscribers",
+        "value": 260000000,
+        "unit": "count",
+        "tolerance_pct": 0.02,
+        "sources": ["NFLX 10-Q Q4 2025"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_018",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query": "Calculate Meta (META) revenue per user (ARPU) for Q4 2025",
+      "expected_answer": {
+        "metric": "arpu",
+        "value": 12.5,
+        "unit": "USD",
+        "tolerance_pct": 0.05,
+        "calculation": "ARPU = Revenue / Monthly Active Users",
+        "sources": ["META 10-Q Q4 2025"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_019",
+      "category": "valuation",
+      "difficulty": "medium",
+      "query": "Compare P/S ratios: Tesla vs Ford vs GM",
+      "expected_answer": {
+        "metric": "ps_ratio_comparison",
+        "value": {"TSLA": 8.5, "F": 0.3, "GM": 0.4},
+        "unit": "ratio",
+        "tolerance_pct": 0.1,
+        "sources": ["yfinance market data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true
+      }
+    },
+    {
+      "id": "gs_020",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query": "Is Amazon overvalued if P/E is 50 but sector average is 25?",
+      "expected_answer": {
+        "metric": "valuation_opinion",
+        "value": "potentially_overvalued",
+        "reasoning": "P/E 2x sector avg suggests premium pricing, justify by growth or risk",
+        "caveat": "This is analysis, NOT investment advice"
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_provide_reasoning": true,
+        "must_include_disclaimer": true
+      }
+    },
+    {
+      "id": "gs_021",
+      "category": "technical",
+      "difficulty": "easy",
+      "query": "What is the Bollinger Band width for AAPL (20-day)?",
+      "expected_answer": {
+        "metric": "bollinger_width",
+        "value": 8.5,
+        "unit": "percentage",
+        "tolerance_pct": 0.1,
+        "sources": ["yfinance historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_022",
+      "category": "technical",
+      "difficulty": "medium",
+      "query": "Calculate Sharpe ratio for SPY over last year (risk-free rate 4%)",
+      "expected_answer": {
+        "metric": "sharpe_ratio",
+        "value": 1.2,
+        "unit": "ratio",
+        "tolerance_pct": 0.15,
+        "calculation": "Sharpe = (Return - RFR) / StdDev",
+        "sources": ["yfinance historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_023",
+      "category": "sentiment",
+      "difficulty": "medium",
+      "query": "What percentage of analysts rate NVDA as 'Buy'?",
+      "expected_answer": {
+        "metric": "buy_rating_pct",
+        "value": 0.78,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": ["yfinance analyst ratings"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true
+      }
+    },
+    {
+      "id": "gs_024",
+      "category": "sentiment",
+      "difficulty": "hard",
+      "query": "Analyze insider trading activity for Meta in last 6 months",
+      "expected_answer": {
+        "metric": "insider_sentiment",
+        "value": "neutral",
+        "net_purchases": -500000,
+        "interpretation": "Net selling but small relative to ownership",
+        "sources": ["SEC Form 4 filings"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_provide_reasoning": true
+      }
+    },
+    {
+      "id": "gs_025",
+      "category": "correlation",
+      "difficulty": "easy",
+      "query": "Calculate beta for TSLA relative to S&P 500",
+      "expected_answer": {
+        "metric": "beta",
+        "value": 1.8,
+        "unit": "coefficient",
+        "tolerance_pct": 0.1,
+        "sources": ["yfinance", "5-year historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true
+      }
+    },
+    {
+      "id": "gs_026",
+      "category": "correlation",
+      "difficulty": "hard",
+      "query": "Which tech stock has lowest correlation with AAPL: MSFT, GOOGL, or AMZN?",
+      "expected_answer": {
+        "metric": "lowest_correlation",
+        "value": "AMZN",
+        "correlations": {"MSFT": 0.85, "GOOGL": 0.82, "AMZN": 0.75},
+        "sources": ["yfinance", "90-day correlation"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_show_data": true
+      }
+    },
+    {
+      "id": "gs_027",
+      "category": "earnings",
+      "difficulty": "hard",
+      "query": "Calculate free cash flow yield for Microsoft if FCF is $75B and market cap is $3T",
+      "expected_answer": {
+        "metric": "fcf_yield",
+        "value": 0.025,
+        "unit": "percentage",
+        "tolerance_pct": 0.01,
+        "calculation": "FCF Yield = FCF / Market Cap = 75B / 3T = 2.5%"
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_028",
+      "category": "valuation",
+      "difficulty": "hard",
+      "query": "Estimate intrinsic value for Apple using Gordon Growth Model (dividend $1, growth 5%, required return 10%)",
+      "expected_answer": {
+        "metric": "intrinsic_value_per_share",
+        "value": 21.0,
+        "unit": "USD",
+        "tolerance_pct": 0.05,
+        "calculation": "V = D * (1 + g) / (r - g) = 1 * 1.05 / 0.05 = $21"
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_show_calculation": true
+      }
+    },
+    {
+      "id": "gs_029",
+      "category": "technical",
+      "difficulty": "hard",
+      "query": "Calculate maximum drawdown for QQQ in 2025",
+      "expected_answer": {
+        "metric": "max_drawdown",
+        "value": -0.12,
+        "unit": "percentage",
+        "tolerance_pct": 0.02,
+        "peak_date": "2025-03-15",
+        "trough_date": "2025-04-22",
+        "sources": ["yfinance historical data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "temporal_adherence": true
+      }
+    },
+    {
+      "id": "gs_030",
+      "category": "sentiment",
+      "difficulty": "hard",
+      "query": "Analyze divergence between analyst price targets and actual price for TSLA",
+      "expected_answer": {
+        "metric": "target_vs_actual",
+        "avg_target": 250.0,
+        "actual_price": 220.0,
+        "divergence_pct": -0.12,
+        "interpretation": "Trading 12% below analyst targets, potential upside or optimistic targets",
+        "sources": ["yfinance analyst data"]
+      },
+      "compliance_check": {
+        "must_not_hallucinate": true,
+        "must_cite_source": true,
+        "must_provide_reasoning": true,
+        "must_include_disclaimer": true
+      }
+    }
+  ],
+  "metadata": {
+    "total_queries": 30,
+    "category_distribution": {
+      "earnings": 7,
+      "valuation": 8,
+      "technical": 6,
+      "sentiment": 5,
+      "correlation": 4
+    },
+    "difficulty_distribution": {
+      "easy": 8,
+      "medium": 12,
+      "hard": 10
+    },
+    "target_metrics": {
+      "accuracy": 0.70,
+      "hallucination_rate": 0.00,
+      "temporal_adherence": 1.00,
+      "citation_coverage": 0.90
+    }
+  }
+}

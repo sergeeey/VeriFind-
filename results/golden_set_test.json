@@ -1,0 +1,347 @@
+{
+  "run_info": {
+    "timestamp": "2026-02-14T13:12:36.768917",
+    "golden_set_version": "1.0",
+    "total_queries": 3,
+    "successful": 3,
+    "errors": 0
+  },
+  "metrics": {
+    "accuracy": 1.0,
+    "hallucination_rate": 1.0,
+    "error_rate": 0.0,
+    "avg_processing_time_ms": 17204.495429992676,
+    "total_cost_usd": 0.006
+  },
+  "breakdown_by_category": {
+    "earnings": {
+      "total": 3,
+      "correct": 3,
+      "accuracy": 1.0
+    }
+  },
+  "breakdown_by_difficulty": {
+    "easy": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1.0
+    },
+    "medium": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1.0
+    }
+  },
+  "results": [
+    {
+      "query_id": "gs_001",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query_text": "What is Apple (AAPL) revenue for Q4 2025?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.625,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "revenue",
+        "value": 124300000000,
+        "unit": "USD",
+        "tolerance_pct": 0.01,
+        "sources": [
+          "AAPL 10-Q Q4 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 17021.89302444458,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific Q4 2025 revenue figures for Apple (AAPL) are not yet available, the company's historical performance and strategic positioning provide compelling reasons for bullish investment. Apple has consistently demonstrated robust revenue growth across its diversified product ecosystem, with services revenue becoming an increasingly significant contributor to overall financial performance. The company's premium brand positioning, loyal customer base, and expanding services portfolio create multiple revenue streams that should continue driving growth through 2025.\n\nLooking forward, Apple's innovation pipeline and market expansion opportunities present substantial upside potential. The company's continued investment in augmented reality, health technologies, and artificial intelligence integration across its product lines positions it to capture new market segments. Additionally, Apple's growing presence in emerging markets and potential new product categories could drive significant revenue acceleration in Q4 2025 and beyond, supported by the company's strong balance sheet and consistent execution track record.",
+            "confidence": 0.85,
+            "key_points": [
+              "Diversified revenue streams with services segment showing consistent double-digit growth",
+              "Strong brand loyalty and premium pricing power driving sustainable margins",
+              "Innovation pipeline in AR/VR and AI integration creating new market opportunities",
+              "Expanding presence in emerging markets with significant growth potential",
+              "Consistent historical execution and strong balance sheet supporting future investments"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Apple's historical performance and strategic initiatives suggest a strong potential for revenue growth in Q4 2025, driven by its diversified product ecosystem and expanding services portfolio. The company's investment in new technologies and its penetration into emerging markets could further bolster its financial performance. However, without specific bearish arguments provided, one must consider general risks such as market saturation, competitive pressures, and potential global economic downturns that could impact consumer spending and thus Apple's revenue growth. The balance between Apple's proven track record of innovation and execution against the backdrop of these potential market risks suggests a cautiously optimistic outlook. Apple's ability to navigate past challenges and its continuous pursuit of innovation position it well, yet the unpredictable nature of technology markets and global economic factors introduce a degree of risk that cannot be ignored.",
+            "confidence": 0.7,
+            "key_points": [
+              "Apple's diversified product ecosystem and expanding services portfolio are key drivers of growth.",
+              "Investments in augmented reality, health technologies, and AI could unlock new revenue streams.",
+              "Market saturation, competitive pressures, and global economic factors pose potential risks."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.625,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 17006.569862365723,
+          "timestamp": 1771056718.1657338
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:11:58.165736",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:11:58.165765"
+    },
+    {
+      "query_id": "gs_002",
+      "category": "earnings",
+      "difficulty": "easy",
+      "query_text": "Calculate Tesla (TSLA) revenue growth YoY for Q4 2025",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.565,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "revenue_growth_yoy",
+        "value": 0.23,
+        "unit": "percentage",
+        "tolerance_pct": 0.05,
+        "sources": [
+          "TSLA 10-Q Q4 2025",
+          "TSLA 10-Q Q4 2024"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 14848.899602890015,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While specific Q4 2025 revenue figures aren't available yet, Tesla's trajectory suggests strong YoY growth potential based on current momentum and strategic positioning. The company's aggressive expansion into energy storage and autonomous driving technology creates multiple revenue streams beyond automotive sales, with energy storage deployments growing over 200% YoY in recent quarters. Tesla's industry-leading profit margins (approximately 17% automotive gross margin) provide financial flexibility to invest in growth while maintaining profitability, creating a virtuous cycle of reinvestment and expansion. The company's direct-to-consumer sales model and over-the-air update capabilities create recurring revenue opportunities that traditional automakers cannot easily replicate, suggesting sustainable growth beyond simple vehicle sales volume increases.",
+            "confidence": 0.65,
+            "key_points": [
+              "Multiple revenue streams beyond automotive (energy storage growing 200%+ YoY, autonomous driving technology)",
+              "Industry-leading profit margins (~17% automotive gross margin) enabling aggressive reinvestment",
+              "Direct-to-consumer model and over-the-air updates creating recurring revenue opportunities",
+              "Global manufacturing expansion increasing production capacity and market penetration",
+              "Strong brand loyalty and ecosystem lock-in through Supercharger network and software integration"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the absence of a bearish perspective, the analysis leans on available optimistic projections while integrating general market risks to provide a balanced view. Tesla's aggressive expansion into various sectors beyond traditional automotive sales, such as energy storage and autonomous driving, suggests a diversified growth strategy that could significantly boost revenue YoY by Q4 2025. The company's high profit margins and direct-to-consumer sales model offer a competitive edge, potentially leading to sustained growth. However, these optimistic projections must be tempered with general market risks, including regulatory challenges, potential supply chain disruptions, and competition intensification, which could impact Tesla's growth trajectory. While Tesla's strategic positioning and current momentum indicate strong growth potential, these external factors could pose significant risks to achieving projected revenue growth.",
+            "confidence": 0.7,
+            "key_points": [
+              "Tesla's diversified growth strategy and high profit margins suggest strong revenue growth potential.",
+              "External market risks, including regulatory challenges and competition, could impact growth projections.",
+              "Tesla's direct-to-consumer sales model and technology advancements provide a competitive edge."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.565,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 14833.08219909668,
+          "timestamp": 1771056735.021635
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:12:15.021638",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:12:15.021659"
+    },
+    {
+      "query_id": "gs_003",
+      "category": "earnings",
+      "difficulty": "medium",
+      "query_text": "What is Microsoft (MSFT) operating margin for FY 2025?",
+      "answer": {
+        "synthesis_text": "BUY",
+        "confidence": 0.58,
+        "risk_reward": "70/30"
+      },
+      "expected": {
+        "metric": "operating_margin",
+        "value": 0.42,
+        "unit": "percentage",
+        "tolerance_pct": 0.02,
+        "sources": [
+          "MSFT 10-K 2025"
+        ]
+      },
+      "correct": true,
+      "hallucination": true,
+      "processing_time_ms": 19742.693662643433,
+      "cost_usd": 0.002,
+      "full_result": {
+        "perspectives": {
+          "bull": {
+            "analysis": "While the specific FY 2025 operating margin for Microsoft (MSFT) isn't provided in the context, the company's historical performance and strategic positioning suggest continued margin strength. Microsoft has consistently demonstrated robust operating margins, typically ranging from 40-45% in recent years, driven by its high-margin cloud and software businesses. The company's ongoing transition to cloud-based subscription models, particularly with Azure and Microsoft 365, creates predictable recurring revenue streams with excellent scalability and margin expansion potential. Microsoft's diversified portfolio across productivity software, cloud infrastructure, gaming, and enterprise solutions provides multiple growth engines while maintaining operational efficiency through economies of scale and technological integration.\n\nLooking forward to FY 2025, several factors support margin optimization: Microsoft's increasing focus on AI integration across its product suite creates premium pricing opportunities and operational efficiencies. The company's disciplined capital allocation and continued investment in high-return areas like AI infrastructure and security solutions position it for sustainable margin improvement. Additionally, Microsoft's strong competitive moat, established enterprise relationships, and cross-selling capabilities across its ecosystem enable efficient customer acquisition and retention, further supporting margin stability and potential expansion in the coming fiscal year.",
+            "confidence": 0.7,
+            "key_points": [
+              "Microsoft's cloud-first strategy with Azure and Microsoft 365 drives high-margin recurring revenue with excellent scalability",
+              "AI integration across product portfolio creates premium pricing opportunities and operational efficiency gains",
+              "Diversified business model across software, cloud, gaming, and enterprise solutions provides multiple margin expansion levers",
+              "Strong competitive moat and established enterprise relationships enable efficient customer acquisition and retention",
+              "Historical operating margins of 40-45% demonstrate proven ability to maintain profitability while investing in growth"
+            ],
+            "provider": "deepseek"
+          },
+          "bear": {
+            "analysis": "Error generating bearish analysis: Expecting value: line 1 column 1 (char 0)",
+            "confidence": 0.3,
+            "key_points": [
+              "Analysis unavailable due to error"
+            ],
+            "provider": "anthropic"
+          },
+          "arbiter": {
+            "analysis": "Given the lack of a bearish perspective provided, the analysis leans on the bullish outlook while incorporating general market risks that Microsoft (MSFT) may face by FY 2025. Historically, Microsoft has shown strong operating margins, buoyed by its diversified business model, which includes high-margin sectors like cloud services and software. The company's strategic shift towards cloud-based subscription models, such as Azure and Microsoft 365, not only ensures a steady revenue stream but also offers significant scalability, potentially leading to margin expansion. Additionally, Microsoft's investment in AI and its wide-ranging product ecosystem offer avenues for premium pricing and operational efficiencies, which could further bolster margins. However, it's crucial to consider potential challenges that could pressure margins, including increased competition in cloud and enterprise services, regulatory risks, and the costs associated with continuous innovation and cybersecurity. Economic downturns or shifts in consumer and enterprise spending could also impact Microsoft's performance and, by extension, its operating margins.",
+            "confidence": 0.7,
+            "key_points": [
+              "Microsoft's diversified business and shift to cloud-based models provide a strong foundation for margin stability and potential growth.",
+              "Investments in AI and a robust product ecosystem could enable premium pricing and operational efficiencies, supporting margin expansion.",
+              "Potential challenges include increased competition, regulatory risks, and economic downturns, which could pressure margins."
+            ],
+            "recommendation": "BUY",
+            "provider": "openai"
+          }
+        },
+        "synthesis": {
+          "recommendation": "BUY",
+          "overall_confidence": 0.58,
+          "risk_reward_ratio": "70/30"
+        },
+        "metadata": {
+          "cost_usd": 0.002,
+          "latency_ms": 19713.22464942932,
+          "timestamp": 1771056756.7688816
+        },
+        "data_attribution": {
+          "sources": [
+            {
+              "name": "yfinance",
+              "type": "market_data",
+              "delay": "15min"
+            },
+            {
+              "name": "FRED",
+              "type": "economic_data",
+              "delay": "1day"
+            }
+          ],
+          "llm_providers": [
+            {
+              "role": "bull",
+              "provider": "deepseek",
+              "model": "deepseek-chat"
+            },
+            {
+              "role": "bear",
+              "provider": "anthropic",
+              "model": "claude-sonnet-4-5-20250929"
+            },
+            {
+              "role": "arbiter",
+              "provider": "openai",
+              "model": "gpt-4-turbo-preview"
+            }
+          ],
+          "generated_at": "2026-02-14T13:12:36.768884",
+          "data_freshness": "Data may be delayed up to 15 minutes"
+        }
+      },
+      "timestamp": "2026-02-14T13:12:36.768906"
+    }
+  ]
+}
