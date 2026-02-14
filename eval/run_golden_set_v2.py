@@ -34,12 +34,12 @@ except ImportError:
     sys.path.insert(0, str(project_root / '.claude' / 'worktrees' / 'awesome-yonath'))
     from src.adapters.yfinance_adapter import YFinanceAdapter
 
-# Week 14 Day 2: Import FRED client for macro queries
+# Week 14 Day 1: Import FRED adapter for macro queries
 try:
-    from src.adapters.fred_client import FREDClient
+    from src.adapters.fred_adapter import FredAdapter
 except ImportError:
-    print("⚠️  FRED client not found, macro queries will fail")
-    FREDClient = None
+    print("⚠️  FRED adapter not found, macro queries will fail")
+    FredAdapter = None
 
 
 def extract_tickers_from_query(query: str) -> list[str]:
@@ -104,30 +104,30 @@ async def fetch_market_context(tickers: list[str], query: str = "") -> Dict[str,
     ]
     is_economic_query = any(kw in query.lower() for kw in economic_keywords)
 
-    if is_economic_query and FREDClient is not None:
+    if is_economic_query and FredAdapter is not None:
         try:
-            fred = FREDClient()  # Week 14 Day 2: Use new FREDClient (auto-fallback)
+            fred = FredAdapter(cache_enabled=True)
             context['economic'] = {}
 
-            # Fetch common economic indicators (async)
+            # Fetch common economic indicators
             try:
-                dff_data = await fred.get_latest('DFF')  # Federal Funds Rate
-                context['economic']['fed_funds_rate'] = dff_data.value
-                print(f"   ✅ Fetched Fed Funds Rate: {dff_data.value}%")
+                dff = fred.get_latest_value('DFF')  # Federal Funds Rate
+                context['economic']['fed_funds_rate'] = dff
+                print(f"   ✅ Fetched Fed Funds Rate: {dff}%")
             except:
                 pass
 
             try:
-                unrate_data = await fred.get_latest('UNRATE')  # Unemployment Rate
-                context['economic']['unemployment_rate'] = unrate_data.value
-                print(f"   ✅ Fetched Unemployment Rate: {unrate_data.value}%")
+                unrate = fred.get_latest_value('UNRATE')  # Unemployment Rate
+                context['economic']['unemployment_rate'] = unrate
+                print(f"   ✅ Fetched Unemployment Rate: {unrate}%")
             except:
                 pass
 
             try:
-                dgs3mo_data = await fred.get_latest('DGS3MO')  # 3-Month Treasury
-                context['economic']['treasury_3mo'] = dgs3mo_data.value
-                print(f"   ✅ Fetched 3-Month Treasury: {dgs3mo_data.value}%")
+                dgs3mo = fred.get_latest_value('DGS3MO')  # 3-Month Treasury
+                context['economic']['treasury_3mo'] = dgs3mo
+                print(f"   ✅ Fetched 3-Month Treasury: {dgs3mo}%")
             except:
                 pass
 
