@@ -227,14 +227,25 @@ Be constructive but not unrealistic. Ground your analysis in the provided data."
                 response_format={"type": "json_object"}
             )
 
-            # Parse JSON response
-            content = response.choices[0].message.content
-            data = json.loads(content)
-
-            # Week 13 Day 2: Extract token usage
+            # Week 13 Day 2: Extract token usage BEFORE parsing (survives JSON errors)
             usage = response.usage
             in_tok = usage.prompt_tokens if usage else 0
             out_tok = usage.completion_tokens if usage else 0
+
+            # Parse JSON response
+            content = response.choices[0].message.content
+
+            try:
+                data = json.loads(content)
+            except json.JSONDecodeError as json_err:
+                self.logger.warning(f"{self.__class__.__name__} JSON parse error: {json_err}")
+                self.logger.warning(f"Raw content (first 200 chars): {content[:200]}")
+                # Fallback: use raw content as analysis, but preserve usage
+                data = {
+                    "analysis": content,
+                    "confidence": 0.5,
+                    "key_points": ["Raw response (JSON parse failed)"]
+                }
 
             return AgentResponse(
                 role=AgentRole.BULL,
@@ -490,14 +501,25 @@ Be objective. Consider both bull and bear arguments fairly."""
                 response_format={"type": "json_object"}
             )
 
-            # Parse JSON response
-            content = response.choices[0].message.content
-            data = json.loads(content)
-
-            # Week 13 Day 2: Extract token usage
+            # Week 13 Day 2: Extract token usage BEFORE parsing (survives JSON errors)
             usage = response.usage
             in_tok = usage.prompt_tokens if usage else 0
             out_tok = usage.completion_tokens if usage else 0
+
+            # Parse JSON response
+            content = response.choices[0].message.content
+
+            try:
+                data = json.loads(content)
+            except json.JSONDecodeError as json_err:
+                self.logger.warning(f"{self.__class__.__name__} JSON parse error: {json_err}")
+                self.logger.warning(f"Raw content (first 200 chars): {content[:200]}")
+                # Fallback: use raw content as analysis, but preserve usage
+                data = {
+                    "analysis": content,
+                    "confidence": 0.5,
+                    "key_points": ["Raw response (JSON parse failed)"]
+                }
 
             return AgentResponse(
                 role=AgentRole.ARBITER,
