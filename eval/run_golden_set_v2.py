@@ -26,12 +26,11 @@ sys.path.insert(0, str(project_root))
 # Import validators
 from eval.validators import AnswerValidator, extract_answer_from_debate
 
-# Import data fetching layer
+# Import data fetching layer — USE v2 with fallback chain
 try:
-    # Try new location first
-    from src.adapters.yfinance_adapter import YFinanceAdapter
+    from src.adapters.yfinance_adapter_v2 import YFinanceAdapterV2 as YFinanceAdapter
 except ImportError:
-    # Fallback to worktree location
+    # Fallback to worktree v1 location
     sys.path.insert(0, str(project_root / '.claude' / 'worktrees' / 'awesome-yonath'))
     from src.adapters.yfinance_adapter import YFinanceAdapter
 
@@ -91,9 +90,9 @@ async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
 
     for ticker in tickers:
         try:
-            # Fetch last 365 days for technical analysis
+            # Fetch last 30 days (CSV snapshots have limited history)
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=365)
+            start_date = end_date - timedelta(days=30)
 
             data = adapter.fetch_ohlcv(
                 ticker=ticker,
@@ -117,7 +116,8 @@ async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
                     'date_range': f"{data.index[0]} to {data.index[-1]}"
                 }
 
-                print(f"   ✅ Fetched {ticker}: ${latest_price:.2f}, 200-SMA: ${sma_200:.2f if sma_200 else 0}")
+                sma_str = f"${sma_200:.2f}" if sma_200 is not None else "N/A"
+                print(f"   ✅ Fetched {ticker}: ${latest_price:.2f}, 200-SMA: {sma_str}")
             else:
                 print(f"   ⚠️  No data for {ticker}")
                 context['data'][ticker] = None

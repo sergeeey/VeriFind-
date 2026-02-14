@@ -1,0 +1,80 @@
+{
+  "version": "2.0",
+  "run_date": "2026-02-14T19:03:29.756436",
+  "total_queries": 3,
+  "passed": 0,
+  "accuracy": 0.0,
+  "avg_time_seconds": 19.571681333333334,
+  "avg_cost_usd": 0.012068573333333332,
+  "total_cost_usd": 0.03620572,
+  "categories": {
+    "earnings": {
+      "total": 1,
+      "passed": 0
+    },
+    "valuation": {
+      "total": 1,
+      "passed": 0
+    },
+    "technical": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "gs_001",
+      "query": "What is the expected YoY revenue growth for Tesla in Q4 2025?",
+      "category": "earnings",
+      "passed": false,
+      "duration": 20.074213,
+      "cost_usd": 0.01261638,
+      "answer": "DIRECT ANSWER: The analyses do not provide a specific expected YoY revenue growth number for Tesla in Q4 2025.\n\nSYNTHESIS: The optimistic view highlights Tesla's position at the forefront of electric vehicle technology, autonomous driving capabilities, and energy storage solutions as key drivers for sustained revenue expansion. It notes Tesla's ability to scale production, expand its Supercharger network, and grow its energy storage business as factors contributing to strong year-over-year growth. The bearish perspective, however, raises concerns over the lack of available financial data for Tesla, suggesting potential issues with financial reporting accessibility or data quality. This absence of data makes it difficult to assess Tesla's financial performance and compare it against competitors or industry benchmarks. The contrasting views underscore the importance of transparency and reliable data in making informed investment decisions.",
+      "validation_reason": "No percentage found in answer",
+      "context_tickers": [
+        "TSLA"
+      ],
+      "context_data": {
+        "TSLA": {
+          "error": "unsupported format string passed to NoneType.__format__"
+        }
+      }
+    },
+    {
+      "id": "gs_002",
+      "query": "Calculate the current P/E ratio for Apple (AAPL) based on latest data.",
+      "category": "valuation",
+      "passed": false,
+      "duration": 21.128642,
+      "cost_usd": 0.01265496,
+      "answer": "DIRECT ANSWER: The current P/E ratio for Apple (AAPL) cannot be calculated due to a data retrieval failure.\n\nSYNTHESIS: The technical issue preventing the calculation of Apple's current P/E ratio highlights a significant challenge in evaluating the company's valuation. From the optimistic perspective, this situation shifts focus towards Apple's strong fundamentals, including its ecosystem lock-in, high-margin services segment, consistent innovation, and robust financial health. These factors suggest underlying strength and potential for long-term value creation. Conversely, the pessimistic view raises concerns about transparency and the implications of not being able to access basic valuation metrics. This could signal deeper issues, either with data systems or potentially with the company's current financial standing, warranting caution among investors. Balancing these perspectives, the lack of current P/E ratio data introduces uncertainty but must be weighed against Apple's historical performance, market position, and strategic advantages.",
+      "validation_reason": "No numeric value found for pe_ratio",
+      "context_tickers": [
+        "AAPL"
+      ],
+      "context_data": {
+        "AAPL": {
+          "error": "unsupported format string passed to NoneType.__format__"
+        }
+      }
+    },
+    {
+      "id": "gs_003",
+      "query": "Is NVIDIA (NVDA) currently trading above its 200-day moving average?",
+      "category": "technical",
+      "passed": false,
+      "duration": 17.512189,
+      "cost_usd": 0.01093438,
+      "answer": "DIRECT ANSWER: The specific data on whether NVIDIA (NVDA) is currently trading above its 200-day moving average is unavailable due to a data format error.\n\nSYNTHESIS: Both the bullish and bearish perspectives acknowledge the unavailability of technical data due to a system error, which prevents a precise analysis of NVIDIA's current trading position relative to its 200-day moving average. However, the bullish view emphasizes NVIDIA's strong fundamental growth drivers and its leading position in transformative technology sectors as reasons for optimism. In contrast, the bearish view highlights the risks associated with the lack of technical data, elevated valuation multiples, and potential sector headwinds. A balanced analysis would consider NVIDIA's strong market position and growth prospects alongside the risks posed by the current lack of technical data and potential external challenges.",
+      "validation_reason": "Ambiguous answer (both positive and negative indicators)",
+      "context_tickers": [
+        "NVDA"
+      ],
+      "context_data": {
+        "NVDA": {
+          "error": "unsupported format string passed to NoneType.__format__"
+        }
+      }
+    }
+  ]
+}
