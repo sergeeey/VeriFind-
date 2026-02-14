@@ -74,12 +74,12 @@ def extract_tickers_from_query(query: str) -> list[str]:
 
 async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
     """
-    Fetch real market data for tickers.
+    Fetch comprehensive market data for tickers using yfinance .info.
 
     Returns context dict with:
-    - price_data: Latest OHLCV
-    - fundamentals: PE ratio, market cap, etc.
-    - technical: 200-day SMA, RSI, etc.
+    - current_price: Latest market price
+    - fundamentals: P/E ratio, revenue growth, free cash flow, market cap
+    - technical: 50-day MA, 200-day MA, 52-week high/low, beta
     """
     adapter = YFinanceAdapter(cache_enabled=True, cache_ttl_seconds=300)
     context = {
@@ -90,34 +90,29 @@ async def fetch_market_context(tickers: list[str]) -> Dict[str, Any]:
 
     for ticker in tickers:
         try:
-            # Fetch last 30 days (CSV snapshots have limited history)
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=30)
-
-            data = adapter.fetch_ohlcv(
+            # Use comprehensive fetch (includes fundamentals from .info)
+            data = adapter.fetch_comprehensive_data(
                 ticker=ticker,
-                start_date=start_date.strftime('%Y-%m-%d'),
-                end_date=end_date.strftime('%Y-%m-%d'),
-                interval='1d'
+                include_history=False  # Faster, fundamentals only
             )
 
-            if data is not None and not data.empty:
-                # Calculate technical indicators
-                latest_price = float(data['Close'].iloc[-1])
-                sma_200 = float(data['Close'].tail(200).mean()) if len(data) >= 200 else None
+            if data and data.get('current_price'):
+                context['data'][ticker] = data
 
-                context['data'][ticker] = {
-                    'latest_price': latest_price,
-                    'sma_200': sma_200,
-                    'volume': int(data['Volume'].iloc[-1]),
-                    'high_52w': float(data['High'].tail(252).max()),
-                    'low_52w': float(data['Low'].tail(252).min()),
-                    'data_points': len(data),
-                    'date_range': f"{data.index[0]} to {data.index[-1]}"
-                }
+                # Format output for user
+                price = data.get('current_price', 0)
+                pe = data.get('trailing_pe', 'N/A')
+                revenue_growth = data.get('revenue_growth')
+                ma_200 = data.get('ma_200')
 
-                sma_str = f"${sma_200:.2f}" if sma_200 is not None else "N/A"
-                print(f"   ✅ Fetched {ticker}: ${latest_price:.2f}, 200-SMA: {sma_str}")
+                # Format revenue growth as percentage
+                revenue_str = f"{revenue_growth*100:.1f}%" if revenue_growth is not None else "N/A"
+                ma_str = f"${ma_200:.2f}" if ma_200 is not None else "N/A"
+
+                print(f"   ✅ Fetched {ticker}: ${price:.2f}, "
+                      f"P/E: {pe if pe != 'N/A' else 'N/A'}, "
+                      f"Revenue Growth: {revenue_str}, "
+                      f"200-MA: {ma_str}")
             else:
                 print(f"   ⚠️  No data for {ticker}")
                 context['data'][ticker] = None

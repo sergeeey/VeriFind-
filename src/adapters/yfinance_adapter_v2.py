@@ -27,12 +27,6 @@ try:
 except ImportError:
     FinnhubAdapter = None
 
-# Import CSV snapshot fallback
-try:
-    from .csv_snapshot_adapter import CSVSnapshotAdapter
-except ImportError:
-    CSVSnapshotAdapter = None
-
 logger = logging.getLogger(__name__)
 
 
@@ -86,9 +80,6 @@ class YFinanceAdapterV2:
 
         # Finnhub fallback (more reliable than Alpha Vantage)
         self.finnhub_adapter = FinnhubAdapter() if FinnhubAdapter else None
-
-        # CSV snapshot fallback (last resort)
-        self.csv_adapter = CSVSnapshotAdapter() if CSVSnapshotAdapter else None
 
         # In-memory cache fallback
         self._memory_cache: Dict[str, tuple] = {}
@@ -145,6 +136,89 @@ class YFinanceAdapterV2:
         # Fallback to in-memory
         self._memory_cache[cache_key] = (data, time.time())
         logger.info(f"Cache WRITE (Memory): {cache_key}")
+
+    def fetch_comprehensive_data(
+        self,
+        ticker: str,
+        include_history: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Fetch comprehensive market data using .info property.
+
+        This is the RECOMMENDED method for Golden Set validation as it provides
+        all fundamental data needed for financial queries (P/E, revenue, etc.).
+
+        Args:
+            ticker: Stock ticker symbol
+            include_history: Whether to include historical OHLCV (slower)
+
+        Returns:
+            Dict with all available market data:
+            {
+                'current_price': float,
+                'trailing_pe': float,
+                'forward_pe': float,
+                'revenue_growth': float,
+                'free_cashflow': int,
+                'ma_50': float,
+                'ma_200': float,
+                'market_cap': int,
+                'beta': float,
+                'volume': int,
+                'high_52w': float,
+                'low_52w': float,
+                'ticker': str,
+                'fetched_at': str (ISO format),
+                # If include_history=True:
+                'history': pd.DataFrame  # Last 30 days OHLCV
+            }
+        """
+        cache_key = f"comprehensive:{ticker}"
+        cached = self._get_from_cache(cache_key)
+        if cached is not None:
+            return cached
+
+        try:
+            logger.info(f"Fetching comprehensive data for {ticker}")
+            ticker_obj = yf.Ticker(ticker)
+            info = ticker_obj.info
+
+            # Extract all useful fields from .info
+            data = {
+                'current_price': info.get('currentPrice') or info.get('regularMarketPrice'),
+                'trailing_pe': info.get('trailingPE'),
+                'forward_pe': info.get('forwardPE'),
+                'revenue_growth': info.get('revenueGrowth'),
+                'free_cashflow': info.get('freeCashflow'),
+                'ma_50': info.get('fiftyDayAverage'),
+                'ma_200': info.get('twoHundredDayAverage'),
+                'market_cap': info.get('marketCap'),
+                'beta': info.get('beta'),
+                'volume': info.get('volume') or info.get('regularMarketVolume'),
+                'high_52w': info.get('fiftyTwoWeekHigh'),
+                'low_52w': info.get('fiftyTwoWeekLow'),
+                'ticker': ticker,
+                'fetched_at': datetime.now().isoformat()
+            }
+
+            # Optional: Include historical OHLCV
+            if include_history:
+                try:
+                    hist = ticker_obj.history(period='1mo')
+                    data['history'] = hist if not hist.empty else None
+                except Exception as e:
+                    logger.warning(f"Failed to fetch history for {ticker}: {e}")
+                    data['history'] = None
+
+            logger.info(f"Comprehensive data SUCCESS for {ticker}: "
+                       f"Price=${data.get('current_price')}, P/E={data.get('trailing_pe')}")
+
+            self._put_in_cache(cache_key, data)
+            return data
+
+        except Exception as e:
+            logger.error(f"Failed to fetch comprehensive data for {ticker}: {e}")
+            return {}
 
     def fetch_ohlcv(
         self,
@@ -226,17 +300,8 @@ class YFinanceAdapterV2:
                 self._put_in_cache(cache_key, fallback_data)
                 return fallback_data
 
-        # Final fallback: CSV snapshots
-        if self.csv_adapter:
-            logger.warning(f"ALL EXTERNAL APIS FAILED for {ticker}. Trying CSV snapshot (last resort)")
-            csv_data = self.csv_adapter.fetch_ohlcv(ticker, start_date, end_date)
-            if csv_data is not None and not csv_data.empty:
-                logger.warning(f"CSV snapshot SUCCESS for {ticker} (DATA MAY BE STALE)")
-                self._put_in_cache(cache_key, csv_data)
-                return csv_data
-
         # All sources failed
-        logger.error(f"ALL DATA SOURCES FAILED for {ticker} (including CSV snapshots)")
+        logger.error(f"ALL DATA SOURCES FAILED for {ticker}")
         return pd.DataFrame()
 
     def _fetch_from_alpha_vantage(

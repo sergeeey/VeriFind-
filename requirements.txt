@@ -48,7 +48,7 @@ langchain-openai==0.0.6       # OpenAI integration
 # ==============================================================================
 # Data Sources (Week 2+)
 # ==============================================================================
-yfinance==0.2.36              # Yahoo Finance API
+yfinance>=1.1.0               # Yahoo Finance API (upgraded for .info reliability)
 fredapi==0.5.1                # FRED (Federal Reserve) API
 pandas==2.2.0                 # Data manipulation
 numpy==1.26.4                 # Numerical computing
