@@ -50,9 +50,25 @@ class AnswerValidator:
         """
         metric = expected.get("metric", "")
 
-        # Extract floats from answer
+        # Week 14 Day 2: Blacklist common financial index names to avoid false extractions
+        # Problem: "S&P 500" → extracts "500" instead of actual P/E ratio
+        blacklist_patterns = [
+            r'S&P\s+500',
+            r'Russell\s+2000',
+            r'Nasdaq\s+100',
+            r'Dow\s+30',
+            r'FTSE\s+100',
+            r'year\s+2000',  # Avoid matching year 2000 as Russell 2000
+        ]
+
+        # Remove blacklisted phrases before number extraction
+        cleaned_answer = answer
+        for pattern in blacklist_patterns:
+            cleaned_answer = re.sub(pattern, '', cleaned_answer, flags=re.IGNORECASE)
+
+        # Extract floats from cleaned answer
         float_pattern = r'\b\d+\.?\d*\b'
-        matches = re.findall(float_pattern, answer)
+        matches = re.findall(float_pattern, cleaned_answer)
 
         if not matches:
             return False, f"No numeric value found for {metric}"
