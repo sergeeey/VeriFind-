@@ -231,11 +231,18 @@ Be constructive but not unrealistic. Ground your analysis in the provided data."
             content = response.choices[0].message.content
             data = json.loads(content)
 
+            # Week 13 Day 2: Extract token usage
+            usage = response.usage
+            in_tok = usage.prompt_tokens if usage else 0
+            out_tok = usage.completion_tokens if usage else 0
+
             return AgentResponse(
                 role=AgentRole.BULL,
                 analysis=data.get("analysis", ""),
                 confidence=float(data.get("confidence", 0.5)),
-                key_points=data.get("key_points", [])
+                key_points=data.get("key_points", []),
+                input_tokens=in_tok,
+                output_tokens=out_tok
             )
 
         except Exception as e:
@@ -277,6 +284,23 @@ class BearAgent(BaseAgent):
 
     def build_prompt(self, query: str, context: Dict[str, Any]) -> str:
         """Build BEAR perspective prompt."""
+        # Check if context has meaningful data
+        has_data = context and any(
+            v for k, v in context.items()
+            if k not in ['query', 'timestamp'] and v
+        )
+
+        if has_data:
+            instruction = "Ground your analysis in the provided data."
+        else:
+            instruction = """Even without perfect data, provide bearish analysis based on:
+- Historical patterns and common risks for this type of query
+- General market concerns and structural headwinds
+- Potential data limitations and transparency issues
+- Valuation concerns and competitive threats
+
+DO NOT say "I cannot analyze" or "no data available". Provide substantive bearish perspective."""
+
         return f"""You are a BEARISH financial analyst. Find reasons to SELL/avoid.
 
 Query: {query}
@@ -286,7 +310,7 @@ Context:
 
 Your task:
 1. Focus on: risks, threats, overvaluation signals, negative trends, bearish indicators
-2. Be specific with numbers and facts from the context
+2. Be specific with numbers and facts from the context (if available)
 3. Identify 3-5 key concerns or red flags
 4. Provide a confidence score (0.0-1.0) based on strength of evidence
 
@@ -301,7 +325,7 @@ Return JSON:
     ]
 }}
 
-Be critical but fair. Ground your analysis in the provided data."""
+{instruction}"""
 
     async def analyze(self, query: str, context: Dict[str, Any]) -> AgentResponse:
         """Run bearish analysis."""
@@ -340,11 +364,18 @@ Be critical but fair. Ground your analysis in the provided data."""
 
             data = json.loads(json_content)
 
+            # Week 13 Day 2: Extract token usage (Anthropic format)
+            usage = response.usage
+            in_tok = usage.input_tokens if usage else 0
+            out_tok = usage.output_tokens if usage else 0
+
             return AgentResponse(
                 role=AgentRole.BEAR,
                 analysis=data.get("analysis", ""),
                 confidence=float(data.get("confidence", 0.5)),
-                key_points=data.get("key_points", [])
+                key_points=data.get("key_points", []),
+                input_tokens=in_tok,
+                output_tokens=out_tok
             )
 
         except json.JSONDecodeError as e:
@@ -463,12 +494,19 @@ Be objective. Consider both bull and bear arguments fairly."""
             content = response.choices[0].message.content
             data = json.loads(content)
 
+            # Week 13 Day 2: Extract token usage
+            usage = response.usage
+            in_tok = usage.prompt_tokens if usage else 0
+            out_tok = usage.completion_tokens if usage else 0
+
             return AgentResponse(
                 role=AgentRole.ARBITER,
                 analysis=data.get("analysis", ""),
                 confidence=float(data.get("confidence", 0.5)),
                 key_points=data.get("key_points", []),
-                recommendation=data.get("recommendation", "HOLD")
+                recommendation=data.get("recommendation", "HOLD"),
+                input_tokens=in_tok,
+                output_tokens=out_tok
             )
 
         except Exception as e:

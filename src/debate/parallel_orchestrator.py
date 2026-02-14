@@ -131,12 +131,26 @@ class ParallelDebateOrchestrator:
             arbiter_response.confidence * 0.4
         )
 
-        # Estimate cost (rough approximation)
-        # DeepSeek: 500 tokens * $0.14/1M = $0.00007 input + 800 tokens * $0.28/1M = $0.000224 output
-        # Claude: 500 tokens * $3/1M = $0.0015 input + 800 tokens * $15/1M = $0.012 output
-        # GPT-4: 1000 tokens * $2.5/1M = $0.0025 input + 1000 tokens * $10/1M = $0.01 output
-        # Approximate total
-        cost_usd = 0.0003 + 0.0015 + 0.0002
+        # Week 13 Day 2: Real cost calculation from token usage
+        # Pricing (per 1M tokens):
+        # DeepSeek: $0.14 input, $0.28 output
+        # Claude Sonnet 4.5: $3 input, $15 output
+        # GPT-4 Turbo: $2.5 input, $10 output
+
+        bull_cost = (
+            (bull_response.input_tokens * 0.14 / 1_000_000) +
+            (bull_response.output_tokens * 0.28 / 1_000_000)
+        )
+        bear_cost = (
+            (bear_response.input_tokens * 3.0 / 1_000_000) +
+            (bear_response.output_tokens * 15.0 / 1_000_000)
+        )
+        arbiter_cost = (
+            (arbiter_response.input_tokens * 2.5 / 1_000_000) +
+            (arbiter_response.output_tokens * 10.0 / 1_000_000)
+        )
+
+        cost_usd = bull_cost + bear_cost + arbiter_cost
 
         result = MultiLLMDebateResult(
             bull_response=bull_response,

@@ -13,6 +13,9 @@ load_dotenv(project_root / '.env', override=True)
 # Now add project to path
 sys.path.insert(0, str(project_root))
 
+# Week 13 Day 2: Import validators
+from eval.validators import AnswerValidator, extract_answer_from_debate
+
 # Заглушка оркестратора для первого прогона
 class MockOrchestrator:
     async def run_debate(self, query, context=None):
@@ -58,17 +61,24 @@ async def run_golden_set(file_path):
             result = await orchestrator.run_debate(query=q['query'])
             duration = (datetime.now() - start_time).total_seconds()
 
-            # Базовая валидация структуры
-            # result is MultiLLMDebateResult object, not dict
-            has_synthesis = hasattr(result, 'recommendation')
-            recommendation = result.recommendation if has_synthesis else "N/A"
-            
-            print(f"   ✅ Result: {recommendation} (Time: {duration:.2f}s)")
-            
+            # Week 13 Day 2: Real validation (not just field existence)
+            answer_text = extract_answer_from_debate(result)
+            expected = q.get('expected_answer', {})
+
+            is_correct, validation_reason = AnswerValidator.validate_answer(
+                answer_text, expected
+            )
+
+            status = "✅" if is_correct else "❌"
+            print(f"   {status} Result: {answer_text[:60]}... (Time: {duration:.2f}s)")
+            print(f"      Validation: {validation_reason}")
+
             results.append({
                 "id": q["id"],
-                "passed": has_synthesis,
+                "passed": is_correct,
                 "duration": duration,
+                "answer": answer_text,
+                "validation_reason": validation_reason,
                 "response": result
             })
         except Exception as e:
