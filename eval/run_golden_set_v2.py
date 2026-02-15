@@ -50,8 +50,10 @@ def extract_tickers_from_query(query: str) -> list[str]:
     - "Tesla in Q4" → ["TSLA"]
     - "Apple (AAPL)" → ["AAPL"]
     - "NVIDIA (NVDA)" → ["NVDA"]
+    - "Bitcoin (BTC-USD)" → ["BTC-USD"]
+    - "AMD's P/E ratio" → ["AMD"]
     """
-    # Common ticker mappings
+    # Common ticker mappings (EXPANDED for failing queries)
     ticker_map = {
         'tesla': 'TSLA',
         'apple': 'AAPL',
@@ -60,18 +62,49 @@ def extract_tickers_from_query(query: str) -> list[str]:
         'amazon': 'AMZN',
         'google': 'GOOGL',
         'meta': 'META',
-        'crypto': 'BTC-USD'
+        'netflix': 'NFLX',
+        'uber': 'UBER',
+        'shopify': 'SHOP',
+        'palantir': 'PLTR',
+        'amd': 'AMD',  # FIX: Advanced Micro Devices
+        'visa': 'V',
+        'mastercard': 'MA',
+        'coca-cola': 'KO',
+        'bitcoin': 'BTC-USD',  # FIX: crypto tickers
+        'ethereum': 'ETH-USD',
+        'crypto': 'BTC-USD',
+        'spy': 'SPY',
+        'gold': 'GC=F',
     }
 
     tickers = []
     query_lower = query.lower()
-
-    # Check for explicit tickers in parentheses: (AAPL)
     import re
-    explicit_tickers = re.findall(r'\(([A-Z]{1,5})\)', query)
-    tickers.extend(explicit_tickers)
 
-    # Check for common company names
+    # PRIORITY 1: Explicit tickers with crypto suffix: (BTC-USD), (ETH-USD)
+    crypto_tickers = re.findall(r'\(([A-Z]{1,5}-USD)\)', query)
+    tickers.extend(crypto_tickers)
+
+    # PRIORITY 2: Explicit stock tickers in parentheses: (AAPL), (AMD)
+    stock_tickers = re.findall(r'\(([A-Z]{1,5})\)', query)
+    tickers.extend([t for t in stock_tickers if t not in tickers])
+
+    # PRIORITY 3: Standalone tickers (no parentheses): "AMD's P/E ratio"
+    # Match word boundaries to avoid false positives (e.g., "I" in "Is")
+    standalone = re.findall(r'\b([A-Z]{2,5})\b', query)
+    for ticker in standalone:
+        # Skip common words that look like tickers
+        if ticker in ['IS', 'THE', 'AND', 'FOR', 'ARE', 'NOT', 'USD', 'ETF', 'BTC', 'ETH']:
+            continue  # Skip these specific words
+
+        # Skip if already part of a crypto ticker (e.g., "BTC" when "BTC-USD" exists)
+        if any(ticker in existing for existing in tickers):
+            continue
+
+        if ticker not in tickers:
+            tickers.append(ticker)
+
+    # PRIORITY 4: Company name mappings
     for name, ticker in ticker_map.items():
         if name in query_lower and ticker not in tickers:
             tickers.append(ticker)

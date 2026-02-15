@@ -160,6 +160,8 @@ class YFinanceAdapterV2:
                 'forward_pe': float,
                 'revenue_growth': float,
                 'free_cashflow': int,
+                'dividend_yield': float,  # NEW: Dividend yield (e.g., 0.0327 = 3.27%)
+                'dividend_rate': float,   # NEW: Annual dividend per share
                 'ma_50': float,
                 'ma_200': float,
                 'market_cap': int,
@@ -190,6 +192,8 @@ class YFinanceAdapterV2:
                 'forward_pe': info.get('forwardPE'),
                 'revenue_growth': info.get('revenueGrowth'),
                 'free_cashflow': info.get('freeCashflow'),
+                'dividend_yield': info.get('dividendYield'),  # NEW: For dividend queries (gs_026)
+                'dividend_rate': info.get('dividendRate'),    # NEW: Annual dividend per share
                 'ma_50': info.get('fiftyDayAverage'),
                 'ma_200': info.get('twoHundredDayAverage'),
                 'market_cap': info.get('marketCap'),
