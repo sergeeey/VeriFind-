@@ -1,45 +1,49 @@
 # Active Context — APE 2026
-**Last Updated:** 2026-02-14 (Week 14 Day 1 ITERATION 2 — Fixes Applied)
-**Current Phase:** Public Beta Ready (8.0/10 → 8.5/10 target)
+**Last Updated:** 2026-02-15 (Week 14 Day 2 COMPLETE — 93.3% ACHIEVED)
+**Current Phase:** Public Beta Ready (8.5/10 ACHIEVED)
 **Active Branch:** feat/phase1-conformal-enhanced-debate
 
 ---
 
-## 🚀 Week 14 Day 1 ITERATION 2 — Critical Fixes
+## 🎉 Week 14 Day 2 — TARGET ACHIEVED: 93.3%!
 
-**Goal:** 73.3% → 90%+ Golden Set accuracy
-**Status:** Phase 1+2 implemented → Baseline 70% → Fixes applied → Rerun in progress
+**Goal:** 86.67% → 90%+ Golden Set accuracy ✅
+**Status:** Ticker extraction + dividend fixes → FULL RERUN COMPLETE → 93.3%!
 
-**Baseline Results (Run #1):**
-- Accuracy: 70% (21/30) — below 90% target
+**Final Results (2026-02-15 15:33):**
+- **Accuracy: 93.3% (28/30)** ✅ TARGET REACHED
+- Compliance: 5/5 (100%) ✅
+- Earnings: 7/7 (100%) ✅
 - Technical: 8/8 (100%) ✅
-- Earnings: 6/7 (85.7%) ✅
-- Valuation: 6/8 (75.0%) 🟡
-- **Compliance: 1/5 (20.0%)** ❌ CRITICAL
-- **Macro: 0/2 (0.0%)** ❌ CRITICAL
+- Valuation: 7/8 (87.5%) ✅
+- Macro: 1/2 (50%) 🟡 (gs_005 validator depth issue)
+- **Improvement: +6.67% (+2 queries from 86.67%)**
 
-**Root Causes Identified:**
-1. RefusalAgent NOT integrated into orchestrator (dead code)
-2. FRED integration NOT called in Golden Set validation flow
-3. OpenAI GPT-4 quota exhausted (429 errors)
+**Fixes Applied (Week 14 Day 2):**
 
-**Fixes Applied (3 commits):**
-1. **d893627:** Integrated RefusalAgent into orchestrator
-   - Pre-execution check in `run_debate()` BEFORE debate
-   - Returns REFUSED result (no LLM calls) if jailbreak/illegal query
-2. **d893627:** Added FRED fetching to Golden Set runner
-   - Detect economic keywords in query
-   - Fetch DFF, UNRATE, DGS3MO from FRED
-   - Add to context['economic'] for debate
-3. **194ad15:** Added Claude support to ArbiterAgent
-   - Auto-detect provider from model name
-   - Fallback from GPT-4 → Claude (quota fix)
-   - JSON markdown unwrapping for Claude
+1. **ec44206:** Ticker extraction fix (eval/run_golden_set_v2.py)
+   - Support crypto tickers: BTC-USD, ETH-USD
+   - Extract standalone tickers: AMD, V, MA (no parentheses)
+   - Add 15+ company name mappings
+   - Dedup logic (skip BTC if BTC-USD found)
+   - ✅ gs_008 (Bitcoin): SPY → BTC-USD
+   - ✅ gs_014 (AMD): SPY → AMD
 
-**Expected Impact (Run #2):**
-- Compliance: 20% → 100% (RefusalAgent blocks all jailbreak/illegal)
-- Macro: 0% → 80%+ (FRED data available in context)
-- Overall: 70% → 90%+ accuracy
+2. **ec44206:** Dividend data (src/adapters/yfinance_adapter_v2.py)
+   - Add dividend_yield field
+   - Add dividend_rate field
+   - ✅ gs_026 (KO): missing → 2.59%
+
+3. **0d32267:** Golden Set guard test (CI protection)
+   - tests/integration/test_golden_set_guard.py
+   - Baseline: 86.67% (blocks merge if drops)
+   - Target: 90% (aspirational)
+   - Performance check: avg time <30s
+
+**Validation:**
+- 10/10 unit tests passing (test_ticker_extraction_fix.py)
+- Full Golden Set rerun: 86.67% → 93.33% ✅
+- Cost: $0.38 (30 queries × $0.0125 avg)
 
 ---
 
@@ -180,18 +184,32 @@ python eval/run_golden_set_v2.py 33
 
 ---
 
-## 🎉 Achievement Unlocked
+## 🎉 Achievement Unlocked — Week 14 Day 2 COMPLETE
 
-**"Week 14 Phase 1+2 Complete"**
-- FRED integration: macro queries now possible
-- Jailbreak defense: compliance at 100%
-- 69 new tests: all passing
-- 3h actual time vs 12h planned (4x efficiency)
-
-**Next:** Golden Set validation → measure real accuracy improvement! 🚀
+**"93.3% Golden Set Accuracy" 🏆**
+- Ticker extraction: crypto + standalone support
+- Dividend data: added to YFinance adapter
+- Golden Set guard: CI regression protection
+- **2 commits pushed** (ec44206, 0d32267)
+- **1 hour total** (planned vs 4-6h in original plan)
 
 ---
 
-**Status:** ✅ **READY FOR VALIDATION**
-**Next Session:** Run Golden Set → analyze results → Phase 3 (expansion)
-**Confidence:** High (8.0/10 → 8.5/10 path clear)
+## 🎯 Next Steps
+
+**Immediate (Week 14 Day 3+):**
+1. **Fix 2 remaining failures** (93.3% → 96.7%)
+   - gs_005 (macro): Improve LLM analytical depth
+   - gs_020 (valuation): Comparative query prompt enhancement
+
+2. **Expand Golden Set** (30 → 50 queries)
+   - Add more edge cases
+   - Sector coverage (energy, healthcare, finance)
+
+3. **Production deployment**
+   - Blue-green deployment setup
+   - Monitoring dashboards (Grafana)
+
+**Status:** ✅ **PUBLIC BETA READY (8.5/10)**
+**Next Session:** Fix remaining 2 queries OR production deployment
+**Confidence:** Very High (target exceeded, guard tests in place)
