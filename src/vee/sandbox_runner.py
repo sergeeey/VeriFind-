@@ -80,7 +80,9 @@ class SandboxRunner:
         self.timeout = timeout
         self.enable_temporal_checks = enable_temporal_checks
         self.query_date = query_date
-        self.disable_docker_sandbox = bool(os.getenv("DISABLE_DOCKER_SANDBOX"))
+        # Parse DISABLE_DOCKER_SANDBOX from string (handles "false", "False", "0", empty)
+        disable_value = os.getenv("DISABLE_DOCKER_SANDBOX", "").lower()
+        self.disable_docker_sandbox = disable_value in ("true", "1", "yes")
 
         # Initialize Temporal Integrity Checker (if enabled)
         if enable_temporal_checks:
@@ -131,7 +133,8 @@ class SandboxRunner:
 
         start_time = time.time()
 
-        if self.disable_docker_sandbox or os.getenv("DISABLE_DOCKER_SANDBOX"):
+        # Check if Docker sandbox is disabled (use instance variable set in __init__)
+        if self.disable_docker_sandbox:
             duration_ms = int((time.time() - start_time) * 1000)
             return ExecutionResult(
                 status="success",

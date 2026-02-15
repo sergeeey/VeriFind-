@@ -1,0 +1,26 @@
+[
+  {
+    "id": "gs_008",
+    "ticker_extraction": "PASS",
+    "data_fetch": "PASS",
+    "ticker": "BTC-USD",
+    "price": 70206.68,
+    "dividend_yield": null
+  },
+  {
+    "id": "gs_014",
+    "ticker_extraction": "PASS",
+    "data_fetch": "PASS",
+    "ticker": "AMD",
+    "price": 207.32,
+    "dividend_yield": null
+  },
+  {
+    "id": "gs_026",
+    "ticker_extraction": "PASS",
+    "data_fetch": "PASS",
+    "ticker": "KO",
+    "price": 78.68,
+    "dividend_yield": 2.59
+  }
+]

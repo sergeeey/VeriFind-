@@ -7,12 +7,26 @@ Test strategy:
 - Real VEE sandbox execution (Docker required)
 - TIM pre-execution validation
 - Verify violations blocked before Docker runs
+
+TECHDEBT APE-001: Tests skip on Windows due to docker-py named pipe issue
+- docker-py cannot connect to Docker Desktop on Windows (npipe://)
+- Workaround: DISABLE_DOCKER_SANDBOX=true for local dev
+- Tests PASS in CI/Linux environments
+- Track: https://github.com/docker/docker-py/issues/3113
 """
 
+import os
 import pytest
 from datetime import datetime, UTC
 
 from src.vee.sandbox_runner import SandboxRunner
+
+# Skip all tests if Docker sandbox disabled (Windows dev environment)
+pytestmark = pytest.mark.skipif(
+    os.getenv("DISABLE_DOCKER_SANDBOX", "false").lower() in ("true", "1", "yes"),
+    reason="TECHDEBT APE-001: docker-py Windows named pipe issue. "
+           "Tests work in CI/Linux. Track: https://github.com/docker/docker-py/issues/3113"
+)
 
 
 # ==============================================================================
